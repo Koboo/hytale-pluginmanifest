@@ -8,7 +8,7 @@ subprojects {
     }
 
     group = "eu.koboo.pluginmanifest"
-    version = "1.0.7-ALPHA"
+    version = "1.0.8-ALPHA"
 
     java {
         toolchain.languageVersion.set(JavaLanguageVersion.of(25))
