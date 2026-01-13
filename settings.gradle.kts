@@ -1,2 +1,2 @@
-rootProject.name = "hytale-manifest"
+rootProject.name = "plugin-manifest"
 include("gradle-plugin")
