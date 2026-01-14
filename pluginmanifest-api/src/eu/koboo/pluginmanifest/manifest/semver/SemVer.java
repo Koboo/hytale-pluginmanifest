@@ -1,5 +1,6 @@
-package eu.koboo.pluginmanifest.manifest.validation;
+package eu.koboo.pluginmanifest.manifest.semver;
 
+import eu.koboo.pluginmanifest.manifest.validation.ValidationResult;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class SemVer {
 
     // MAJOR.MINOR.PATCH-RELEASE.RELEASE.RELEASE+BUILD
     public static SemVer parseString(List<ValidationResult> resultList, String key, String versionString) {
+        versionString = versionString.trim();
         String build = null;
         if (versionString.contains("+")) {
             String[] buildSplit = versionString.split("\\+");
