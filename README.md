@@ -235,7 +235,7 @@ Here is a complete example of how to use the provided annotations.
         includesAssetPack = true
 )
 public class MyPlugin extends JavaPlugin{
-    
+
 }
 ````
 
