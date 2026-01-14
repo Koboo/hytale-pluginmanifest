@@ -144,7 +144,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
         try {
             manifestMap = manifestFile.asMap();
         } catch (InvalidPluginManifestException e) {
-            throw new InvalidUserDataException("PluginManifest Error: " + "PluginManifest Error: " + System.lineSeparator() + e.buildMessage());
+            throw new InvalidUserDataException("PluginManifest Error: " + System.lineSeparator() + e.buildMessage());
         }
 
         String json = JsonOutput.toJson(manifestMap);
