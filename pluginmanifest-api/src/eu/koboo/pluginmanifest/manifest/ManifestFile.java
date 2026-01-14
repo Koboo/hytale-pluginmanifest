@@ -27,7 +27,6 @@ public class ManifestFile {
     String pluginWebsite;
     String pluginMainClass;
 
-    // NOT SUPPORTED, needs SemVerRange implementation
     String serverVersion = "*";
 
     final Map<String, String> dependencies = new LinkedHashMap<>();
