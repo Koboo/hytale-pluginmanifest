@@ -20,7 +20,7 @@ public class SemVerRange {
     boolean maxInclusive;
 
     // Parses range strings like: >=1.2.3, ^1.2.3, ~1.2.3, 1.2.3 - 2.0.0, *, etc.
-    public static SemVerRange parseString(List<ValidationResult> resultList, String key, String rangeString) {
+    public static SemVerRange parseString(List<ValidationResult> resultList, String rangeString, String key) {
         rangeString = rangeString.trim();
 
         // Check for wildcard
