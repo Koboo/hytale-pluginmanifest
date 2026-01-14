@@ -1,8 +1,8 @@
-package eu.koboo.pluginmanifest.api;
+package eu.koboo.pluginmanifest.manifest;
 
-import eu.koboo.pluginmanifest.api.validation.InvalidPluginManifestException;
-import eu.koboo.pluginmanifest.api.validation.ManifestValidation;
-import eu.koboo.pluginmanifest.api.validation.ValidationResult;
+import eu.koboo.pluginmanifest.manifest.validation.InvalidPluginManifestException;
+import eu.koboo.pluginmanifest.manifest.validation.ManifestValidation;
+import eu.koboo.pluginmanifest.manifest.validation.ValidationResult;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;

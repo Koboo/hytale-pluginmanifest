@@ -1,4 +1,4 @@
-package eu.koboo.pluginmanifest.api.validation;
+package eu.koboo.pluginmanifest.manifest.validation;
 
 import lombok.AccessLevel;
 import lombok.Getter;

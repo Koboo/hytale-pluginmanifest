@@ -1,6 +1,6 @@
-package eu.koboo.pluginmanifest.api.validation;
+package eu.koboo.pluginmanifest.manifest.validation;
 
-import eu.koboo.pluginmanifest.api.ManifestAuthor;
+import eu.koboo.pluginmanifest.manifest.ManifestAuthor;
 import lombok.experimental.UtilityClass;
 
 import java.net.URI;

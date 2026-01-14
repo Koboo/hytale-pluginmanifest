@@ -3,8 +3,8 @@ package eu.koboo.pluginmanifest.annotations;
 import eu.koboo.pluginmanifest.annotations.api.PluginAuthor;
 import eu.koboo.pluginmanifest.annotations.api.PluginDependency;
 import eu.koboo.pluginmanifest.annotations.api.PluginManifest;
-import eu.koboo.pluginmanifest.api.ManifestFile;
-import eu.koboo.pluginmanifest.api.validation.InvalidPluginManifestException;
+import eu.koboo.pluginmanifest.manifest.ManifestFile;
+import eu.koboo.pluginmanifest.manifest.validation.InvalidPluginManifestException;
 import org.json.JSONObject;
 
 import javax.annotation.processing.AbstractProcessor;

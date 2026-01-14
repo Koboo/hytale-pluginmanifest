@@ -1,4 +1,4 @@
-package eu.koboo.pluginmanifest.api.validation;
+package eu.koboo.pluginmanifest.manifest.validation;
 
 public record ValidationResult(String key, String value, String message) {
 

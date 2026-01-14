@@ -1,4 +1,4 @@
-package eu.koboo.pluginmanifest.api;
+package eu.koboo.pluginmanifest.manifest;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
