@@ -1,4 +1,4 @@
-package eu.koboo.pluginmanifest.model;
+package eu.koboo.pluginmanifest.api;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthorInfo {
+public class ManifestAuthor {
 
     String name;
     String email;
