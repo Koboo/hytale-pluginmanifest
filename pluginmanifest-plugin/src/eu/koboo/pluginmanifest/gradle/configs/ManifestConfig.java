@@ -58,6 +58,14 @@ public class ManifestConfig {
         return manifestFile.getPluginDescription();
     }
 
+    public void serverVersion(String serverVersion) {
+        manifestFile.setServerVersion(serverVersion);
+    }
+
+    public String serverVersion() {
+        return manifestFile.getServerVersion();
+    }
+
     public void pluginWebsite(String website) {
         manifestFile.setPluginWebsite(website);
     }
@@ -113,12 +121,12 @@ public class ManifestConfig {
 
     public void pluginDependencies(Action<ManifestDependencyConfig> action) {
         action.execute(dependencyConfig);
-        updateFileDependencies(manifestFile.getDependencies(), dependencyConfig.getRequiredDependencies());
-        updateFileDependencies(manifestFile.getOptionalDependencies(), dependencyConfig.getOptionalDependencies());
-        updateFileDependencies(manifestFile.getLoadBefore(), dependencyConfig.getLoadBeforeDependencies());
+        updateManifestDependencies(manifestFile.getDependencies(), dependencyConfig.getRequiredDependencies());
+        updateManifestDependencies(manifestFile.getOptionalDependencies(), dependencyConfig.getOptionalDependencies());
+        updateManifestDependencies(manifestFile.getLoadBefore(), dependencyConfig.getLoadBeforeDependencies());
     }
 
-    private void updateFileDependencies(Map<String, String> fileDependencies, Map<String, String> configDependencies) {
+    private void updateManifestDependencies(Map<String, String> fileDependencies, Map<String, String> configDependencies) {
         fileDependencies.clear();
         for (String pluginIdentifier : configDependencies.keySet()) {
             String pluginVersion = configDependencies.get(pluginIdentifier);
