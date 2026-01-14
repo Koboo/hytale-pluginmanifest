@@ -12,7 +12,7 @@ subprojects {
     }
 
     group = "eu.koboo.pluginmanifest"
-    version = "1.0.22-ALPHA"
+    version = "1.0.22"
 
     repositories {
         mavenCentral()

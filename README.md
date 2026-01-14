@@ -46,7 +46,7 @@ You only need to apply the plugin on your project.
 
 ````groovy
 plugins {
-    id 'eu.koboo.pluginmanifest' version '1.0.18'
+    id 'eu.koboo.pluginmanifest' version '1.0.22'
 }
 ````
 
@@ -54,7 +54,7 @@ plugins {
 
 ````groovy
 plugins {
-    id("eu.koboo.pluginmanifest") version("1.0.18")
+    id("eu.koboo.pluginmanifest") version("1.0.22")
 }
 ````
 
@@ -192,8 +192,8 @@ You only need to add the dependency to your project.
 
 ````groovy
 dependency {
-    compileOnly 'eu.koboo.pluginmanifest:annotation-processor:1.0.18'
-    annotationProcessor 'eu.koboo.pluginmanifest:annotation-processor:1.0.18'
+    compileOnly 'eu.koboo.pluginmanifest:annotation-processor:1.0.22'
+    annotationProcessor 'eu.koboo.pluginmanifest:annotation-processor:1.0.22'
 }
 ````
 
@@ -201,8 +201,8 @@ dependency {
 
 ````groovy
 dependency {
-  compileOnly("eu.koboo.pluginmanifest:annotation-processor:1.0.18")
-  annotationProcessor("eu.koboo.pluginmanifest:annotation-processor:1.0.18")
+  compileOnly("eu.koboo.pluginmanifest:annotation-processor:1.0.22")
+  annotationProcessor("eu.koboo.pluginmanifest:annotation-processor:1.0.22")
 }
 ````
 
