@@ -1,14 +1,12 @@
-import java.net.URI
-
 plugins {
     id("java")
-    id("maven-publish")
+    id("com.gradleup.shadow") version ("9.3.1")
 }
 
 subprojects {
     apply {
         plugin("java")
-        plugin("maven-publish")
+        plugin("com.gradleup.shadow")
     }
 
     group = "eu.koboo.pluginmanifest"
@@ -51,26 +49,6 @@ subprojects {
 
     tasks.withType<Javadoc>().configureEach {
         (options as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")
-    }
-
-    publishing {
-        repositories {
-            mavenLocal()
-            maven {
-                name = "entixReposilite"
-                var repositoryByVersion =
-                    if (!project.version.toString().contains("-")) {
-                        "releases";
-                    } else {
-                        "snapshots";
-                    }
-                url = URI.create("https://repo.entix.eu/$repositoryByVersion")
-                credentials {
-                    username = System.getenv("ENTIX_REPO_USER")
-                    password = System.getenv("ENTIX_REPO_PASS")
-                }
-            }
-        }
     }
 }
 
