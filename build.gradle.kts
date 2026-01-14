@@ -1,16 +1,18 @@
 plugins {
     id("java")
+    id("maven-publish")
     id("com.gradleup.shadow") version ("9.3.1")
 }
 
 subprojects {
     apply {
         plugin("java")
+        plugin("maven-publish")
         plugin("com.gradleup.shadow")
     }
 
     group = "eu.koboo"
-    version = "1.0.22"
+    version = "1.0.23-rc1"
 
     repositories {
         mavenCentral()
@@ -48,6 +50,20 @@ subprojects {
 
     tasks.withType<Javadoc>().configureEach {
         (options as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")
+    }
+
+    publishing {
+        repositories {
+            mavenLocal()
+            maven {
+                name = "entixReposilite"
+                url = uri("https://repo.entix.eu/snapshots")
+                credentials {
+                    username = System.getenv("ENTIX_REPO_USER")
+                    password = System.getenv("ENTIX_REPO_PASS")
+                }
+            }
+        }
     }
 }
 
