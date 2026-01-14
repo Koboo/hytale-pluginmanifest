@@ -71,14 +71,6 @@ subprojects {
                 }
             }
         }
-//        // GradlePlugin has custom publishing
-//        if(project.name.toString() != "gradle-plugin") {
-//            publications {
-//                create<MavenPublication>("maven") {
-//                    from(components["java"])
-//                }
-//            }
-//        }
     }
 }
 
