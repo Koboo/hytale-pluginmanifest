@@ -4,8 +4,8 @@ import eu.koboo.pluginmanifest.api.ManifestFile;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
@@ -34,6 +34,6 @@ public abstract class PluginManifestTask extends DefaultTask {
         }
 
         Files.writeString(outputFile.toPath(), manifestJson, StandardCharsets.UTF_8);
-        getLogger().lifecycle("> PluginManifest :"  + PluginManifestPlugin.TASK_NAME + ": Generated " + ManifestFile.NAME + " at: {}", outputFile.getAbsolutePath());
+        getLogger().lifecycle("> PluginManifest :" + PluginManifestPlugin.TASK_NAME + ": Generated " + ManifestFile.NAME + " at: {}", outputFile.getAbsolutePath());
     }
 }

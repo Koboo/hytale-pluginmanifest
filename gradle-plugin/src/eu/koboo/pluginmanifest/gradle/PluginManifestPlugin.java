@@ -4,8 +4,8 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
-import eu.koboo.pluginmanifest.api.validation.InvalidPluginManifestException;
 import eu.koboo.pluginmanifest.api.ManifestFile;
+import eu.koboo.pluginmanifest.api.validation.InvalidPluginManifestException;
 import eu.koboo.pluginmanifest.gradle.configs.ManifestConfig;
 import groovy.json.JsonOutput;
 import lombok.AccessLevel;
@@ -34,7 +34,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
     @Override
     public void apply(Project target) {
         ManifestConfig manifestConfig = target.getExtensions()
-                .create(EXTENSION_NAME, ManifestConfig.class);
+            .create(EXTENSION_NAME, ManifestConfig.class);
 
         File resourceDirectory = getGeneratedResourceDirectory(target);
 
@@ -66,8 +66,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
     private SourceSet getMainSources(Project project) {
         return project.getExtensions()
-                .getByType(SourceSetContainer.class)
-                .getByName("main");
+            .getByType(SourceSetContainer.class)
+            .getByName("main");
     }
 
     private void applyDefaultValues(Project project, ManifestConfig config) {
@@ -169,8 +169,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
             List<Path> javaFiles;
             try {
                 javaFiles = Files.walk(srcDir.toPath())
-                        .filter(p -> p.toString().endsWith(".java"))
-                        .toList();
+                    .filter(p -> p.toString().endsWith(".java"))
+                    .toList();
             } catch (IOException e) {
                 throw new GradleException("Couldn't detect mainClass: ", e);
             }
@@ -181,7 +181,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 CompilationUnit compilationUnit;
                 try {
                     Optional<CompilationUnit> result = parser.parse(filePath)
-                            .getResult();
+                        .getResult();
                     if (result.isEmpty()) {
                         continue;
                     }
@@ -191,19 +191,19 @@ public class PluginManifestPlugin implements Plugin<Project> {
                     continue;
                 }
                 List<ClassOrInterfaceDeclaration> classDeclarationList = compilationUnit
-                        .findAll(ClassOrInterfaceDeclaration.class)
-                        .stream()
-                        .filter(c -> !c.isInterface())
-                        .filter(c -> c.getExtendedTypes().stream().anyMatch(t -> t.getNameAsString().equals("JavaPlugin")))
-                        .filter(c -> !c.isNestedType())
-                        .toList();
+                    .findAll(ClassOrInterfaceDeclaration.class)
+                    .stream()
+                    .filter(c -> !c.isInterface())
+                    .filter(c -> c.getExtendedTypes().stream().anyMatch(t -> t.getNameAsString().equals("JavaPlugin")))
+                    .filter(c -> !c.isNestedType())
+                    .toList();
                 for (ClassOrInterfaceDeclaration classDeclaration : classDeclarationList) {
                     String classPackage = compilationUnit.getPackageDeclaration()
-                            .map(NodeWithName::getNameAsString)
-                            .orElse("");
+                        .map(NodeWithName::getNameAsString)
+                        .orElse("");
                     String fullyQualifiedClassName = classPackage.isEmpty()
-                            ? classDeclaration.getNameAsString()
-                            : classPackage + "." + classDeclaration.getNameAsString();
+                        ? classDeclaration.getNameAsString()
+                        : classPackage + "." + classDeclaration.getNameAsString();
                     candidates.add(fullyQualifiedClassName);
                 }
             }

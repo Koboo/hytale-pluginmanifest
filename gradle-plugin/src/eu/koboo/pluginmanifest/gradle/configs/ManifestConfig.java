@@ -104,9 +104,9 @@ public class ManifestConfig {
         List<ManifestAuthorConfig> authorConfigList = authorsConfig.getAuthorConfigList();
         for (ManifestAuthorConfig manifestAuthorConfig : authorConfigList) {
             manifestFile.addPluginAuthor(
-                    manifestAuthorConfig.authorName(),
-                    manifestAuthorConfig.authorEmail(),
-                    manifestAuthorConfig.authorUrl()
+                manifestAuthorConfig.authorName(),
+                manifestAuthorConfig.authorEmail(),
+                manifestAuthorConfig.authorUrl()
             );
         }
     }
