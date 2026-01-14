@@ -1,4 +1,3 @@
 rootProject.name = "pluginmanifest"
-include("gradle-plugin")
-include("manifest-api")
-include("annotation-processor")
+include("pluginmanifest-plugin")
+include("pluginmanifest-api")
