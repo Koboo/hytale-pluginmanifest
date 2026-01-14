@@ -12,7 +12,7 @@ subprojects {
     }
 
     group = "eu.koboo"
-    version = "1.0.23-rc1"
+    version = "1.0.23"
 
     repositories {
         mavenCentral()
