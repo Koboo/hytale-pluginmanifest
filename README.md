@@ -259,3 +259,6 @@ Some keys and values of the ``manifest.json`` are required and some are optional
 | ``LoadBefore``           | See above, same as ``Dependencies``                         | ❌        | See above, same as ``Dependencies``    |
 | ``Main``                 | Fully qualified class name                                  | ✅        | ``eu.koboo.myplugin.MyPlugin``         |
 
+## Credits
+
+- [Flaticon / Freepik](https://www.flaticon.com/free-icons/stamp)
