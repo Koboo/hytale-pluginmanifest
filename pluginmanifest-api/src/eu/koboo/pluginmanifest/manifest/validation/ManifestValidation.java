@@ -1,6 +1,8 @@
 package eu.koboo.pluginmanifest.manifest.validation;
 
 import eu.koboo.pluginmanifest.manifest.ManifestAuthor;
+import eu.koboo.pluginmanifest.manifest.semver.SemVer;
+import eu.koboo.pluginmanifest.manifest.semver.SemVerRange;
 import lombok.experimental.UtilityClass;
 
 import java.net.URI;
@@ -66,10 +68,8 @@ public class ManifestValidation {
     }
 
     public void validateSemVerRange(List<ValidationResult> resultList, String semVerRangeString, String pluginIdentifier) {
-        if (semVerRangeString.equals("*")) {
-            return;
-        }
-        // TODO: Add SemVerRange parser/validator
+        validateRequired(resultList, semVerRangeString, pluginIdentifier);
+        SemVerRange.parseString(resultList, pluginIdentifier, semVerRangeString);
     }
 
     @SuppressWarnings("all")
