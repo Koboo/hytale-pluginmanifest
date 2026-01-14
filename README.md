@@ -17,7 +17,7 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 
 ## Gradle Plugin
 
-The Gradle plugin exposes a configuration for manually setting the values, but also tries to resolve
+The Gradle plugin exposes a configuration for manually setting the values but also tries to resolve
 the required values by using your Gradle project. The automatically resolved values can be overridden.
 
 ### What does it do?
