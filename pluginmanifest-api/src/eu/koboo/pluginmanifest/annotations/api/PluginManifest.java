@@ -15,6 +15,8 @@ public @interface PluginManifest {
 
     String version();
 
+    String serverVersion() default "*";
+
     String description() default "";
 
     PluginAuthor[] authors();
