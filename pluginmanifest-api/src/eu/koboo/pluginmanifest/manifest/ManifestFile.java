@@ -28,7 +28,7 @@ public class ManifestFile {
     String pluginMainClass;
 
     // NOT SUPPORTED, needs SemVerRange implementation
-    final String serverVersion = "*";
+    String serverVersion = "*";
 
     final Map<String, String> dependencies = new LinkedHashMap<>();
     final Map<String, String> optionalDependencies = new LinkedHashMap<>();
@@ -62,6 +62,7 @@ public class ManifestFile {
 
         ManifestValidation.validateCharacters(resultList, pluginGroup, "pluginGroup", '-');
         ManifestValidation.validateCharacters(resultList, pluginName, "pluginName", '-');
+        ManifestValidation.validateSemVerRange(resultList, serverVersion, "serverVersion");
         ManifestValidation.validateSemVer(resultList, pluginVersion);
         ManifestValidation.validateWebsite(resultList, pluginWebsite);
         ManifestValidation.validateAuthors(resultList, pluginAuthors);
@@ -88,6 +89,7 @@ public class ManifestFile {
         if (pluginDescription != null && !pluginDescription.isEmpty()) {
             manifestMap.put("Description", pluginDescription);
         }
+        manifestMap.put("ServerVersion", serverVersion);
 
         List<Map<String, String>> authorList = new LinkedList<>();
         for (ManifestAuthor author : pluginAuthors) {
