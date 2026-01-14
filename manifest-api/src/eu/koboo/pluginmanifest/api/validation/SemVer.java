@@ -21,14 +21,14 @@ public class SemVer {
     // MAJOR.MINOR.PATCH-RELEASE.RELEASE.RELEASE+BUILD
     public static SemVer parseString(List<ValidationResult> resultList, String key, String versionString) {
         String build = null;
-        if(versionString.contains("+")) {
+        if (versionString.contains("+")) {
             String[] buildSplit = versionString.split("\\+");
             build = buildSplit[1];
             versionString = buildSplit[0];
         }
 
         String[] releases = null;
-        if(versionString.contains("-")) {
+        if (versionString.contains("-")) {
             String[] releaseSplit = versionString.split("-");
             versionString = releaseSplit[0];
             releases = releaseSplit[1].split("\\.");
@@ -43,7 +43,7 @@ public class SemVer {
         int major = parseVersionNumber(resultList, key, "major", split[0]);
         int minor = parseVersionNumber(resultList, key, "minor", split[1]);
         int patch = parseVersionNumber(resultList, key, "patch", split[2]);
-        if(major == Integer.MIN_VALUE || minor == Integer.MIN_VALUE || patch == Integer.MIN_VALUE) {
+        if (major == Integer.MIN_VALUE || minor == Integer.MIN_VALUE || patch == Integer.MIN_VALUE) {
             return null;
         }
 
@@ -53,7 +53,7 @@ public class SemVer {
     private static int parseVersionNumber(List<ValidationResult> resultList, String key, String type, String segmentString) {
         try {
             int versionNumber = Integer.parseInt(segmentString);
-            if(versionNumber < 0) {
+            if (versionNumber < 0) {
                 resultList.add(ValidationResult.of(key, type, "version segment \"" + type + "\" must be positive (>= 0)"));
                 return Integer.MIN_VALUE;
             }

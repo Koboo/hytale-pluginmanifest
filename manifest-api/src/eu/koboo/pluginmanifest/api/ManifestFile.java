@@ -5,7 +5,6 @@ import eu.koboo.pluginmanifest.api.validation.ManifestValidation;
 import eu.koboo.pluginmanifest.api.validation.ValidationResult;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.util.*;
@@ -126,7 +125,7 @@ public class ManifestFile {
         ManifestValidation.validateDependencies(resultList, loadBefore);
         ManifestValidation.validateMainClass(resultList, pluginMainClass);
 
-        if(!resultList.isEmpty()) {
+        if (!resultList.isEmpty()) {
             throw new InvalidPluginManifestException(resultList);
         }
     }

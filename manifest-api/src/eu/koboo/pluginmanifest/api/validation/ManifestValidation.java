@@ -91,11 +91,11 @@ public class ManifestValidation {
             resultList.add(ValidationResult.of(key, uriString, "must have non-null host"));
             return;
         }
-        if(host.isEmpty()) {
+        if (host.isEmpty()) {
             resultList.add(ValidationResult.of(key, uriString, "must have a non-empty host"));
             return;
         }
-        if(!host.contains(".")) {
+        if (!host.contains(".")) {
             resultList.add(ValidationResult.of(key, uriString, "must have a host which contains at least one '.'"));
             return;
         }
@@ -148,7 +148,7 @@ public class ManifestValidation {
             resultList.add(ValidationResult.of(key, emailAddress, "must contain a domain with at least one '.'"));
             return;
         }
-        if(domain.startsWith(".") || domain.endsWith(".")) {
+        if (domain.startsWith(".") || domain.endsWith(".")) {
             resultList.add(ValidationResult.of(key, emailAddress, "cannot contain a domain that starts or ends with a '.'"));
             return;
         }
