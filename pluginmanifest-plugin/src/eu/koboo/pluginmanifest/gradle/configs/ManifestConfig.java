@@ -1,6 +1,6 @@
 package eu.koboo.pluginmanifest.gradle.configs;
 
-import eu.koboo.pluginmanifest.api.ManifestFile;
+import eu.koboo.pluginmanifest.manifest.ManifestFile;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;

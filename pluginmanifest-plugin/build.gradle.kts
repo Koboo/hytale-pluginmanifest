@@ -11,20 +11,24 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":manifest-api"))
+    implementation(project(":pluginmanifest-api"))
     implementation("org.jetbrains:annotations:26.0.2-1")
     implementation("com.github.javaparser:javaparser-core:3.25.9")
 }
 
 gradlePlugin {
+    val githubUrl = findProperty("githubUrl") as String
+    val projectDescription = findProperty("projectDescription") as String
+    val projectDisplayName = findProperty("projectDisplayName") as String
+
     plugins {
         create("pluginManifestPlugin") {
             id = "eu.koboo.pluginmanifest"
-            displayName = "Hytale Plugin Manifest Generator"
-            description = "Gradle plugin to automatically generate the manifest.json for Hytale plugins."
+            displayName = projectDisplayName
+            description = "Gradle plugin $projectDescription"
             implementationClass = "eu.koboo.pluginmanifest.gradle.PluginManifestPlugin"
-            website = "https://github.com/Koboo/hytale-pluginmanifest"
-            vcsUrl = "https://github.com/Koboo/hytale-pluginmanifest"
+            website = githubUrl
+            vcsUrl = githubUrl
             tags = setOf("hytale", "manifest", "generator")
         }
     }

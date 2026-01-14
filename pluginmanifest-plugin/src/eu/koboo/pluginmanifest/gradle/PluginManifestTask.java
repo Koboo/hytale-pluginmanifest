@@ -1,6 +1,6 @@
 package eu.koboo.pluginmanifest.gradle;
 
-import eu.koboo.pluginmanifest.api.ManifestFile;
+import eu.koboo.pluginmanifest.manifest.ManifestFile;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
