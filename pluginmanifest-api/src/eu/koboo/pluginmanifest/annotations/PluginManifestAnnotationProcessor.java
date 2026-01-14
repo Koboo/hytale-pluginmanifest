@@ -43,6 +43,7 @@ public class PluginManifestAnnotationProcessor extends AbstractProcessor {
         manifestFile.setPluginGroup(annotation.group());
         manifestFile.setPluginName(annotation.name());
         manifestFile.setPluginVersion(annotation.version());
+        manifestFile.setServerVersion(annotation.serverVersion());
         manifestFile.setPluginDescription(annotation.description());
 
         PluginAuthor[] authors = annotation.authors();
