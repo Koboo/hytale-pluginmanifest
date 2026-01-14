@@ -192,8 +192,8 @@ You only need to add the dependency to your project.
 
 ````groovy
 dependency {
-    compileOnly 'eu.koboo.pluginmanifest:annotation-processor:1.0.22'
-    annotationProcessor 'eu.koboo.pluginmanifest:annotation-processor:1.0.22'
+    compileOnly 'eu.koboo:pluginmanifest-api:1.0.22'
+    annotationProcessor 'eu.koboo:pluginmanifest-api:1.0.22'
 }
 ````
 
@@ -201,8 +201,8 @@ dependency {
 
 ````groovy
 dependency {
-  compileOnly("eu.koboo.pluginmanifest:annotation-processor:1.0.22")
-  annotationProcessor("eu.koboo.pluginmanifest:annotation-processor:1.0.22")
+  compileOnly("eu.koboo:pluginmanifest-api:1.0.22")
+  annotationProcessor("eu.koboo:pluginmanifest-api:1.0.22")
 }
 ````
 
