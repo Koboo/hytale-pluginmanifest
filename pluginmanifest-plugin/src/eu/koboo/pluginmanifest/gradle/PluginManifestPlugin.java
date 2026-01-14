@@ -106,9 +106,9 @@ public class PluginManifestPlugin implements Plugin<Project> {
             log(project, "Automatically applied project version as pluginVersion \"" + projectVersion + "\"!");
         }
 
-        if (!manifestFile.hasAuthors()) {
+        if (manifestFile.getPluginAuthors().isEmpty()) {
             String userName = System.getProperty("user.name");
-            manifestFile.addPluginAuthor(userName);
+            manifestFile.addPluginAuthor(userName, null, null);
             usesDefaultValue = true;
             log(project, "Automatically applied current user as pluginAuthor \"" + userName + "\"!");
         }

@@ -75,7 +75,7 @@ public class ManifestConfig {
     }
 
     public void pluginDisabledByDefault(boolean disabledByDefault) {
-        manifestFile.setPluginDisabledByDefault(disabledByDefault);
+        manifestFile.setDisabledByDefault(disabledByDefault);
     }
 
     public boolean pluginIsDisabledByDefault() {
@@ -83,7 +83,7 @@ public class ManifestConfig {
     }
 
     public void pluginIncludesAssetPack(boolean includesAssetPack) {
-        manifestFile.setPluginIncludesAssetPack(includesAssetPack);
+        manifestFile.setIncludesAssetPack(includesAssetPack);
     }
 
     public boolean pluginIncludesAssetPack() {

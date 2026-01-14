@@ -60,8 +60,8 @@ public class PluginManifestAnnotationProcessor extends AbstractProcessor {
             }
         }
 
-        manifestFile.setPluginDisabledByDefault(annotation.disabledByDefault());
-        manifestFile.setPluginIncludesAssetPack(annotation.includesAssetPack());
+        manifestFile.setDisabledByDefault(annotation.disabledByDefault());
+        manifestFile.setIncludesAssetPack(annotation.includesAssetPack());
         manifestFile.setPluginMainClass(fullyQualifiedName);
 
         Map<String, Object> manifestMap;
