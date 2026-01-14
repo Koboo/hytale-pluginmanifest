@@ -52,7 +52,7 @@ plugins {
 
 **Kotlin DSL: ``build.gradle.kts``**
 
-````groovy
+````kotlin
 plugins {
     id("eu.koboo.pluginmanifest") version("1.0.23")
 }
@@ -199,7 +199,7 @@ dependency {
 
 **Kotlin DSL: ``build.gradle.kts``**
 
-````groovy
+````kotlin
 dependency {
   compileOnly("eu.koboo:pluginmanifest-api:1.0.23")
   annotationProcessor("eu.koboo:pluginmanifest-api:1.0.23")
