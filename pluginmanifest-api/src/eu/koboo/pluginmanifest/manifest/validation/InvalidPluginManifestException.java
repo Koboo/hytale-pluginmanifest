@@ -19,7 +19,7 @@ public class InvalidPluginManifestException extends RuntimeException {
         Map<String, String> errorKeyMap = new LinkedHashMap<>();
         for (ValidationResult validationResult : resultList) {
             String key = validationResult.key();
-            errorKeyMap.put(key, key + " " + validationResult.message() + " -> " + validationResult.value());
+            errorKeyMap.put(key, key + " " + validationResult.message() + " -> \"" + validationResult.value() + "\"");
         }
         StringBuilder messageBuilder = new StringBuilder();
         for (String key : errorKeyMap.keySet()) {
