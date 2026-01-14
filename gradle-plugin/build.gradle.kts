@@ -23,8 +23,8 @@ gradlePlugin {
             displayName = "Hytale Plugin Manifest Generator"
             description = "Gradle plugin to automatically generate the manifest.json for Hytale plugins."
             implementationClass = "eu.koboo.pluginmanifest.gradle.PluginManifestPlugin"
-            website = "https://github.com/Koboo/pluginmanifest"
-            vcsUrl = "https://github.com/Koboo/pluginmanifest"
+            website = "https://github.com/Koboo/hytale-pluginmanifest"
+            vcsUrl = "https://github.com/Koboo/hytale-pluginmanifest"
             tags = setOf("hytale", "manifest", "generator")
         }
     }
