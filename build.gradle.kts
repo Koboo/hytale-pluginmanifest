@@ -9,7 +9,7 @@ subprojects {
         plugin("com.gradleup.shadow")
     }
 
-    group = "eu.koboo.pluginmanifest"
+    group = "eu.koboo"
     version = "1.0.22"
 
     repositories {
@@ -24,7 +24,6 @@ subprojects {
     java {
         toolchain.languageVersion.set(JavaLanguageVersion.of(25))
         withSourcesJar()
-        withJavadocJar()
     }
 
     tasks {
