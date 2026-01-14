@@ -14,6 +14,7 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
   - [Installation](#installation-annotationprocessor)
   - [Configuration](#configuration-annotationprocessor)
 - [Manifest specification](#manifest-specification)
+- [Credits](#credits)
 
 ## Gradle Plugin
 
