@@ -67,9 +67,9 @@ public class ManifestValidation {
         validateURI(resultList, website, "pluginWebsite");
     }
 
-    public void validateSemVerRange(List<ValidationResult> resultList, String semVerRangeString, String pluginIdentifier) {
-        validateRequired(resultList, semVerRangeString, pluginIdentifier);
-        SemVerRange.parseString(resultList, pluginIdentifier, semVerRangeString);
+    public void validateSemVerRange(List<ValidationResult> resultList, String semVerRangeString, String key) {
+        validateRequired(resultList, semVerRangeString, key);
+        SemVerRange.parseString(resultList, semVerRangeString, key);
     }
 
     @SuppressWarnings("all")
@@ -158,7 +158,7 @@ public class ManifestValidation {
         for (String pluginIdentifier : dependencies.keySet()) {
             validatePluginIdentifier(resultList, pluginIdentifier);
             String semVerRange = dependencies.get(pluginIdentifier);
-            validateSemVerRange(resultList, semVerRange, pluginIdentifier);
+            validateSemVerRange(resultList, semVerRange, pluginIdentifier + ":version");
         }
     }
 
