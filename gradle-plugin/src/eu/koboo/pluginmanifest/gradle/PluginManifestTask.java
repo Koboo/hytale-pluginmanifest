@@ -1,7 +1,6 @@
-package eu.koboo.pluginmanifest;
+package eu.koboo.pluginmanifest.gradle;
 
-import eu.koboo.pluginmanifest.model.AuthorInfo;
-import groovy.json.JsonOutput;
+import eu.koboo.pluginmanifest.api.ManifestFile;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
@@ -35,6 +34,6 @@ public abstract class PluginManifestTask extends DefaultTask {
         }
 
         Files.writeString(outputFile.toPath(), manifestJson, StandardCharsets.UTF_8);
-        getLogger().lifecycle("Generated manifest at: {}", outputFile.getAbsolutePath());
+        getLogger().lifecycle("> PluginManifest :"  + PluginManifestPlugin.TASK_NAME + ": Generated " + ManifestFile.NAME + " at: {}", outputFile.getAbsolutePath());
     }
 }
