@@ -6,7 +6,10 @@ build/
 .kotlin
 
 ### IntelliJ IDEA ###
-.idea/
+.idea/*.xml
+.idea/.name
+.idea/.gitignore
+.idea/*/
 *.iws
 *.iml
 *.ipr
