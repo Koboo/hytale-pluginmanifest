@@ -5,11 +5,13 @@ import eu.koboo.pluginmanifest.manifest.validation.ManifestValidation;
 import eu.koboo.pluginmanifest.manifest.validation.ValidationResult;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.util.*;
 
 @Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ManifestFile {
 
@@ -38,76 +40,20 @@ public class ManifestFile {
     boolean disabledByDefault = false;
     boolean includesAssetPack = false;
 
-    public void setPluginGroup(String pluginGroup) {
-        this.pluginGroup = pluginGroup;
-    }
-
-    public void setPluginName(String pluginName) {
-        this.pluginName = pluginName;
-    }
-
-    public void setPluginVersion(String pluginVersion) {
-        this.pluginVersion = pluginVersion;
-    }
-
-    public void setPluginDescription(String description) {
-        this.pluginDescription = description;
-    }
-
     public void addPluginAuthor(String name, String email, String website) {
         pluginAuthors.add(new ManifestAuthor(name, email, website));
-    }
-
-    public void addPluginAuthor(String name, String email) {
-        addPluginAuthor(name, email, null);
-    }
-
-    public void addPluginAuthor(String name) {
-        addPluginAuthor(name, null, null);
-    }
-
-    public boolean hasAuthors() {
-        return !pluginAuthors.isEmpty();
-    }
-
-    public void setPluginWebsite(String website) {
-        this.pluginWebsite = website;
-    }
-
-    public void setPluginMainClass(String mainClass) {
-        this.pluginMainClass = mainClass;
-    }
-
-    public void addRequiredDependency(String pluginIdentifier) {
-        addRequiredDependency(pluginIdentifier, "*");
     }
 
     public void addRequiredDependency(String pluginIdentifier, String versionRange) {
         dependencies.put(pluginIdentifier, versionRange);
     }
 
-    public void addOptionalDependency(String pluginIdentifier) {
-        addOptionalDependency(pluginIdentifier, "*");
-    }
-
     public void addOptionalDependency(String pluginIdentifier, String versionRange) {
         optionalDependencies.put(pluginIdentifier, versionRange);
     }
 
-    public void addLoadBeforeDependency(String pluginIdentifier) {
-        addLoadBeforeDependency(pluginIdentifier, "*");
-    }
-
     public void addLoadBeforeDependency(String pluginIdentifier, String versionRange) {
         loadBefore.put(pluginIdentifier, versionRange);
-    }
-
-    public void setPluginDisabledByDefault(boolean disabledByDefault) {
-        this.disabledByDefault = disabledByDefault;
-    }
-
-    public void setPluginIncludesAssetPack(boolean includesAssetPack) {
-        this.includesAssetPack = includesAssetPack;
     }
 
     private void validateManifest() throws InvalidPluginManifestException {
