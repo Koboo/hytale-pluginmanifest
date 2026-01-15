@@ -186,7 +186,9 @@ public class ManifestValidation {
 
     public void validateMainClass(List<ValidationResult> resultList, String className) {
         validateRequired(resultList, className, "pluginMainClass");
-
+        if (className == null) {
+            return;
+        }
         if (className.startsWith(".") || className.endsWith(".")) {
             resultList.add(ValidationResult.of(className, "pluginMainClass", "cannot start or end with '.'"));
             return;
