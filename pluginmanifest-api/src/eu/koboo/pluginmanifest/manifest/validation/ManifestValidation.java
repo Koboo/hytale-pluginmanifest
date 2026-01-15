@@ -25,29 +25,48 @@ public class ManifestValidation {
         }
     }
 
-    public void validateCharacters(List<ValidationResult> resultList, String value, String key, char... allowedChars) {
+    public void validateString(List<ValidationResult> resultList, String value, String key) {
+        validateString(resultList, value, key, false);
+    }
+
+    public void validateString(List<ValidationResult> resultList, String value, String key, boolean groupNameSeparatorAllowed) {
         validateRequired(resultList, value, key);
-
-        Set<Character> allowedSet = new HashSet<>();
-        for (char allowedChar : allowedChars) {
-            allowedSet.add(allowedChar);
-        }
-
         char[] charArray = value.toCharArray();
         for (int i = 0; i < charArray.length; i++) {
-            char c = charArray[i];
-            boolean isAlphabetical = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-            boolean isDigit = Character.isDigit(c);
-            boolean isAllowedChar = allowedSet.contains(c);
-            if (!isAlphabetical && !isDigit && !isAllowedChar) {
-                resultList.add(ValidationResult.of(key, value, "contains illegal character: '" + c + "' at index " + i));
+            char currentChar = charArray[i];
+            if (!Character.isISOControl(currentChar)
+                && !Character.isWhitespace(currentChar)
+                && currentChar != ':') {
+                continue;
             }
+            if (groupNameSeparatorAllowed && currentChar == ':') {
+                continue;
+            }
+            String charHint = createCharHint(currentChar, i, value);
+            resultList.add(ValidationResult.of(key, value, "contains illegal character \"" + charHint + "\" at position " + i));
         }
+    }
+
+    private String createCharHint(char currentChar, int index, String value) {
+        String printableChar = switch (currentChar) {
+            case '\n' -> "\\n";
+            case '\r' -> "\\r";
+            case '\t' -> "\\t";
+            case '\b' -> "\\b";
+            case '\f' -> "\\f";
+            default -> Character.isISOControl(currentChar)
+                ? String.format("\\u%04X", (int) currentChar)
+                : String.valueOf(currentChar);
+        };
+        return value.substring(0, index) +
+            ">" + printableChar + "<" +
+            value.substring(index + 1);
+
     }
 
     public void validatePluginIdentifier(List<ValidationResult> resultList, String pluginIdentifier) {
         String key = "pluginIdentifier";
-        validateCharacters(resultList, pluginIdentifier, key, '-', ':');
+        validateString(resultList, pluginIdentifier, key, true);
         if (!pluginIdentifier.contains(":")) {
             resultList.add(ValidationResult.of(pluginIdentifier, key, "must contain ':' in format \"Group:Name\""));
             return;
@@ -56,7 +75,7 @@ public class ManifestValidation {
 
     public void validateSemVer(List<ValidationResult> resultList, String semVerString) {
         String key = "pluginVersion";
-        validateRequired(resultList, semVerString, key);
+        validateString(resultList, semVerString, key);
         SemVer.parseString(resultList, key, semVerString);
     }
 
@@ -74,6 +93,7 @@ public class ManifestValidation {
 
     @SuppressWarnings("all")
     public void validateURI(List<ValidationResult> resultList, String uriString, String key) {
+        validateString(resultList, uriString, key);
         URI uri;
         try {
             uri = URI.create(uriString);
@@ -112,19 +132,21 @@ public class ManifestValidation {
         }
         for (int i = 0; i < authorList.size(); i++) {
             ManifestAuthor author = authorList.get(i);
-            validateRequired(resultList, author.getName(), "authorName[" + i + "]");
+            String name = author.getName();
+            validateRequired(resultList, name, "author.name[i=" + i + "]");
             String authorEmail = author.getEmail();
             if (authorEmail != null && !authorEmail.trim().isEmpty()) {
-                validateEmailAddress(resultList, authorEmail, "authorEmail[" + i + "]");
+                validateEmailAddress(resultList, authorEmail, "author.email[i=" + i + ", name=" + name + "]");
             }
             String authorUrl = author.getUrl();
             if (authorUrl != null && !authorUrl.trim().isEmpty()) {
-                validateURI(resultList, authorUrl, "authorUrl[" + i + "]");
+                validateURI(resultList, authorUrl, "author.url[i=" + i + ", name=" + name + "]");
             }
         }
     }
 
     public void validateEmailAddress(List<ValidationResult> resultList, String emailAddress, String key) {
+        validateString(resultList, emailAddress, key);
         int atIndex = emailAddress.indexOf('@');
         if (atIndex == -1) {
             resultList.add(ValidationResult.of(key, emailAddress, "must contain a '@'"));
