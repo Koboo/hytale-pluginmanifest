@@ -1,6 +1,5 @@
 package eu.koboo.pluginmanifest.gradle;
 
-import eu.koboo.pluginmanifest.manifest.ManifestFile;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
@@ -14,8 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 public abstract class PluginManifestTask extends DefaultTask {
-
-    protected PluginManifestPlugin plugin;
 
     @OutputFile
     public abstract RegularFileProperty getOutputFile();
@@ -34,6 +31,10 @@ public abstract class PluginManifestTask extends DefaultTask {
         }
 
         Files.writeString(outputFile.toPath(), manifestJson, StandardCharsets.UTF_8);
-        getLogger().lifecycle("> PluginManifest :" + PluginManifestPlugin.TASK_NAME + ": Generated " + ManifestFile.NAME + " at: {}", outputFile.getAbsolutePath());
+        log("Generated at: " + outputFile.getAbsolutePath());
+    }
+
+    private void log(String message) {
+        getLogger().lifecycle(PluginManifestPlugin.LOG_PREFIX + PluginManifestPlugin.TASK_NAME + ": " + message);
     }
 }
