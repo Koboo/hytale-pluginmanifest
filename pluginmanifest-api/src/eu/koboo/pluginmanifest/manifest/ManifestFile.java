@@ -11,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 import java.util.*;
 
 @Getter
-@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ManifestFile {
 
@@ -33,25 +32,71 @@ public class ManifestFile {
     final Map<String, String> optionalDependencies = new LinkedHashMap<>();
     final Map<String, String> loadBefore = new LinkedHashMap<>();
 
-    // NOT SUPPORTED, needs complex serilization
+    // NOT SUPPORTED
     final List<ManifestFile> subPlugins = new ArrayList<>();
 
+    @Setter
     boolean disabledByDefault = false;
+    @Setter
     boolean includesAssetPack = false;
 
-    public void addPluginAuthor(String name, String email, String website) {
-        pluginAuthors.add(new ManifestAuthor(name, email, website));
+    public void setPluginGroup(String pluginGroup) {
+        pluginGroup = replaceEmptyWithNull(pluginGroup);
+        this.pluginGroup = pluginGroup;
+    }
+
+    public void setPluginName(String pluginName) {
+        pluginName = replaceEmptyWithNull(pluginName);
+        this.pluginName = pluginName;
+    }
+
+    public void setPluginVersion(String pluginVersion) {
+        pluginVersion = replaceEmptyWithNull(pluginVersion);
+        this.pluginVersion = pluginVersion;
+    }
+
+    public void setPluginDescription(String pluginDescription) {
+        pluginDescription = replaceEmptyWithNull(pluginDescription);
+        this.pluginDescription = pluginDescription;
+    }
+
+    public void addPluginAuthor(String name, String email, String url) {
+        name = replaceEmptyWithNull(name);
+        email = replaceEmptyWithNull(email);
+        url = replaceEmptyWithNull(url);
+        pluginAuthors.add(new ManifestAuthor(name, email, url));
+    }
+
+    public void setPluginWebsite(String pluginWebsite) {
+        pluginWebsite = replaceEmptyWithNull(pluginWebsite);
+        this.pluginWebsite = pluginWebsite;
+    }
+
+    public void setPluginMainClass(String pluginMainClass) {
+        pluginMainClass = replaceEmptyWithNull(pluginMainClass);
+        this.pluginMainClass = pluginMainClass;
+    }
+
+    public void setServerVersion(String serverVersion) {
+        serverVersion = replaceEmptyWithNull(serverVersion);
+        this.serverVersion = serverVersion;
     }
 
     public void addRequiredDependency(String pluginIdentifier, String versionRange) {
+        pluginIdentifier =  replaceEmptyWithNull(pluginIdentifier);
+        versionRange = replaceEmptyWithNull(versionRange);
         dependencies.put(pluginIdentifier, versionRange);
     }
 
     public void addOptionalDependency(String pluginIdentifier, String versionRange) {
+        pluginIdentifier =  replaceEmptyWithNull(pluginIdentifier);
+        versionRange = replaceEmptyWithNull(versionRange);
         optionalDependencies.put(pluginIdentifier, versionRange);
     }
 
     public void addLoadBeforeDependency(String pluginIdentifier, String versionRange) {
+        pluginIdentifier =  replaceEmptyWithNull(pluginIdentifier);
+        versionRange = replaceEmptyWithNull(versionRange);
         loadBefore.put(pluginIdentifier, versionRange);
     }
 
@@ -59,8 +104,8 @@ public class ManifestFile {
 
         List<ValidationResult> resultList = new ArrayList<>();
 
-        ManifestValidation.validateCharacters(resultList, pluginGroup, "pluginGroup", '-');
-        ManifestValidation.validateCharacters(resultList, pluginName, "pluginName", '-');
+        ManifestValidation.validateString(resultList, pluginGroup, "pluginGroup");
+        ManifestValidation.validateString(resultList, pluginName, "pluginName");
         ManifestValidation.validateSemVerRange(resultList, serverVersion, "serverVersion");
         ManifestValidation.validateSemVer(resultList, pluginVersion);
         ManifestValidation.validateWebsite(resultList, pluginWebsite);
@@ -132,5 +177,16 @@ public class ManifestFile {
         manifestMap.put("Main", pluginMainClass);
 
         return manifestMap;
+    }
+
+    private static String replaceEmptyWithNull(String string) {
+        if(string == null) {
+            return null;
+        }
+        string = string.trim();
+        if(string.isEmpty()) {
+            return string;
+        }
+        return string;
     }
 }
