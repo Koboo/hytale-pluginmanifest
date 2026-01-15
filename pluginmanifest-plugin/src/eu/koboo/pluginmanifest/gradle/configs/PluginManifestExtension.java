@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.Action;
 
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,11 +21,9 @@ public class PluginManifestExtension {
     boolean minimizeJson = false;
 
     @Getter
-    boolean addServerDependency = true;
+    boolean applyServerDependency = true;
 
-    String serverJarName;
-    @Getter
-    final List<String> searchableDirectories = new LinkedList<>();
+    String serverJarPath;
 
     public void pluginMeta(String pluginGroup, String pluginName, String pluginVersion) {
         manifestFile.setPluginGroup(pluginGroup);
@@ -107,35 +103,28 @@ public class PluginManifestExtension {
         return manifestFile.isIncludesAssetPack();
     }
 
-    public void minimizeJson(boolean minimizeJson) {
-        this.minimizeJson = minimizeJson;
+    public void minimizeJson(boolean value) {
+        this.minimizeJson = value;
     }
 
     public boolean minimizeJson() {
         return minimizeJson;
     }
 
-    public void addServerDependency(boolean value) {
-        this.addServerDependency = value;
+    public void applyServerDependency(boolean value) {
+        this.applyServerDependency = value;
     }
 
-    public boolean addServerDependency() {
-        return addServerDependency;
+    public boolean applyServerDependency() {
+        return applyServerDependency;
     }
 
-    public void serverJarName(String serverJarName) {
-        this.serverJarName = serverJarName;
+    public void serverJarPath(String serverJarPath) {
+        this.serverJarPath = serverJarPath;
     }
 
-    public String serverJarName() {
-        return serverJarName;
-    }
-
-    public void searchableDirectories(String... searchableDirectoryArray) {
-        if(searchableDirectoryArray == null) {
-            return;
-        }
-        this.searchableDirectories.addAll(Arrays.asList(searchableDirectoryArray));
+    public String serverJarPath() {
+        return serverJarPath;
     }
 
     public void authors(Action<ManifestAuthorsConfig> action) {

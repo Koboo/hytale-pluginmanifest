@@ -15,8 +15,6 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.language.jvm.tasks.ProcessResources;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PluginManifestPlugin implements Plugin<Project> {
@@ -79,81 +77,18 @@ public class PluginManifestPlugin implements Plugin<Project> {
     }
 
     private void applyServerDependency(Project project, PluginManifestExtension extension) {
-        if(!extension.addServerDependency()) {
+        if(!extension.isApplyServerDependency()) {
+            log(project, "applyServerDependency", "Applying server dependency is disabled.");
             return;
         }
-        String serverJarFileName;
-        String extensionJarName = extension.serverJarName();
-        if(extensionJarName == null || extensionJarName.trim().isEmpty()) {
-            serverJarFileName = SERVER_JAR_NAME;
-        } else {
-            serverJarFileName = extensionJarName;
-        }
-        if(!serverJarFileName.endsWith(".jar")) {
-            serverJarFileName += ".jar";
-        }
-
-        List<String> searchedPathList = new LinkedList<>();
-
-        String appDataDirectory = GradleUtils.getAppDataDirectory();
-        if (!appDataDirectory.endsWith("/")) {
-            appDataDirectory += "/";
-        }
-        String rootDirectory = GradleUtils.getRootProjectDirectory(project).getAbsolutePath();
-        if(!rootDirectory.endsWith("/")) {
-            rootDirectory += "/";
-        }
-
-        // Try searching in "{PROJECT}/{JAR_NAME}"
-        File serverJarFile = new File(rootDirectory + serverJarFileName);
-
-        if(!serverJarFile.exists()) {
-            searchedPathList.add(serverJarFile.getAbsolutePath());
-
-            // Try searching in "{PROJECT}/libs/{JAR_NAME}"
-            serverJarFile = new File(rootDirectory + LIBS_DIRECTORY + serverJarFileName);
-        }
-
-        if(!serverJarFile.exists()) {
-            searchedPathList.add(serverJarFile.getAbsolutePath());
-
-            // Try searching in "{APPDATA}/Hytale/install/release/package/game/latest/Server/{JAR_NAME}"
-            serverJarFile = new File(appDataDirectory + CLIENT_SERVER_PATH + serverJarFileName);
-        }
-
-        List<String> searchableDirectories = extension.getSearchableDirectories();
-        if(!serverJarFile.exists() && !searchableDirectories.isEmpty()) {
-            // Try searching for a user-provided directory.
-            for (String searchableDirectory : searchableDirectories) {
-                if(!searchableDirectory.endsWith("/")) {
-                    searchableDirectory += "/";
-                }
-                serverJarFile = new File(searchableDirectory + serverJarFileName);
-                if(!serverJarFile.exists()) {
-                    searchedPathList.add(serverJarFile.getAbsolutePath());
-                    continue;
-                }
-                // Found a serverJarFile in a user-provided directory
-                break;
-            }
-        }
-
-        if(!serverJarFile.exists()) {
-            searchedPathList.add(serverJarFile.getAbsolutePath());
-            log(project, "applyDependency", "Couldn't add hytale dependency to project!");
-            log(project, "applyDependency", "Couldn't find \"" + serverJarFileName + "\" in any location:");
-            for (String searchedPath : searchedPathList) {
-                log(project, "applyDependency", "- \"" + searchedPath + "\"");
-            }
+        final File finalServerJarFile = DependencyUtils.searchServerFile(this, project, extension);
+        if(finalServerJarFile == null) {
+            // Errors are printed within searchServerFile.
             return;
         }
-        // serverJarFile exists!
-
-        final File finalServerJarFile = serverJarFile;
         Provider<RegularFile> jarProvider = project.getLayout().file(project.provider(() -> finalServerJarFile));
-
         DependencyHandler dependencies = project.getDependencies();
         dependencies.add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, project.files(jarProvider));
-        log(project, "applyDependency", "Dependency added from " + serverJarFile.getAbsolutePath());
+        log(project, "applyServerDependency", "Dependency added from " + finalServerJarFile.getAbsolutePath());
     }
 }
