@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ManifestConfig {
+public class PluginManifestExtension {
 
     @Getter
     final ManifestFile manifestFile = new ManifestFile();
@@ -19,6 +19,9 @@ public class ManifestConfig {
 
     @Getter
     boolean minimizeJson = false;
+
+    @Getter
+    boolean addServerDependency = true;
 
     public void pluginMeta(String pluginGroup, String pluginName, String pluginVersion) {
         manifestFile.setPluginGroup(pluginGroup);
@@ -104,6 +107,14 @@ public class ManifestConfig {
 
     public boolean minimizeJson() {
         return minimizeJson;
+    }
+
+    public void addServerDependency(boolean value) {
+        this.addServerDependency = value;
+    }
+
+    public boolean addServerDependency() {
+        return addServerDependency;
     }
 
     public void authors(Action<ManifestAuthorsConfig> action) {
