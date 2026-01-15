@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.Action;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +24,10 @@ public class PluginManifestExtension {
 
     @Getter
     boolean addServerDependency = true;
+
+    String serverJarName;
+    @Getter
+    final List<String> searchableDirectories = new LinkedList<>();
 
     public void pluginMeta(String pluginGroup, String pluginName, String pluginVersion) {
         manifestFile.setPluginGroup(pluginGroup);
@@ -115,6 +121,21 @@ public class PluginManifestExtension {
 
     public boolean addServerDependency() {
         return addServerDependency;
+    }
+
+    public void serverJarName(String serverJarName) {
+        this.serverJarName = serverJarName;
+    }
+
+    public String serverJarName() {
+        return serverJarName;
+    }
+
+    public void searchableDirectories(String... searchableDirectoryArray) {
+        if(searchableDirectoryArray == null) {
+            return;
+        }
+        this.searchableDirectories.addAll(Arrays.asList(searchableDirectoryArray));
     }
 
     public void authors(Action<ManifestAuthorsConfig> action) {

@@ -82,7 +82,17 @@ public class PluginManifestPlugin implements Plugin<Project> {
         if(!extension.addServerDependency()) {
             return;
         }
-        String serverJarFileName = SERVER_JAR_NAME;
+        String serverJarFileName;
+        String extensionJarName = extension.serverJarName();
+        if(extensionJarName == null || extensionJarName.trim().isEmpty()) {
+            serverJarFileName = SERVER_JAR_NAME;
+        } else {
+            serverJarFileName = extensionJarName;
+        }
+        if(!serverJarFileName.endsWith(".jar")) {
+            serverJarFileName += ".jar";
+        }
+
         List<String> searchedPathList = new LinkedList<>();
 
         String appDataDirectory = GradleUtils.getAppDataDirectory();
@@ -111,10 +121,27 @@ public class PluginManifestPlugin implements Plugin<Project> {
             serverJarFile = new File(appDataDirectory + CLIENT_SERVER_PATH + serverJarFileName);
         }
 
+        List<String> searchableDirectories = extension.getSearchableDirectories();
+        if(!serverJarFile.exists() && !searchableDirectories.isEmpty()) {
+            // Try searching for a user-provided directory.
+            for (String searchableDirectory : searchableDirectories) {
+                if(!searchableDirectory.endsWith("/")) {
+                    searchableDirectory += "/";
+                }
+                serverJarFile = new File(searchableDirectory + serverJarFileName);
+                if(!serverJarFile.exists()) {
+                    searchedPathList.add(serverJarFile.getAbsolutePath());
+                    continue;
+                }
+                // Found a serverJarFile in a user-provided directory
+                break;
+            }
+        }
+
         if(!serverJarFile.exists()) {
             searchedPathList.add(serverJarFile.getAbsolutePath());
             log(project, "applyDependency", "Couldn't add hytale dependency to project!");
-            log(project, "applyDependency", "Couldn't find \"" + serverJarFileName + "\" at:");
+            log(project, "applyDependency", "Couldn't find \"" + serverJarFileName + "\" in any location:");
             for (String searchedPath : searchedPathList) {
                 log(project, "applyDependency", "- \"" + searchedPath + "\"");
             }
@@ -122,7 +149,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
         }
         // serverJarFile exists!
 
-        File finalServerJarFile = serverJarFile;
+        final File finalServerJarFile = serverJarFile;
         Provider<RegularFile> jarProvider = project.getLayout().file(project.provider(() -> finalServerJarFile));
 
         DependencyHandler dependencies = project.getDependencies();
