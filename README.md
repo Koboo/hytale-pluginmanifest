@@ -105,8 +105,9 @@ pluginManifest {
     // The provided class has to "extends JavaPlugin".
     pluginMainClass("eu.koboo.myplugin.MyPlugin")
 
-    // The plugin can be disabled on server start.
-    // So you need to start manually.
+    // The plugin doesn't start automatically with the server,
+    // so you need to start it manually ingame with the commands:
+    // /plugin load <PLUGIN_NAME>
     pluginDisabledByDefault(false)
 
     // Does this plugin contain any assets?
