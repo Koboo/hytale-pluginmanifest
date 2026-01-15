@@ -1,6 +1,6 @@
 # Hytale Plugin Manifest Generator
 
-<a href="https://mvnrepository.com/artifact/eu.koboo/pluginmanifest-api"><img src="https://img.shields.io/badge/maven-central-blue" alt="MavenCentral"></a>
+<a href="https://central.sonatype.com/artifact/eu.koboo/pluginmanifest-api"><img src="https://img.shields.io/badge/maven-central-blue" alt="MavenCentral"></a>
 <a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/badge/gradle-plugin_portal-blue" alt="PluginPortal"></a>
 <a href="https://discord.koboo.eu/"><img src="https://img.shields.io/badge/discord-server-blue" alt="PluginPortal"></a>
 
@@ -8,7 +8,6 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 
 ## Overview
 
-- [Versions / Project](#project)
 - [Gradle Plugin](#gradle-plugin)
     - [Installation](#installation)
     - [Configuration](#configuration)
@@ -22,32 +21,20 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 - [Credits](#credits)
 - [MIT LICENSE](LICENSE)
 
-## Project
-
-### Gradle Plugin
-
-- ![Latest version](https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version)
-- [pluginmanifest-plugin](https://github.com/Koboo/hytale-pluginmanifest/tree/main/pluginmanifest-plugin)
-
-### AnnotationProcessor
-
-- ![Latest api](https://img.shields.io/maven-central/v/eu.koboo/pluginmanifest-api?label=latest+version)
-- [pluginmanifest-api](https://github.com/Koboo/hytale-pluginmanifest/tree/main/pluginmanifest-api)
-
 ## Features
 
-- 🟢 Resolves properties automatically
-- 🟢 Exposes configuration for ``build.gradle.kts``
 - Validates provided properties
 - Logs user-friendly errors on validation issues
 - Generates ``manifest.json``
 - Includes generated ``manifest.json`` file into JAR-file
 - Overrides existing ``manifest.json``
-- 🟢 Works with ``shadowJar``
-- 🟢 Works with ``org.gradle.configuration-cache=true``
 - Supports ``Windows``, ``Linux`` and ``Mac``
+- 🟢 Resolves properties automatically
+- 🟢 Exposes configuration for ``build.gradle.kts``
 - 🟢 Automatically detect ``HytaleServer.jar``
 - 🟢 Automatically add ``HytaleServer.jar`` as project dependency
+- 🟢 Works with ``shadowJar``
+- 🟢 Works with ``org.gradle.configuration-cache=true``
 
 > [!NOTE]
 > All features marked with 🟢 are only available for the [Gradle-Plugin](#gradle-plugin)
@@ -60,10 +47,10 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 
 ### Installation
 
-**Available on:**
-
 - [Gradle Plugin Portal](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
-- [Entix Reposilite](https://repo.entix.eu/#/releases/eu/koboo/eu.koboo.pluginmanifest.gradle.plugin)
+- [Entix Reposilite](https://repo.entix.eu/#/releases/eu/koboo/pluginmanifest-plugin)
+- ![Latest version](https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version)
+- [pluginmanifest-plugin](https://github.com/Koboo/hytale-pluginmanifest/tree/main/pluginmanifest-plugin)
 
 **Required environment**
 
@@ -73,16 +60,18 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``build.gradle``**
     ````groovy
     plugins {
-        id 'eu.koboo.pluginmanifest' version '1.0.23'
+        id 'eu.koboo.pluginmanifest' version 'LATEST_VERSION'
     }
     ````
 
 2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``build.gradle.kts``**
     ````kotlin
     plugins {
-        id("eu.koboo.pluginmanifest") version("1.0.23")
+        id("eu.koboo.pluginmanifest") version("LATEST_VERSION")
     }
     ````
+
+[See latest version](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
 
 ### Configuration
 
@@ -257,10 +246,10 @@ The Gradle plugin's generated ``manifest.json``:
 
 ### Installation
 
-**Available on:**
-
-- [Maven Central](https://mvnrepository.com/artifact/eu.koboo/pluginmanifest-api)
+- [Maven Central](https://central.sonatype.com/artifact/eu.koboo/pluginmanifest-api)
 - [Entix Reposilite](https://repo.entix.eu/#/releases/eu/koboo/pluginmanifest-api)
+- ![Latest api](https://img.shields.io/maven-central/v/eu.koboo/pluginmanifest-api?label=latest+version)
+- [pluginmanifest-api](https://github.com/Koboo/hytale-pluginmanifest/tree/main/pluginmanifest-api)
 
 **Required environment**
 
@@ -269,16 +258,16 @@ The Gradle plugin's generated ``manifest.json``:
 1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``build.gradle``**
     ````groovy
     dependency {
-        compileOnly 'eu.koboo:pluginmanifest-api:1.0.23'
-        annotationProcessor 'eu.koboo:pluginmanifest-api:1.0.23'
+        compileOnly 'eu.koboo:pluginmanifest-api:LATEST_VERSION'
+        annotationProcessor 'eu.koboo:pluginmanifest-api:LATEST_VERSION'
     }
     ````
 
 2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``build.gradle.kts``**
    ````kotlin
    dependency {
-       compileOnly("eu.koboo:pluginmanifest-api:1.0.23")
-       annotationProcessor("eu.koboo:pluginmanifest-api:1.0.23")
+       compileOnly("eu.koboo:pluginmanifest-api:LATEST_VERSION")
+       annotationProcessor("eu.koboo:pluginmanifest-api:LATEST_VERSION")
    }
    ````
 3. <img src=".idea/maven_logo.png" height="13em" alt="Maven Logo"></img> **Maven: ``pom.xml``**
@@ -286,10 +275,12 @@ The Gradle plugin's generated ``manifest.json``:
     <dependency>
         <groupId>eu.koboo</groupId>
         <artifactId>pluginmanifest-api</artifactId>
-        <version>1.0.23</version>
+        <version>LATEST_VERSION</version>
         <scope>provided</scope>
     </dependency>
     ````
+
+[See latest version](https://central.sonatype.com/artifact/eu.koboo/pluginmanifest-api)
 
 ### Configuration
 
