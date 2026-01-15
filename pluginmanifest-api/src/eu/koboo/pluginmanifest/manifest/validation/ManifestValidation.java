@@ -31,6 +31,9 @@ public class ManifestValidation {
 
     public void validateString(List<ValidationResult> resultList, String value, String key, boolean groupNameSeparatorAllowed) {
         validateRequired(resultList, value, key);
+        if (value == null) {
+            return;
+        }
         char[] charArray = value.toCharArray();
         for (int i = 0; i < charArray.length; i++) {
             char currentChar = charArray[i];
@@ -88,6 +91,9 @@ public class ManifestValidation {
 
     public void validateSemVerRange(List<ValidationResult> resultList, String semVerRangeString, String key) {
         validateRequired(resultList, semVerRangeString, key);
+        if(semVerRangeString == null) {
+            return;
+        }
         SemVerRange.parseString(resultList, semVerRangeString, key);
     }
 
@@ -134,6 +140,9 @@ public class ManifestValidation {
             ManifestAuthor author = authorList.get(i);
             String name = author.getName();
             validateRequired(resultList, name, "author.name[i=" + i + "]");
+            if (name == null) {
+                return;
+            }
             String authorEmail = author.getEmail();
             if (authorEmail != null && !authorEmail.trim().isEmpty()) {
                 validateEmailAddress(resultList, authorEmail, "author.email[i=" + i + ", name=" + name + "]");
