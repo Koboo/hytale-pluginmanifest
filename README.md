@@ -137,6 +137,9 @@ pluginManifest {
     // 3. ...doesn't search in the locations mentioned in "applyServerDependency"
     // 4. ...logs an error if the file does not exist
     // You can specify an absolute or relative path.
+    //
+    // !! NOTE: IT NEEDS "applyServerDependency(true)" !!
+    //          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     serverJarPath("C:/Users/Koboo/Downloads/HytaleServer.jar")
 
     // You need to set at least 1 author.
