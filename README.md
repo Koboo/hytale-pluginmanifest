@@ -1,75 +1,97 @@
 # Hytale Plugin Manifest Generator
 
+<a href="https://mvnrepository.com/artifact/eu.koboo/pluginmanifest-api"><img src="https://img.shields.io/badge/maven-central-blue" alt="MavenCentral"></a>
+<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/badge/gradle-plugin_portal-blue" alt="PluginPortal"></a>
+<a href="https://discord.koboo.eu/"><img src="https://img.shields.io/badge/discord-server-blue" alt="PluginPortal"></a>
+
 This project enables you to generate your Hytale Plugin's ``manifest.json`` automatically.
 
 ## Overview
 
+- [Versions / Project](#project)
 - [Gradle Plugin](#gradle-plugin)
-    - [What does it do?](#what-does-it-do)
-    - [Installation](#installation-gradle-plugin)
-    - [Configuration](#configuration-gradle-plugin)
-    - [Automatic properties](#automatic-properties-gradle-plugin)
-    - [Automatic configuration example](#automatic-properties-gradle-plugin)
+    - [Installation](#installation)
+    - [Configuration](#configuration)
+    - [Automatic properties](#automatic-properties)
+    - [Automatic configuration example](#automatic-configuration-example)
 - [AnnotationProcessor](#annotationprocessor)
-  - [Installation](#installation-annotationprocessor)
-  - [Configuration](#configuration-annotationprocessor)
+    - [Installation](#installation-1)
+    - [Configuration](#configuration-1)
 - [Manifest specification](#manifest-specification)
+- [Dependencies](#dependencies)
 - [Credits](#credits)
+- [MIT LICENSE](LICENSE)
+
+## Project
+
+### Gradle Plugin
+
+- ![Latest version](https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version)
+- [pluginmanifest-plugin](https://github.com/Koboo/hytale-pluginmanifest/tree/main/pluginmanifest-plugin)
+
+### AnnotationProcessor
+
+- ![Latest api](https://img.shields.io/maven-central/v/eu.koboo/pluginmanifest-api?label=latest+version)
+- [pluginmanifest-api](https://github.com/Koboo/hytale-pluginmanifest/tree/main/pluginmanifest-api)
+
+## Features
+
+- 🟢 Resolves properties automatically
+- 🟢 Exposes configuration for ``build.gradle.kts``
+- Validates provided properties
+- Logs user-friendly errors on validation issues
+- Generates ``manifest.json``
+- Includes generated ``manifest.json`` file into JAR-file
+- Overrides existing ``manifest.json``
+- 🟢 Works with ``shadowJar``
+- 🟢 Works with ``org.gradle.configuration-cache=true``
+- Supports ``Windows``, ``Linux`` and ``Mac``
+
+> [!NOTE]
+> All features marked with 🟢 are only available for the [Gradle-Plugin](#gradle-plugin)
 
 ## Gradle Plugin
 
-The Gradle plugin exposes a configuration for manually setting the values but also tries to resolve
-the required values by using your Gradle project. The automatically resolved values can be overridden.
+- Exposes a configuration for manually setting properties.
+- Tries to resolve required properties by current project and OS information.
+- Can override automatically resolved properties
 
-### What does it do?
+### Installation
 
-- Resolves values automatically
-- Exposes Gradle configuration
-- Validates provided values
-- Logs user-friendly errors on validation issues
-- Generates a valid ``manifest.json`` files
-- Includes the generated ``manifest.json`` file into your plugin JAR-file
-- Works with ``shadowJar``
-- Works with ``org.gradle.configuration-cache=true``
+**Available on:**
 
-### Installation (Gradle Plugin)
-
-The Gradle plugin will be hosted on the Gradle plugin portal.
+- [Gradle Plugin Portal](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
+- [Entix Reposilite](https://repo.entix.eu/#/releases/eu/koboo/eu.koboo.pluginmanifest.gradle.plugin)
 
 **Required environment**
 
 - ``Gradle 9.2.1`` or newer
 - ``JDK 25`` or newer
 
-You only need to apply the plugin on your project.
+1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``build.gradle``**
+    ````groovy
+    plugins {
+        id 'eu.koboo.pluginmanifest' version '1.0.23'
+    }
+    ````
 
-**Groovy DSL: ``build.gradle``**
+2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``build.gradle.kts``**
+    ````kotlin
+    plugins {
+        id("eu.koboo.pluginmanifest") version("1.0.23")
+    }
+    ````
 
-````groovy
-plugins {
-    id 'eu.koboo.pluginmanifest' version '1.0.23'
-}
-````
+### Configuration
 
-**Kotlin DSL: ``build.gradle.kts``**
-
-````kotlin
-plugins {
-    id("eu.koboo.pluginmanifest") version("1.0.23")
-}
-````
-
-### Configuration (Gradle Plugin)
-
-You can configure all values of the ``manifest.json`` inside the ``pluginManifest { }``.
-Here is an example of all currently supported values:
+You can override properties of the generated ``manifest.json``.
 
 ````kotlin
 pluginManifest {
     pluginGroup("Koboo")
     pluginName("MyPlugin")
     pluginVersion("1.0.0")
-    // Or you can set all values at once by calling
+    // Or you can set all properties at once by calling
     pluginMeta("Koboo", "MyPlugin", "1.0.0")
 
     pluginDescription("MyPlugin, that does awesome things!")
@@ -79,7 +101,19 @@ pluginManifest {
     pluginDisabledByDefault(false)
     pluginIncludesAssetPack(false)
 
+    // Minimizes the JSON string written into manifest.json
     minimizeJson(false)
+
+    // Automatically adds the HytaleServer.jar as dependency
+    // It searches in the following locations by order:
+    // - {rootProjectDirectory}/HytaleServer.jar
+    // - {rootProjectDirectory}/libs/HytaleServer.jar
+    // - {appDataDirectory}/Hytale/install/release/package/game/latest/Server/HytaleServer.jar
+    // Here are examples of the above paths: (from Windows)
+    // - C:/Users/Koboo/Projects/hytale-plugin-template/HytaleServer.jar
+    // - C:/Users/Koboo/Projects/hytale-plugin-template/libs/HytaleServer.jar
+    // - C:/Users/Koboo/AppData/Roaming/Hytale/install/release/package/game/latest/Server/HytaleServer.jar
+    addServerDependency(true)
 
     authors {
         author {
@@ -90,50 +124,55 @@ pluginManifest {
         author {
             authorName("AnotherAuthor")
             authorEmail("author@example.com")
-            authorUrl("https://example.com/")
+        }
+        author {
+            authorName("OnlyNameIsRequiredOnAuthor")
         }
     }
 
     pluginDependencies {
+        // Dependency is required -> Plugin fails if dependency is not available
         required("Nitrado:WebServer")
+        // Dependency is optional -> Plugin does not fail if dependency is not available
         optional("Nitrado:QueryPlugin", ">=1.0.0")
+        // MyPlugin needs to load before this plugin (Not tested if it fails, if the plugin is not available)
         loadBefore("OtherGroup:OtherPlugin")
     }
 }
 ````
 
-### Automatic properties (Gradle Plugin)
+### Automatic properties
 
-Because, we all hate writing the same stuff all over again and we love automation, the Gradle plugin tries
-to resolve the required values automatically.
+Because we all hate writing the same stuff all over again, and we love automation, the Gradle plugin tries
+to resolve the required properties automatically.
 
-In the table below, you can see where and how the Gradle plugin resolves automatically generated values.
+In the table below, you can see where we get properties from.
 
 Table description:
 
-- ``manifest.json Key`` - The JSON key within the ``manifest.json`` file
-- ``Source`` - From where does the plugin get the value?
+- ``Source`` - Where does the gradle-plugin get the property?
 - ``Example`` - How would the ``Source`` look like?
 - ``Result`` - What does it look like in the ``manifest.json``?
-- ``Override with`` - How can I override these values?
+- ``Override with`` - How can I override this property?
 
-| ``manifest.json`` Key | Source                         | Example                                                             | Result                                  | Override with               |
-|-----------------------|--------------------------------|---------------------------------------------------------------------|-----------------------------------------|-----------------------------|
-| ``Group``             | Gradle ``build.gradle.kts``    | ``group = "eu.koboo"``                                              | ``"Group": "koboo"``                    | ``pluginGroup(String)``     |
-| ``Name``              | Gradle ``settings.gradle.kts`` | ``rootProject.name = "MyPlugin"``                                   | ``"Name": "MyPlugin"``                  | ``pluginName(String)``      |
-| ``Version``           | Gradle ``build.gradle.kts``    | ``version = "1.0.0"``                                               | ``"Version": "1.0.0"``                  | ``pluginVersion(String)``   |
-| ``Author``            | OS Username                    | ``String username = System.getProperty("user.name");``              | ``"Authors": [ { "Name": "Koboo" } ]``  | See manual configuration    |
-| ``Main``              | Project's java files           | ``public class eu.koboo.myplugin.MyPlugin extends JavaPlugin { } `` | ``"Main": "eu.koboo.myplugin.MyPlugin`` | ``pluginMainClass(String)`` |
+| Source                         | Example                                                             | Result                                  | Override with               |
+|--------------------------------|---------------------------------------------------------------------|-----------------------------------------|-----------------------------|
+| Gradle ``build.gradle.kts``    | ``group = "eu.koboo"``                                              | ``"Group": "koboo"``                    | ``pluginGroup(String)``     |
+| Gradle ``settings.gradle.kts`` | ``rootProject.name = "MyPlugin"``                                   | ``"Name": "MyPlugin"``                  | ``pluginName(String)``      |
+| Gradle ``build.gradle.kts``    | ``version = "1.0.0"``                                               | ``"Version": "1.0.0"``                  | ``pluginVersion(String)``   |
+| OS Username                    | ``String username = System.getProperty("user.name");``              | ``"Authors": [ { "Name": "Koboo" } ]``  | See manual configuration    |
+| Project's java files           | ``public class eu.koboo.myplugin.MyPlugin extends JavaPlugin { } `` | ``"Main": "eu.koboo.myplugin.MyPlugin`` | ``pluginMainClass(String)`` |
 
 > [!IMPORTANT]
 > The Gradle plugin scans your source files (``*.java``) and tries to find a file, which ``extends JavaPlugin``
 > If no class is found, a warning is logged
 > If more than one class is found, a warning is logged
+> If only one class is found, it's used as pluginMainClass
 
-#### Automatic configuration example (Gradle Plugin)
+#### Automatic configuration example
 
-Here you can see a complete example, where and how the values are generated, based on a common Gradle project structure
-with a single module.
+Here you can see a complete example, where and how the properties are generated,
+based on a common Gradle project structure with a single module.
 
 File: ``build.gradle.kts``
 
@@ -148,7 +187,7 @@ File: ``settings.gradle.kts``
 rootProject.name = "MyPlugin"
 ````
 
-File: ``src/main/java/eu/koboo/myplugin/MyPLugin.java``
+File: ``src/main/java/eu/koboo/myplugin/MyPlugin.java``
 
 ````java
 public class YourPlugin extends JavaPlugin {
@@ -162,104 +201,187 @@ The Gradle plugin's generated ``manifest.json``:
 
 ````json
 {
-  "Group": "koboo",
-  "Name": "hytale-plugin-template",
-  "Version": "1.0.0",
-  "Authors": [
-    {
-      "Name": "Koboo"
-    }
-  ],
-  "ServerVersion": "*",
-  "Main": "your.plugin.YourPlugin"
+    "Group": "koboo",
+    "Name": "hytale-plugin-template",
+    "Version": "1.0.0",
+    "Authors": [
+        {
+            "Name": "Koboo"
+        }
+    ],
+    "ServerVersion": "*",
+    "Main": "your.plugin.YourPlugin"
 }
 ````
 
 ## AnnotationProcessor
 
+### Installation
 
-### Installation (AnnotationProcessor)
+**Available on:**
 
-The AnnotationProcessor will be hosted on MavenCentral.
+- [Maven Central](https://mvnrepository.com/artifact/eu.koboo/pluginmanifest-api)
+- [Entix Reposilite](https://repo.entix.eu/#/releases/eu/koboo/pluginmanifest-api)
 
 **Required environment**
 
-- ``Gradle 9.2.1`` or newer
 - ``JDK 25`` or newer
 
-You only need to add the dependency to your project.
+1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``build.gradle``**
+    ````groovy
+    dependency {
+        compileOnly 'eu.koboo:pluginmanifest-api:1.0.23'
+        annotationProcessor 'eu.koboo:pluginmanifest-api:1.0.23'
+    }
+    ````
 
-**Groovy DSL: ``build.gradle``**
+2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``build.gradle.kts``**
+   ````kotlin
+   dependency {
+       compileOnly("eu.koboo:pluginmanifest-api:1.0.23")
+       annotationProcessor("eu.koboo:pluginmanifest-api:1.0.23")
+   }
+   ````
+3. <img src=".idea/maven_logo.png" height="13em" alt="Maven Logo"></img> **Maven: ``pom.xml``**
+    ````xml
+    <dependency>
+        <groupId>eu.koboo</groupId>
+        <artifactId>pluginmanifest-api</artifactId>
+        <version>1.0.23</version>
+        <scope>provided</scope>
+    </dependency>
+    ````
 
-````groovy
-dependency {
-    compileOnly 'eu.koboo:pluginmanifest-api:1.0.23'
-    annotationProcessor 'eu.koboo:pluginmanifest-api:1.0.23'
-}
-````
-
-**Kotlin DSL: ``build.gradle.kts``**
-
-````kotlin
-dependency {
-  compileOnly("eu.koboo:pluginmanifest-api:1.0.23")
-  annotationProcessor("eu.koboo:pluginmanifest-api:1.0.23")
-}
-````
-
-### Configuration (AnnotationProcessor)
+### Configuration
 
 Here is a complete example of how to use the provided annotations.
+
 ````java
+
 @PluginManifest(
-        group = "Koboo",
-        name = "MyPlugin",
-        version = "1.0.0",
-        description = "My awesome description",
-        authors = {
-                @PluginAuthor(
-                        name = "Koboo"
-                ),
-                @PluginAuthor(
-                        name = "OtherAuthor",
-                        email = "author@example.com",
-                        url = "https://example.com"
-                )
-        },
-        website = "https://github.com/Koboo/MyPlugin",
-        dependencies = {
-                @PluginDependency(pluginId = "Nitrado:WebServer"),
-                @PluginDependency(pluginId = "Nitrado:QueryPlugin", type = DependencyType.OPTIONAL),
-                @PluginDependency(pluginId = "Group:Name", version = ">=1.0.0", type = DependencyType.LOAD_BEFORE),
-        },
-        disabledByDefault = true,
-        includesAssetPack = true
+    group = "Koboo",
+    name = "MyPlugin",
+    version = "1.0.0",
+    description = "My awesome description",
+    authors = {
+        @PluginAuthor(
+            name = "Koboo"
+        ),
+        @PluginAuthor(
+            name = "OtherAuthor",
+            email = "author@example.com",
+            url = "https://example.com"
+        )
+    },
+    website = "https://github.com/Koboo/MyPlugin",
+    dependencies = {
+        @PluginDependency(pluginId = "Nitrado:WebServer"),
+        @PluginDependency(pluginId = "Nitrado:QueryPlugin", type = DependencyType.OPTIONAL),
+        @PluginDependency(pluginId = "Group:Name", version = ">=1.0.0", type = DependencyType.LOAD_BEFORE),
+    },
+    disabledByDefault = true,
+    includesAssetPack = true
 )
-public class MyPlugin extends JavaPlugin{
+public class MyPlugin extends JavaPlugin {
 
 }
 ````
 
 ## Manifest specification
 
-Some keys and values of the ``manifest.json`` are required and some are optional. They are explaind in this table:
+- Keys and values of ``manifest.json`` are required or optional.
+- Keys and values need to be validated.
 
 | ``manifest.json`` Key    | Validation                                                  | Required | Example                                |
 |--------------------------|-------------------------------------------------------------|----------|----------------------------------------|
-| ``Group``                | Only ``A-Z``, ``a-z``, ``0-9`` or ``-``                     | ✅        | ``Koboos-Plugins``                     |
-| ``Name``                 | Only ``A-Z``, ``a-z``, ``0-9`` or ``-``                     | ✅        | ``my-plugin``                          |
+| ``Group``                | UTF-8 ``String``                                            | ✅        | ``Koboos-Plugins``                     |
+| ``Name``                 | UTF-8 ``String``                                            | ✅        | ``my-plugin``                          |
 | ``Version``              | SemVer format ``MAJOR.MINOR.PATCH-RELEASE1.RELEASE2+BUILD`` | ✅        | ``1.0.0-SNAPSHOT.PRERELEASE+1d27cwq``  |
 | ``Description``          | UTF-8 ``String``                                            | ❌        | ``My awesome plugin that does things`` |
 | ``Authors`` - ``Name``   | UTF-8 ``String``                                            | ✅        | ``Koboo``                              |
-| ``Authors`` - ``Email``  | Email-Schema ``{PREFIX}@{DOMAIN}.{TLD}``                    | ❌        | ``admin@koboo.eu``                     |
-| ``Authors`` - ``Url``    | Url-Schema ``{https\|http}://{DOMAIN}.{TLD}``               | ❌        | ``https://koboo.eu``                   |
-| ``Website``              | Url-Schema ``{https\|http}://{DOMAIN}.{TLD}``               | ❌        | ``https://github.com/Koboo/MyPlugin``  |
+| ``Authors`` - ``Email``  | E-Mail-Address format ``{PREFIX}@{DOMAIN}.{TLD}``           | ❌        | ``admin@koboo.eu``                     |
+| ``Authors`` - ``Url``    | URI format ``{https\|http}://{DOMAIN}.{TLD}``               | ❌        | ``https://koboo.eu``                   |
+| ``Website``              | URI format ``{https\|http}://{DOMAIN}.{TLD}``               | ❌        | ``https://github.com/Koboo/MyPlugin``  |
 | ``ServerVersion``        | SemVerRange format                                          | ✅        | ``*``, ``>=1.0.0``                     |
 | ``Dependencies``         | ``"{PluginGroup:PluginName}": "{SemVerRange}"``             | ❌        | ``"Koboos-Plugins": "*"``              |
 | ``OptionalDependencies`` | See above, same as ``Dependencies``                         | ❌        | See above, same as ``Dependencies``    |
 | ``LoadBefore``           | See above, same as ``Dependencies``                         | ❌        | See above, same as ``Dependencies``    |
 | ``Main``                 | Fully qualified class name                                  | ✅        | ``eu.koboo.myplugin.MyPlugin``         |
 
+## Add Reposilite as repository
+
+### In ``build.gradle.kts``
+
+1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``build.gradle``**
+
+  ````groovy
+  repositories {
+    mavenCentral()
+    maven {
+        name 'entixReposilite'
+        url 'https://repo.entix.eu/releases'
+    }
+}
+  ````
+
+2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``build.gradle.kts``**
+
+  ````kotlin
+  repositories {
+    mavenCentral()
+    maven {
+        name = "entixReposilite"
+        url = uri("https://repo.entix.eu/releases")
+    }
+}
+  ````
+
+### In ``settings.gradle.kts``
+
+1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``settings.gradle``**
+
+  ````groovy
+   pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            name 'entixReposilite'
+            url 'https://repo.entix.eu/releases'
+        }
+    }
+}
+  ````
+
+2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``settings.gradle.kts``**
+   ````kotlin
+   pluginManagement {
+     repositories {
+       gradlePluginPortal()
+       maven {
+         name = "entixReposilite"
+         url = uri("https://repo.entix.eu/releases")
+       }
+     }
+   }
+   ````
+
+## Dependencies
+
+``pluginmanifest-api``dependencies:
+
+- ``org.json:json:20251224``
+
+``pluginmanifest-plugin`` dependencies:
+
+- ``pluginmanifest-api``
+- ``org.jetbrains:annotations:26.0.2-1``
+- ``com.github.javaparser:javaparser-core:3.25.9``
+
 ## Credits
 
-- [Flaticon / Freepik](https://www.flaticon.com/free-icons/stamp)
+- [Hytale Server Manual](https://support.hytale.com/hc/en-us/articles/45326769420827-Hytale-Server-Manual)
+- [HytaleModding Docs](https://hytalemodding.dev/en/docs)
+- [FlatIcon / FreePik](https://www.flaticon.com/free-icons/stamp)
+- [Kotlin Logo](https://commons.wikimedia.org/wiki/File:Kotlin_Icon.png)
+- [Groovy Logo](https://www.pngfind.com/mpng/iRwoTwo_file-groovy-logo-svg-groovy-language-logo-hd/)
+- [Maven Logo](https://www.stickpng.com/de/img/comics-und-fantasy/technologieunternehmen/apache-maven-federn)
