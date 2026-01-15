@@ -12,7 +12,7 @@ subprojects {
     }
 
     group = "eu.koboo"
-    version = "1.0.23"
+    version = "1.0.24"
 
     repositories {
         mavenCentral()
@@ -56,7 +56,15 @@ subprojects {
         repositories {
             mavenLocal()
             maven {
-                name = "entixReposilite"
+                name = "entixReposiliteReleases"
+                url = uri("https://repo.entix.eu/releases")
+                credentials {
+                    username = System.getenv("ENTIX_REPO_USER")
+                    password = System.getenv("ENTIX_REPO_PASS")
+                }
+            }
+            maven {
+                name = "entixReposiliteSnapshots"
                 url = uri("https://repo.entix.eu/snapshots")
                 credentials {
                     username = System.getenv("ENTIX_REPO_USER")
