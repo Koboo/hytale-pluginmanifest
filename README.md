@@ -88,20 +88,44 @@ You can override properties of the generated ``manifest.json``.
 
 ````kotlin
 pluginManifest {
+    // Required
     pluginGroup("Koboo")
+    // Required
     pluginName("MyPlugin")
+    // Required
     pluginVersion("1.0.0")
+
     // Or you can set all properties at once by calling
     pluginMeta("Koboo", "MyPlugin", "1.0.0")
 
+    // Required, sets the required serverVersion for your plugin.
+    // Needs to be set in SemVerRange format
+    // "*"          - Any serverVersion
+    // ">=1.0.0"    - serverVersion needs to be greater or equal to 1.0.0
+    // For Early-Access you can just set the wildcard "*".
+    serverVersion("*")
+
+    // Optional
     pluginDescription("MyPlugin, that does awesome things!")
+    // Optional, if set it needs to be a valid URL.
     pluginWebsite("https://github.com/Koboo/MyPlugin")
+
+    // That's your Main-Class / starting point of the plugin.
+    // The provided class has to "extends JavaPlugin".
     pluginMainClass("eu.koboo.myplugin.MyPlugin")
 
+    // The plugin can be disabled on server start.
+    // So you need to start manually.
     pluginDisabledByDefault(false)
+
+    // Does this plugin contain any assets?
+    // These can be i.e., model-, texture, or ui-files
     pluginIncludesAssetPack(false)
 
     // Minimizes the JSON string written into manifest.json
+    // What is minimizing?
+    // Minimizing just removes all unnecessary spaces and line-breaks,
+    // so the file size gets reduced to the bare minimum but sacrifices readability.
     minimizeJson(false)
 
     // Automatically adds the HytaleServer.jar as dependency
@@ -113,8 +137,18 @@ pluginManifest {
     // - C:/Users/Koboo/Projects/hytale-plugin-template/HytaleServer.jar
     // - C:/Users/Koboo/Projects/hytale-plugin-template/libs/HytaleServer.jar
     // - C:/Users/Koboo/AppData/Roaming/Hytale/install/release/package/game/latest/Server/HytaleServer.jar
-    addServerDependency(true)
+    applyServerDependency(true)
 
+    // By setting a value into serverJarPath(String) the following happens:
+    // The plugin...
+    // 1. ...checks if the file exists
+    // 2. ...adds this file as dependency if it exists
+    // 3. ...doesn't search in the locations mentioned in "applyServerDependency"
+    // 4. ...logs an error if the file does not exist
+    // You can specify an absolute or relative path.
+    serverJarPath("C:/Users/Koboo/Downloads/HytaleServer.jar")
+
+    // You need to set at least 1 author.
     authors {
         author {
             authorName("Koboo")
@@ -130,6 +164,8 @@ pluginManifest {
         }
     }
 
+    // Optional, if you don't have any plugin dependency,
+    // you can safely remove this block.
     pluginDependencies {
         // Dependency is required -> Plugin fails if dependency is not available
         required("Nitrado:WebServer")
@@ -155,13 +191,14 @@ Table description:
 - ``Result`` - What does it look like in the ``manifest.json``?
 - ``Override with`` - How can I override this property?
 
-| Source                         | Example                                                             | Result                                  | Override with               |
-|--------------------------------|---------------------------------------------------------------------|-----------------------------------------|-----------------------------|
-| Gradle ``build.gradle.kts``    | ``group = "eu.koboo"``                                              | ``"Group": "koboo"``                    | ``pluginGroup(String)``     |
-| Gradle ``settings.gradle.kts`` | ``rootProject.name = "MyPlugin"``                                   | ``"Name": "MyPlugin"``                  | ``pluginName(String)``      |
-| Gradle ``build.gradle.kts``    | ``version = "1.0.0"``                                               | ``"Version": "1.0.0"``                  | ``pluginVersion(String)``   |
-| OS Username                    | ``String username = System.getProperty("user.name");``              | ``"Authors": [ { "Name": "Koboo" } ]``  | See manual configuration    |
-| Project's java files           | ``public class eu.koboo.myplugin.MyPlugin extends JavaPlugin { } `` | ``"Main": "eu.koboo.myplugin.MyPlugin`` | ``pluginMainClass(String)`` |
+| Source                         | Example                                                            | Result                                   | Override with               |
+|--------------------------------|--------------------------------------------------------------------|------------------------------------------|-----------------------------|
+| Gradle ``build.gradle.kts``    | ``group = "eu.koboo"``                                             | ``"Group": "koboo"``                     | ``pluginGroup(String)``     |
+| Gradle ``settings.gradle.kts`` | ``rootProject.name = "MyPlugin"``                                  | ``"Name": "MyPlugin"``                   | ``pluginName(String)``      |
+| Gradle ``build.gradle.kts``    | ``version = "1.0.0"``                                              | ``"Version": "1.0.0"``                   | ``pluginVersion(String)``   |
+| OS Username                    | ``String username = System.getProperty("user.name");``             | ``"Authors": [ { "Name": "Koboo" } ]``   | See manual configuration    |
+| Project's java files           | ``public class eu.koboo.myplugin.MyPlugin extends JavaPlugin { }`` | ``"Main": "eu.koboo.myplugin.MyPlugin"`` | ``pluginMainClass(String)`` |
+| Default serverVersion          | /                                                                  | ``"ServerVersion": "*"``                 | ``serverVersion(String)``   |
 
 > [!IMPORTANT]
 > The Gradle plugin scans your source files (``*.java``) and tries to find a file, which ``extends JavaPlugin``
