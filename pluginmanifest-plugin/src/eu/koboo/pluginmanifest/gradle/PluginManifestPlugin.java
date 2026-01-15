@@ -1,217 +1,132 @@
 package eu.koboo.pluginmanifest.gradle;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.nodeTypes.NodeWithName;
+import eu.koboo.pluginmanifest.gradle.configs.PluginManifestExtension;
 import eu.koboo.pluginmanifest.manifest.ManifestFile;
-import eu.koboo.pluginmanifest.manifest.validation.InvalidPluginManifestException;
-import eu.koboo.pluginmanifest.gradle.configs.ManifestConfig;
-import groovy.json.JsonOutput;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.gradle.api.GradleException;
-import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.artifacts.dsl.DependencyHandler;
+import org.gradle.api.file.RegularFile;
+import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
+import org.gradle.language.jvm.tasks.ProcessResources;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PluginManifestPlugin implements Plugin<Project> {
 
+    public static final String LOG_PREFIX = "> PluginManifest :";
     public static final String EXTENSION_NAME = "pluginManifest";
     public static final String TASK_NAME = "generateManifestJson";
+    public static final String BUILD_DIRECTORY = "generated/pluginmanifest/";
+
+    public static final String SERVER_JAR_NAME = "HytaleServer.jar";
+    public static final String LIBS_DIRECTORY = "libs/";
+    public static final String CLIENT_SERVER_PATH = "Hytale/install/release/package/game/latest/Server/";
+
 
     @Override
     public void apply(Project target) {
-        ManifestConfig manifestConfig = target.getExtensions()
-            .create(EXTENSION_NAME, ManifestConfig.class);
-
-        File resourceDirectory = getGeneratedResourceDirectory(target);
-
+        PluginManifestExtension extension = target.getExtensions().create(EXTENSION_NAME, PluginManifestExtension.class);
         TaskProvider<PluginManifestTask> provider = target.getTasks().register(TASK_NAME, PluginManifestTask.class);
 
         target.afterEvaluate(project -> {
-            SourceSet mainSourceSet = getMainSources(project);
-            mainSourceSet.getResources().srcDir(resourceDirectory);
-
-            applyDefaultValues(project, manifestConfig);
-            String manifestJson = buildJson(manifestConfig);
-
-            provider.configure(task -> {
-                task.plugin = this;
-                task.setGroup("other");
-                task.getOutputFile().set(new File(resourceDirectory, ManifestFile.NAME));
-                task.getManifestJson().set(manifestJson);
-            });
-
-            project.getTasks().named(mainSourceSet.getProcessResourcesTaskName(), task -> task.dependsOn(provider));
+            applyResourceDirectory(project);
+            configureTaskProvider(project, provider, extension);
+            configureResourceTasks(project, provider);
+            applyServerDependency(project, extension);
         });
     }
 
-    private File getGeneratedResourceDirectory(Project project) {
-        DirectoryProperty directoryProperty = project.getLayout().getBuildDirectory();
-        File buildDirectory = directoryProperty.get().getAsFile();
-        return new File(buildDirectory, "generated/pluginmanifest/");
+    public void log(Project project, String method, String message) {
+        project.getLogger().lifecycle(LOG_PREFIX + method + ":" + message);
     }
 
-    private SourceSet getMainSources(Project project) {
-        return project.getExtensions()
-            .getByType(SourceSetContainer.class)
-            .getByName("main");
+    private void applyResourceDirectory(Project project) {
+        File resourceDirectory = GradleUtils.getDirectoryInBuild(project, BUILD_DIRECTORY);
+        SourceSet mainSourceSet = GradleUtils.getMainSourceSet(project);
+        mainSourceSet.getResources().srcDir(resourceDirectory);
     }
 
-    private void applyDefaultValues(Project project, ManifestConfig config) {
-        ManifestFile manifestFile = config.getManifestFile();
+    private void configureTaskProvider(Project project,
+                                       TaskProvider<PluginManifestTask> provider,
+                                       PluginManifestExtension extension) {
 
-        boolean usesDefaultValue = false;
+        ManifestUtils.applyAutomaticProperties(this, project, extension);
+        String manifestJson = ManifestUtils.buildJson(extension);
 
-        String userPluginGroup = manifestFile.getPluginGroup();
-        if (userPluginGroup == null || userPluginGroup.isEmpty()) {
-            String projectGroupId = project.getGroup().toString();
-            String defaultPluginGroup;
-            if (projectGroupId.contains(".")) {
-                String[] groupSegments = projectGroupId.split("\\.");
-                defaultPluginGroup = groupSegments[groupSegments.length - 1];
-            } else {
-                defaultPluginGroup = projectGroupId;
-            }
-            manifestFile.setPluginGroup(defaultPluginGroup);
-            usesDefaultValue = true;
-            log(project, "Automatically applied project groupId as pluginGroup \"" + defaultPluginGroup + "\"!");
-        }
-
-        String pluginName = manifestFile.getPluginName();
-        if (pluginName == null || pluginName.isEmpty()) {
-            String projectArtifactId = project.getName();
-            manifestFile.setPluginName(projectArtifactId);
-            usesDefaultValue = true;
-            log(project, "Automatically applied project name as pluginName \"" + projectArtifactId + "\"!");
-        }
-
-        String pluginVersion = manifestFile.getPluginVersion();
-        if (pluginVersion == null || pluginVersion.isEmpty()) {
-            String projectVersion = project.getVersion().toString();
-            manifestFile.setPluginVersion(projectVersion);
-            usesDefaultValue = true;
-            log(project, "Automatically applied project version as pluginVersion \"" + projectVersion + "\"!");
-        }
-
-        if (manifestFile.getPluginAuthors().isEmpty()) {
-            String userName = System.getProperty("user.name");
-            manifestFile.addPluginAuthor(userName, null, null);
-            usesDefaultValue = true;
-            log(project, "Automatically applied current user as pluginAuthor \"" + userName + "\"!");
-        }
-
-        String pluginMainClass = manifestFile.getPluginMainClass();
-        if (pluginMainClass == null || pluginMainClass.isEmpty()) {
-            List<String> candidates = getMainClassCandidates(project);
-            if (candidates.isEmpty()) {
-                log(project, "Couldn't find any pluginMainClass! Please configure the correct one manually.");
-            }
-            int candidateAmount = candidates.size();
-            if (candidateAmount > 1) {
-                log(project, "Found " + candidateAmount + " pluginMainClasses! Please configure the correct one manually.");
-            }
-            if (candidateAmount == 1) {
-                String mainClassCandidate = candidates.getFirst();
-                manifestFile.setPluginMainClass(mainClassCandidate);
-                usesDefaultValue = true;
-                log(project, "Found pluginMainClass: \"" + mainClassCandidate + "\"");
-            }
-        }
-
-        if (usesDefaultValue) {
-            log(project, "pluginmanifest automatically applied values!");
-            log(project, "You can manually override values in pluginManifest{}");
-        }
+        File resourceDirectory = GradleUtils.getDirectoryInBuild(project, BUILD_DIRECTORY);
+        provider.configure(task -> {
+            task.setGroup("other");
+            task.getOutputFile().set(new File(resourceDirectory, ManifestFile.NAME));
+            task.getManifestJson().set(manifestJson);
+        });
     }
 
-    private String buildJson(ManifestConfig extension) {
-        ManifestFile manifestFile = extension.getManifestFile();
-
-        Map<String, Object> manifestMap;
-        try {
-            manifestMap = manifestFile.asMap();
-        } catch (InvalidPluginManifestException e) {
-            throw new InvalidUserDataException("PluginManifest Error: " + System.lineSeparator() + e.buildMessage());
-        }
-
-        String json = JsonOutput.toJson(manifestMap);
-
-        if (!extension.isMinimizeJson()) {
-            json = JsonOutput.prettyPrint(json);
-        }
-        return json;
+    private void configureResourceTasks(Project project, TaskProvider<PluginManifestTask> provider) {
+        project.getTasks()
+            .withType(ProcessResources.class)
+            .configureEach(task -> {
+                task.dependsOn(provider);
+                task.exclude(ManifestFile.NAME);
+            });
     }
 
-    private List<String> getMainClassCandidates(Project project) {
-        SourceSet mainSourceSet = getMainSources(project);
-        Set<File> javaSrcDirs = mainSourceSet.getJava().getSrcDirs();
-        List<String> candidates = new ArrayList<>();
-
-        JavaParser parser = new JavaParser();
-
-        for (File srcDir : javaSrcDirs) {
-            if (!srcDir.exists()) {
-                continue;
-            }
-            List<Path> javaFiles;
-            try {
-                javaFiles = Files.walk(srcDir.toPath())
-                    .filter(p -> p.toString().endsWith(".java"))
-                    .toList();
-            } catch (IOException e) {
-                throw new GradleException("Couldn't detect mainClass: ", e);
-            }
-            if (javaFiles.isEmpty()) {
-                continue;
-            }
-            for (Path filePath : javaFiles) {
-                CompilationUnit compilationUnit;
-                try {
-                    Optional<CompilationUnit> result = parser.parse(filePath)
-                        .getResult();
-                    if (result.isEmpty()) {
-                        continue;
-                    }
-                    compilationUnit = result.get();
-                } catch (IOException e) {
-                    // Silent ignore.
-                    continue;
-                }
-                List<ClassOrInterfaceDeclaration> classDeclarationList = compilationUnit
-                    .findAll(ClassOrInterfaceDeclaration.class)
-                    .stream()
-                    .filter(c -> !c.isInterface())
-                    .filter(c -> c.getExtendedTypes().stream().anyMatch(t -> t.getNameAsString().equals("JavaPlugin")))
-                    .filter(c -> !c.isNestedType())
-                    .toList();
-                for (ClassOrInterfaceDeclaration classDeclaration : classDeclarationList) {
-                    String classPackage = compilationUnit.getPackageDeclaration()
-                        .map(NodeWithName::getNameAsString)
-                        .orElse("");
-                    String fullyQualifiedClassName = classPackage.isEmpty()
-                        ? classDeclaration.getNameAsString()
-                        : classPackage + "." + classDeclaration.getNameAsString();
-                    candidates.add(fullyQualifiedClassName);
-                }
-            }
+    private void applyServerDependency(Project project, PluginManifestExtension extension) {
+        if(!extension.addServerDependency()) {
+            return;
         }
-        return candidates;
-    }
+        String serverJarFileName = SERVER_JAR_NAME;
+        List<String> searchedPathList = new LinkedList<>();
 
-    private void log(Project project, String message) {
-        project.getLogger().lifecycle("> PluginManifest :applyDefaults:" + message);
+        String appDataDirectory = GradleUtils.getAppDataDirectory();
+        if (!appDataDirectory.endsWith("/")) {
+            appDataDirectory += "/";
+        }
+        String rootDirectory = GradleUtils.getRootProjectDirectory(project).getAbsolutePath();
+        if(!rootDirectory.endsWith("/")) {
+            rootDirectory += "/";
+        }
+
+        // Try searching in "{PROJECT}/{JAR_NAME}"
+        File serverJarFile = new File(rootDirectory + serverJarFileName);
+
+        if(!serverJarFile.exists()) {
+            searchedPathList.add(serverJarFile.getAbsolutePath());
+
+            // Try searching in "{PROJECT}/libs/{JAR_NAME}"
+            serverJarFile = new File(rootDirectory + LIBS_DIRECTORY + serverJarFileName);
+        }
+
+        if(!serverJarFile.exists()) {
+            searchedPathList.add(serverJarFile.getAbsolutePath());
+
+            // Try searching in "{APPDATA}/Hytale/install/release/package/game/latest/Server/{JAR_NAME}"
+            serverJarFile = new File(appDataDirectory + CLIENT_SERVER_PATH + serverJarFileName);
+        }
+
+        if(!serverJarFile.exists()) {
+            searchedPathList.add(serverJarFile.getAbsolutePath());
+            log(project, "applyDependency", "Couldn't add hytale dependency to project!");
+            log(project, "applyDependency", "Couldn't find \"" + serverJarFileName + "\" at:");
+            for (String searchedPath : searchedPathList) {
+                log(project, "applyDependency", "- \"" + searchedPath + "\"");
+            }
+            return;
+        }
+        // serverJarFile exists!
+
+        File finalServerJarFile = serverJarFile;
+        Provider<RegularFile> jarProvider = project.getLayout().file(project.provider(() -> finalServerJarFile));
+
+        DependencyHandler dependencies = project.getDependencies();
+        dependencies.add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, project.files(jarProvider));
+        log(project, "applyDependency", "Dependency added from " + serverJarFile.getAbsolutePath());
     }
 }
