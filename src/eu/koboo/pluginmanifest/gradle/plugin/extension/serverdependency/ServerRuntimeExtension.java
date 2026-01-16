@@ -1,8 +1,8 @@
 package eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency;
 
+import eu.koboo.pluginmanifest.gradle.plugin.PluginLog;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.AuthMode;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.Patchline;
-import eu.koboo.pluginmanifest.gradle.plugin.PluginLog;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
@@ -129,7 +129,7 @@ public abstract class ServerRuntimeExtension {
         }
         // APPDATA/Hytale/install/PATCHLINE/package/game/latest/
         Patchline patchline = getPatchline().getOrNull();
-        if(patchline == null) {
+        if (patchline == null) {
             throw new GradleException("patchline can't be null!");
         }
         String patchlineString = patchline.name().toLowerCase(Locale.ROOT);
@@ -167,10 +167,10 @@ public abstract class ServerRuntimeExtension {
 
     public static @NotNull String resolveDefaultClientDirectory() {
         String appDataDirectory = resolveAppDataDirectory();
-        if(appDataDirectory == null || appDataDirectory.trim().isEmpty()) {
+        if (appDataDirectory == null || appDataDirectory.trim().isEmpty()) {
             throw new GradleException("Couldn't find client-installation path!");
         }
-        if(!appDataDirectory.endsWith("/")) {
+        if (!appDataDirectory.endsWith("/")) {
             appDataDirectory += "/";
         }
         return appDataDirectory + "Hytale/";
@@ -178,30 +178,30 @@ public abstract class ServerRuntimeExtension {
 
     private static @Nullable String resolveAppDataDirectory() {
         String osName = System.getProperty("os.name");
-        if(osName == null || osName.trim().isEmpty()) {
+        if (osName == null || osName.trim().isEmpty()) {
             throw new GradleException("Couldn't find operating system name by system property \"os.name\"");
         }
         osName = osName.toLowerCase(Locale.ROOT);
-        if(osName.startsWith("win")) {
+        if (osName.startsWith("win")) {
             String appDataDirectory = System.getenv("APPDATA");
-            if(appDataDirectory == null || appDataDirectory.trim().isEmpty()) {
+            if (appDataDirectory == null || appDataDirectory.trim().isEmpty()) {
                 String userHome = System.getProperty("user.home");
-                if(userHome != null && !userHome.trim().isEmpty()) {
+                if (userHome != null && !userHome.trim().isEmpty()) {
                     appDataDirectory = userHome + "/AppData/Roaming";
                 }
             }
             return appDataDirectory;
         }
-        if(osName.startsWith("mac")) {
+        if (osName.startsWith("mac")) {
             String userHome = System.getProperty("user.home");
-            if(userHome == null || userHome.trim().isEmpty()) {
+            if (userHome == null || userHome.trim().isEmpty()) {
                 return null;
             }
             return userHome + "/Library/Application Support/";
         }
-        if(osName.startsWith("linux")) {
+        if (osName.startsWith("linux")) {
             String dataHome = System.getenv("XDG_DATA_HOME");
-            if(dataHome == null || dataHome.trim().isEmpty()) {
+            if (dataHome == null || dataHome.trim().isEmpty()) {
                 dataHome = "/.local/share/";
             }
             return dataHome;

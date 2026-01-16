@@ -1,12 +1,14 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
+import eu.koboo.pluginmanifest.gradle.plugin.PluginLog;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.AuthMode;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
-import eu.koboo.pluginmanifest.gradle.plugin.PluginLog;
 import lombok.extern.slf4j.Slf4j;
 import org.gradle.api.GradleException;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.*;
+import org.gradle.api.tasks.JavaExec;
+import org.gradle.api.tasks.Nested;
+import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,22 +28,22 @@ public abstract class RunServerTask extends JavaExec {
 
         File runtimeDirectory = runtimeExt.resolveRuntimeDirectory();
         File runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
-        if(!runtimeServerJarFile.exists()) {
+        if (!runtimeServerJarFile.exists()) {
             throw new GradleException("Can't find server jar file: " + runtimeServerJarFile.getAbsolutePath());
         }
         File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
-        if(!runtimeAssetsFile.exists()) {
+        if (!runtimeAssetsFile.exists()) {
             throw new GradleException("Can't find assets file: " + runtimeAssetsFile.getAbsolutePath());
         }
         File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
-        if(!runtimeAOTFile.exists()) {
+        if (!runtimeAOTFile.exists()) {
             throw new GradleException("Can't find AOT file: " + runtimeAOTFile.getAbsolutePath());
         }
 
         List<String> jvmArguments = new ArrayList<>();
         jvmArguments.add("-XX:AOTCache=" + runtimeAOTFile.getAbsolutePath());
         List<String> userJvmArguments = runtimeExt.getJvmArguments().get();
-        if(!userJvmArguments.isEmpty()) {
+        if (!userJvmArguments.isEmpty()) {
             jvmArguments.addAll(userJvmArguments);
         }
 
@@ -49,10 +51,10 @@ public abstract class RunServerTask extends JavaExec {
         if (runtimeExt.getDisableSentry().get()) {
             arguments.add("--disable-sentry");
         }
-        if(runtimeExt.getAcceptEarlyPlugins().get()) {
+        if (runtimeExt.getAcceptEarlyPlugins().get()) {
             arguments.add("--accept-early-plugins");
         }
-        if(runtimeExt.getAllowOp().get()) {
+        if (runtimeExt.getAllowOp().get()) {
             arguments.add("--allow-op");
         }
         AuthMode authMode = runtimeExt.getAuthMode().get();
@@ -67,7 +69,7 @@ public abstract class RunServerTask extends JavaExec {
         arguments.add(runtimeAssetsFile.getAbsolutePath());
 
         List<String> userServerArguments = runtimeExt.getServerArguments().get();
-        if(!userServerArguments.isEmpty()) {
+        if (!userServerArguments.isEmpty()) {
             arguments.addAll(userServerArguments);
         }
 

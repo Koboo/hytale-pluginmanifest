@@ -67,14 +67,14 @@ public class ManifestValidation {
 
     public void validateURI(String key, String uriString, boolean isEmptyAllowed) throws ValidationException {
         if (uriString == null) {
-            if(isEmptyAllowed) {
+            if (isEmptyAllowed) {
                 return;
             }
             throw new ValidationException(key, uriString, "cannot be null");
         }
         uriString = uriString.trim();
         if (uriString.isEmpty()) {
-            if(isEmptyAllowed) {
+            if (isEmptyAllowed) {
                 return;
             }
             throw new ValidationException(key, uriString, "cannot be empty");
@@ -102,11 +102,11 @@ public class ManifestValidation {
     }
 
     public void validateEmailAddress(String key, String emailAddress) throws ValidationException {
-        if(emailAddress == null) {
+        if (emailAddress == null) {
             return;
         }
         emailAddress = emailAddress.trim();
-        if(emailAddress.isEmpty()) {
+        if (emailAddress.isEmpty()) {
             return;
         }
         int atIndex = emailAddress.indexOf('@');

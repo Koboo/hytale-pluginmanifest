@@ -4,8 +4,6 @@ import lombok.experimental.UtilityClass;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
-import java.util.Locale;
-
 @UtilityClass
 public class PluginLog {
 

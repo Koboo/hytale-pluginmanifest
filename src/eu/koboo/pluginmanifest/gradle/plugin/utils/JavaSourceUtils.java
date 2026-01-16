@@ -7,8 +7,6 @@ import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import lombok.experimental.UtilityClass;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
-import org.gradle.api.file.RegularFile;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.jvm.tasks.Jar;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +15,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @UtilityClass
 public class JavaSourceUtils {
@@ -26,7 +27,7 @@ public class JavaSourceUtils {
 
     public boolean hasAnyResource(@NotNull SourceSet sourceSet) {
         for (File srcDir : sourceSet.getResources().getSrcDirs()) {
-            if(srcDir.exists() && containsFile(srcDir)) {
+            if (srcDir.exists() && containsFile(srcDir)) {
                 return true;
             }
         }
@@ -39,7 +40,7 @@ public class JavaSourceUtils {
             return false;
         }
         for (File subFile : files) {
-            if(subFile.isHidden()) {
+            if (subFile.isHidden()) {
                 continue;
             }
             if (subFile.isFile()) {

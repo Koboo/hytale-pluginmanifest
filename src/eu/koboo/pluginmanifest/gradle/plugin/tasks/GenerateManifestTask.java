@@ -1,10 +1,10 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
+import eu.koboo.pluginmanifest.gradle.plugin.PluginLog;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorsExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestPluginDependencyExtension;
-import eu.koboo.pluginmanifest.gradle.plugin.PluginLog;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ManifestValidation;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ValidationException;
 import groovy.json.JsonOutput;
@@ -22,7 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public abstract class GenerateManifestTask extends DefaultTask {
@@ -175,7 +178,7 @@ public abstract class GenerateManifestTask extends DefaultTask {
 
                 // "Author": "Email"
                 String authorEmail = author.getEmail().getOrNull();
-                if(authorEmail != null && !authorEmail.trim().isEmpty()) {
+                if (authorEmail != null && !authorEmail.trim().isEmpty()) {
                     try {
                         ManifestValidation.validateEmailAddress(key + ".email", authorEmail);
                         authorObject.put("Email", authorEmail);
@@ -187,7 +190,7 @@ public abstract class GenerateManifestTask extends DefaultTask {
 
                 // "Author": "Url"
                 String authorUrl = author.getUrl().getOrNull();
-                if(authorUrl != null && !authorUrl.trim().isEmpty()) {
+                if (authorUrl != null && !authorUrl.trim().isEmpty()) {
                     try {
                         boolean isEmptyAllowed = true;
                         ManifestValidation.validateURI(key + ".url", authorUrl, isEmptyAllowed);
@@ -199,10 +202,10 @@ public abstract class GenerateManifestTask extends DefaultTask {
                 authorList.add(authorObject);
             }
             // Default author
-            if(authorList.isEmpty()) {
+            if (authorList.isEmpty()) {
                 Map<String, String> authorObject = new LinkedHashMap<>();
                 String userName = getOSUserName().getOrNull();
-                if(userName == null || userName.trim().isEmpty()) {
+                if (userName == null || userName.trim().isEmpty()) {
                     userName = pluginName + "-Author";
                     PluginLog.info("Used project name as authorName \"" + userName + "\".");
                 } else {
@@ -244,7 +247,7 @@ public abstract class GenerateManifestTask extends DefaultTask {
         }
 
         File resourceDirectory = new File(getResourceDirectory().get());
-        if(!resourceDirectory.exists()){
+        if (!resourceDirectory.exists()) {
             resourceDirectory.mkdir();
         }
         File manifestFile = new File(resourceDirectory, "manifest.json");

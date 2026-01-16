@@ -14,6 +14,6 @@ public class ValidationException extends Exception {
     String message;
 
     public String getFormattedMessage() {
-        return  key + " " + message + " -> \"" + value + "\"";
+        return key + " " + message + " -> \"" + value + "\"";
     }
 }
