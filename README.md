@@ -35,6 +35,7 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 - 🟢 Automatically add ``HytaleServer.jar`` as project dependency
 - 🟢 Works with ``shadowJar``
 - 🟢 Works with ``org.gradle.configuration-cache=true``
+- Works with ``org.gradle.configureondemand=true``
 
 > [!NOTE]
 > All features marked with 🟢 are only available for the [Gradle-Plugin](#gradle-plugin)
