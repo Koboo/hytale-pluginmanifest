@@ -1,4 +1,4 @@
-package eu.koboo.pluginmanifest.manifest.semver;
+package eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.semver;
 
 public enum RangeType {
     // 1.2.3

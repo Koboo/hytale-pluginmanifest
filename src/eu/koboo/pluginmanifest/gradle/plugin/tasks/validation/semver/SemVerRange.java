@@ -1,12 +1,10 @@
-package eu.koboo.pluginmanifest.manifest.semver;
+package eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.semver;
 
-import eu.koboo.pluginmanifest.manifest.validation.ValidationResult;
+import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ValidationException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
-import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
@@ -20,9 +18,7 @@ public class SemVerRange {
     boolean maxInclusive;
 
     // Parses range strings like: >=1.2.3, ^1.2.3, ~1.2.3, 1.2.3 - 2.0.0, *, etc.
-    public static SemVerRange parseString(List<ValidationResult> resultList, String rangeString, String key) {
-        rangeString = rangeString.trim();
-
+    public static SemVerRange parseString(String key, String rangeString) throws ValidationException {
         // Check for wildcard
         if (rangeString.equals("*") || rangeString.equalsIgnoreCase("x")) {
             return new SemVerRange(RangeType.WILDCARD, null, null, true, true);
@@ -30,41 +26,41 @@ public class SemVerRange {
 
         // Check for hyphen range (1.2.3 - 2.0.0)
         if (rangeString.contains(" - ")) {
-            return parseHyphenRange(resultList, key, rangeString);
+            return parseHyphenRange(key, rangeString);
         }
 
         // Check for caret range (^1.2.3)
         if (rangeString.startsWith("^")) {
             String stripPrefix = rangeString.substring(1).trim();
-            return parseCaretRange(resultList, key, stripPrefix);
+            return parseCaretRange(key, stripPrefix);
         }
 
         // Check for tilde range (~1.2.3)
         if (rangeString.startsWith("~")) {
             String stripPrefix = rangeString.substring(1).trim();
-            return parseTildeRange(resultList, key, stripPrefix);
+            return parseTildeRange(key, stripPrefix);
         }
 
         // Check for comparison operators
         if (rangeString.startsWith(">=")) {
             String stripPrefix = rangeString.substring(2).trim();
-            return parseComparisonRange(resultList, key, stripPrefix, RangeType.GREATER_EQUAL, true, false);
+            return parseComparisonRange(key, stripPrefix, RangeType.GREATER_EQUAL, true, false);
         }
         if (rangeString.startsWith(">")) {
             String stripPrefix = rangeString.substring(1).trim();
-            return parseComparisonRange(resultList, key, stripPrefix, RangeType.GREATER, false, false);
+            return parseComparisonRange(key, stripPrefix, RangeType.GREATER, false, false);
         }
         if (rangeString.startsWith("<=")) {
             String stripPrefix = rangeString.substring(2).trim();
-            return parseComparisonRange(resultList, key, stripPrefix, RangeType.LESS_EQUAL, false, true);
+            return parseComparisonRange(key, stripPrefix, RangeType.LESS_EQUAL, false, true);
         }
         if (rangeString.startsWith("<")) {
             String stripPrefix = rangeString.substring(1).trim();
-            return parseComparisonRange(resultList, key, stripPrefix, RangeType.LESS, false, false);
+            return parseComparisonRange(key, stripPrefix, RangeType.LESS, false, false);
         }
 
         // No operator, treat as an exact version
-        SemVer version = SemVer.parseString(resultList, key, rangeString);
+        SemVer version = SemVer.parseString(key, rangeString);
         if (version == null) {
             return null;
         }
@@ -72,15 +68,14 @@ public class SemVerRange {
     }
 
     // Parses hyphen ranges: 1.2.3 - 2.0.0 (inclusive on both ends)
-    private static SemVerRange parseHyphenRange(List<ValidationResult> resultList, String key, String rangeString) {
+    private static SemVerRange parseHyphenRange(String key, String rangeString) throws ValidationException {
         String[] parts = rangeString.split(" - ");
         if (parts.length != 2) {
-            resultList.add(ValidationResult.of(key, rangeString, "hyphen range must have exactly two versions"));
-            return null;
+            throw new IllegalArgumentException("hyphen range must have exactly two versions");
         }
 
-        SemVer minVersion = SemVer.parseString(resultList, key + ".min", parts[0].trim());
-        SemVer maxVersion = SemVer.parseString(resultList, key + ".max", parts[1].trim());
+        SemVer minVersion = SemVer.parseString(key, parts[0]);
+        SemVer maxVersion = SemVer.parseString(key, parts[1]);
 
         if (minVersion == null || maxVersion == null) {
             return null;
@@ -93,8 +88,8 @@ public class SemVerRange {
     // ^1.2.3 := >=1.2.3 <2.0.0
     // ^0.2.3 := >=0.2.3 <0.3.0
     // ^0.0.3 := >=0.0.3 <0.0.4
-    private static SemVerRange parseCaretRange(List<ValidationResult> resultList, String key, String versionString) {
-        SemVer minVersion = SemVer.parseString(resultList, key, versionString);
+    private static SemVerRange parseCaretRange(String key, String versionString) throws ValidationException {
+        SemVer minVersion = SemVer.parseString(key, versionString);
         if (minVersion == null) {
             return null;
         }
@@ -118,8 +113,8 @@ public class SemVerRange {
     // ~1.2.3 := >=1.2.3 <1.3.0
     // ~1.2 := >=1.2.0 <1.3.0
     // ~1 := >=1.0.0 <2.0.0
-    private static SemVerRange parseTildeRange(List<ValidationResult> resultList, String key, String versionString) {
-        SemVer minVersion = SemVer.parseString(resultList, key, versionString);
+    private static SemVerRange parseTildeRange(String key, String versionString) throws ValidationException {
+        SemVer minVersion = SemVer.parseString(key, versionString);
         if (minVersion == null) {
             return null;
         }
@@ -131,10 +126,9 @@ public class SemVerRange {
     }
 
     // Parses comparison ranges: >=1.2.3, >1.2.3, <=1.2.3, <1.2.3
-    private static SemVerRange parseComparisonRange(List<ValidationResult> resultList, String key,
-                                                    String versionString, RangeType type,
-                                                    boolean minInclusive, boolean maxInclusive) {
-        SemVer version = SemVer.parseString(resultList, key, versionString);
+    private static SemVerRange parseComparisonRange(String key, String versionString, RangeType type,
+                                                    boolean minInclusive, boolean maxInclusive) throws ValidationException {
+        SemVer version = SemVer.parseString(key, versionString);
         if (version == null) {
             return null;
         }
