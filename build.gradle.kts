@@ -63,7 +63,7 @@ sourceSets {
         resources.setSrcDirs(emptyList<String>())
     }
     test {
-        java.setSrcDirs(listOf("tests"))
+        java.setSrcDirs(emptyList<String>())
         resources.setSrcDirs(emptyList<String>())
     }
 }
