@@ -9,13 +9,10 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 ## Overview
 
 - [Gradle Plugin](#gradle-plugin)
-    - [Installation](#installation)
-    - [Configuration](#configuration)
-    - [Automatic properties](#automatic-properties)
-    - [Automatic configuration example](#automatic-configuration-example)
-- [AnnotationProcessor](#annotationprocessor)
-    - [Installation](#installation-1)
-    - [Configuration](#configuration-1)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Automatic properties](#automatic-properties)
+- [Automatic configuration example](#automatic-configuration-example)
 - [Manifest specification](#manifest-specification)
 - [Dependencies](#dependencies)
 - [Credits](#credits)
@@ -244,81 +241,6 @@ The Gradle plugin's generated ``manifest.json``:
     ],
     "ServerVersion": "*",
     "Main": "your.plugin.YourPlugin"
-}
-````
-
-## AnnotationProcessor
-
-### Installation
-
-- [Maven Central](https://central.sonatype.com/artifact/eu.koboo/pluginmanifest-api)
-- [Entix Reposilite](https://repo.entix.eu/#/releases/eu/koboo/pluginmanifest-api)
-- ![Latest api](https://img.shields.io/maven-central/v/eu.koboo/pluginmanifest-api?label=latest+version)
-- [pluginmanifest-api](https://github.com/Koboo/hytale-pluginmanifest/tree/main/pluginmanifest-api)
-
-**Required environment**
-
-- ``JDK 25`` or newer
-
-1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``build.gradle``**
-    ````groovy
-    dependency {
-        compileOnly 'eu.koboo:pluginmanifest-api:LATEST_VERSION'
-        annotationProcessor 'eu.koboo:pluginmanifest-api:LATEST_VERSION'
-    }
-    ````
-
-2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``build.gradle.kts``**
-   ````kotlin
-   dependency {
-       compileOnly("eu.koboo:pluginmanifest-api:LATEST_VERSION")
-       annotationProcessor("eu.koboo:pluginmanifest-api:LATEST_VERSION")
-   }
-   ````
-3. <img src=".idea/maven_logo.png" height="13em" alt="Maven Logo"></img> **Maven: ``pom.xml``**
-    ````xml
-    <dependency>
-        <groupId>eu.koboo</groupId>
-        <artifactId>pluginmanifest-api</artifactId>
-        <version>LATEST_VERSION</version>
-        <scope>provided</scope>
-    </dependency>
-    ````
-
-[See latest version](https://central.sonatype.com/artifact/eu.koboo/pluginmanifest-api)
-
-### Configuration
-
-Here is a complete example of how to use the provided annotations.
-
-````java
-
-@PluginManifest(
-    group = "Koboo",
-    name = "MyPlugin",
-    version = "1.0.0",
-    description = "My awesome description",
-    authors = {
-        @PluginAuthor(
-            name = "Koboo"
-        ),
-        @PluginAuthor(
-            name = "OtherAuthor",
-            email = "author@example.com",
-            url = "https://example.com"
-        )
-    },
-    website = "https://github.com/Koboo/MyPlugin",
-    dependencies = {
-        @PluginDependency(pluginId = "Nitrado:WebServer"),
-        @PluginDependency(pluginId = "Nitrado:QueryPlugin", type = DependencyType.OPTIONAL),
-        @PluginDependency(pluginId = "Group:Name", version = ">=1.0.0", type = DependencyType.LOAD_BEFORE),
-    },
-    disabledByDefault = true,
-    includesAssetPack = true
-)
-public class MyPlugin extends JavaPlugin {
-
 }
 ````
 
