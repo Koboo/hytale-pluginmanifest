@@ -1,0 +1,17 @@
+package eu.koboo.pluginmanifest.gradle.plugin;
+
+import lombok.experimental.UtilityClass;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+
+import java.util.Locale;
+
+@UtilityClass
+public class PluginLog {
+
+    public static final Logger LOGGER = Logging.getLogger(PluginLog.class);
+
+    public void info(String message) {
+        LOGGER.lifecycle("> PluginManifest: " + message);
+    }
+}
