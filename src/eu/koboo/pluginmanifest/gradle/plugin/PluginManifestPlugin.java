@@ -196,27 +196,25 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 }
             }
 
-            PluginLog.info("Resolved files:");
-            PluginLog.info(" - 'HytaleServer.jar':");
-            PluginLog.info("   > " + clientServerJarFile.getAbsolutePath());
-            PluginLog.info(" - 'HytaleServer.aot':");
-            PluginLog.info("   > " + clientAOTFile.getAbsolutePath());
-            PluginLog.info(" - 'Assets.zip':");
-            PluginLog.info("   > " + clientAssetsFile.getAbsolutePath());
-            PluginLog.info(" - Patchline: " + pathlineName);
+            PluginLog.info("Files:");
+            PluginLog.info(" - 'HytaleServer.jar' > " + clientServerJarFile.getAbsolutePath());
+            PluginLog.info(" - 'HytaleServer.aot' > " + clientAOTFile.getAbsolutePath());
+            PluginLog.info(" -       'Assets.zip' > " + clientAssetsFile.getAbsolutePath());
+            PluginLog.info(" -          Patchline > " + pathlineName);
             PluginLog.info("Sources:");
-            PluginLog.info(" - Applied dependency? " + booleanToHuman(applyServerDependency));
-            PluginLog.info(" - Found resources? " + booleanToHuman(hasAnyResources));
-            PluginLog.info(" - Found main class?: " + booleanToHuman(hasMainClass));
+            PluginLog.info(" -  Applied dependency? " + booleanToHuman(applyServerDependency));
+            PluginLog.info(" -     Found resources? " + booleanToHuman(hasAnyResources));
+            PluginLog.info(" -    Found main class? " + booleanToHuman(hasMainClass));
             PluginLog.info("JAR-File:");
             PluginLog.info(" - JAR file build task: " + archiveTaskName);
             PluginLog.info(" - JAR file build path: " + archiveFile.getAbsolutePath());
             PluginLog.info("Runtime:");
-            PluginLog.info(" - Server-Directory: " + infoRuntimeDirectory);
-            PluginLog.info(" -  Client-Server: v" + clientServerVersion);
-            PluginLog.info(" - Runtime-Server: v" + runtimeServerVersion);
-            PluginLog.info(" - Versions matching? " + booleanToHuman(matchesVersion));
-            PluginLog.info(" - Is server runnable? " + booleanToHuman(isServerRunnable));
+            PluginLog.info(" -           Directory: " + infoRuntimeDirectory);
+            PluginLog.info(" -         Is runnable? " + booleanToHuman(isServerRunnable));
+            PluginLog.info("Versions:");
+            PluginLog.info(" -       Client-Server: v" + clientServerVersion);
+            PluginLog.info(" -      Runtime-Server: v" + runtimeServerVersion);
+            PluginLog.info(" -   Versions matching? " + booleanToHuman(matchesVersion));
         });
     }
 
