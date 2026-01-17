@@ -47,9 +47,8 @@ public abstract class RunServerTask extends JavaExec {
         }
 
         List<String> arguments = new ArrayList<>();
-        if (runtimeExt.getDisableSentry().get()) {
-            arguments.add("--disable-sentry");
-        }
+        // We disable sentry by default. Don't spam Hypixel, please.
+        arguments.add("--disable-sentry");
         if (runtimeExt.getAcceptEarlyPlugins().get()) {
             arguments.add("--accept-early-plugins");
         }

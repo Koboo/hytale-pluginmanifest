@@ -38,8 +38,6 @@ public abstract class ServerRuntimeExtension {
     Property<String> runtimeDirectory;
 
     @Input
-    Property<Boolean> disableSentry;
-    @Input
     Property<Boolean> acceptEarlyPlugins;
     @Input
     Property<Boolean> allowOp;
@@ -65,9 +63,6 @@ public abstract class ServerRuntimeExtension {
         applyServerDependency.set(true);
 
         runtimeDirectory = objectFactory.property(String.class);
-
-        disableSentry = objectFactory.property(Boolean.class);
-        disableSentry.convention(false);
 
         acceptEarlyPlugins = objectFactory.property(Boolean.class);
         acceptEarlyPlugins.convention(true);
@@ -102,18 +97,6 @@ public abstract class ServerRuntimeExtension {
             PluginLog.info("Created serverRuntimeDirectory: " + runtimeDirectory.getAbsolutePath());
         }
         return runtimeDirectory;
-    }
-
-    public boolean hasRuntimeDirectory() {
-        String runtimeDirectoryPath = getRuntimeDirectory().getOrNull();
-        if (runtimeDirectoryPath == null || runtimeDirectoryPath.trim().isEmpty()) {
-            return false;
-        }
-        File runtimeDirectory = new File(runtimeDirectoryPath);
-        if (runtimeDirectory.exists() && !runtimeDirectory.isDirectory()) {
-            return false;
-        }
-        return true;
     }
 
     // APPDATA/Hytale/
