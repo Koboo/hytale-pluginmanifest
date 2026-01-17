@@ -31,7 +31,12 @@ public class SemVer {
         if (versionString.contains("-")) {
             String[] releaseSplit = versionString.split("-");
             versionString = releaseSplit[0];
-            releases = releaseSplit[1].split("\\.");
+            String releaseString = releaseSplit[1];
+            if(releaseString.contains(".")) {
+                releases = releaseString.split("\\.");
+            } else {
+                releases = new String[]{releaseString};
+            }
         }
 
         String[] split = versionString.split("\\.");
