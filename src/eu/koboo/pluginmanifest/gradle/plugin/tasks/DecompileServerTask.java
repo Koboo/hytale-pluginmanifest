@@ -1,6 +1,7 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
+import eu.koboo.pluginmanifest.gradle.plugin.utils.JarManifestUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.extern.slf4j.Slf4j;
 import org.gradle.api.DefaultTask;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.jar.Manifest;
 
 public abstract class DecompileServerTask extends DefaultTask {
 
@@ -40,16 +42,29 @@ public abstract class DecompileServerTask extends DefaultTask {
 
     @TaskAction
     public void runTask() throws IOException {
-        PluginLog.info("Generating sources of server...");
+        PluginLog.info("Decompiling server sources...");
         ServerRuntimeExtension runtimeExt = getRuntimeExtension().get();
-        File clientServerSourcesFile = runtimeExt.resolveClientServerSourcesFile();
-        if (clientServerSourcesFile.exists()) {
-            clientServerSourcesFile.delete();
-            PluginLog.info("Deleted previous sources file: " + clientServerSourcesFile.getAbsolutePath());
-        }
         File clientServerJarFile = runtimeExt.resolveClientServerJarFile();
         if (!clientServerJarFile.exists()) {
             throw new GradleException("Can't decompile server, because jar file doesn't exist: " + clientServerJarFile.getAbsolutePath());
+        }
+        File clientServerSourcesFile = runtimeExt.resolveClientServerSourcesFile();
+        if (clientServerSourcesFile.exists()) {
+            String jarVersion = JarManifestUtils.getVersion(clientServerJarFile);
+            if(JarManifestUtils.isUnknown(jarVersion)) {
+                throw new GradleException("Couldn't check compiled jar version: " + clientServerSourcesFile.getAbsolutePath());
+            }
+            String sourcesVersion = JarManifestUtils.getVersion(clientServerSourcesFile);
+            if(JarManifestUtils.isUnknown(sourcesVersion)) {
+                throw new GradleException("Couldn't check sources jar version: " + clientServerSourcesFile.getAbsolutePath());
+            }
+            if(jarVersion.equals(sourcesVersion)) {
+                PluginLog.info("Sources file is up-to-date: " + clientServerSourcesFile.getAbsolutePath());
+                return;
+            }
+            PluginLog.info("Sources file is outdated: " + clientServerSourcesFile.getAbsolutePath());
+            clientServerSourcesFile.delete();
+            PluginLog.info("Deleted previous sources file.");
         }
         File clientServerServerDirectory = clientServerJarFile.getParentFile();
 
