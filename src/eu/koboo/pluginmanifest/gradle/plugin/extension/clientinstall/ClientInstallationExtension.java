@@ -1,23 +1,19 @@
 package eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall;
 
 import eu.koboo.pluginmanifest.gradle.plugin.extension.Patchline;
-import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.GradleException;
 import org.gradle.api.model.ObjectFactory;
-import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.util.LinkedList;
 import java.util.Locale;
 
 @Getter
@@ -52,16 +48,20 @@ public abstract class ClientInstallationExtension {
         return clientRootDirectory;
     }
 
-    // APPDATA/Hytale/
-    public @NotNull File resolveClientLatestDirectory() {
-        File clientRootDirectory = resolveClientInstallDirectory();
-        // APPDATA/Hytale/install/PATCHLINE/package/game/latest/
+    public @NotNull String resolvePatchlineName() {
         Patchline patchline = getPatchline().getOrNull();
         if (patchline == null) {
             throw new GradleException("patchline can't be null!");
         }
-        String patchlineString = patchline.name().toLowerCase(Locale.ROOT);
-        String latestDirectoryPath = LATEST_DIRECTORY.replace("PATCHLINE", patchlineString);
+        return patchline.name().toLowerCase(Locale.ROOT);
+    }
+
+    // APPDATA/Hytale/
+    public @NotNull File resolveClientLatestDirectory() {
+        File clientRootDirectory = resolveClientInstallDirectory();
+        // APPDATA/Hytale/install/PATCHLINE/package/game/latest/
+        String patchlineName = resolvePatchlineName();
+        String latestDirectoryPath = LATEST_DIRECTORY.replace("PATCHLINE", patchlineName);
         return new File(clientRootDirectory, latestDirectoryPath);
     }
 
@@ -85,7 +85,7 @@ public abstract class ClientInstallationExtension {
         return new File(resolveClientLatestDirectory(), "Assets.zip");
     }
 
-    public static @NotNull String resolveDefaultClientDirectory() {
+    private static @NotNull String resolveDefaultClientDirectory() {
         String appDataDirectory = resolveAppDataDirectory();
         if (appDataDirectory == null || appDataDirectory.trim().isEmpty()) {
             throw new GradleException("Couldn't find client-installation path!");
