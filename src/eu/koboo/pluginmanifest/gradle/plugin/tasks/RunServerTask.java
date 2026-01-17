@@ -84,5 +84,6 @@ public abstract class RunServerTask extends JavaExec {
         classpath(runtimeServerJarFile.getAbsolutePath());
         setStandardInput(System.in);
         setStandardOutput(System.out);
+        setErrorOutput(System.err);
     }
 }
