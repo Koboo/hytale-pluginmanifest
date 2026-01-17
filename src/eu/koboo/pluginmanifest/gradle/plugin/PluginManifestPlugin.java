@@ -1,6 +1,5 @@
 package eu.koboo.pluginmanifest.gradle.plugin;
 
-import eu.koboo.pluginmanifest.gradle.plugin.extension.PluginManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.*;
@@ -56,8 +55,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
         });
 
         target.afterEvaluate(project -> {
-            ManifestExtension manifestExt = extension.getManifestExtension();
-            ServerRuntimeExtension runtimeExt = extension.getRuntimeExtension();
+            ManifestExtension manifestExt = extension.manifestExtension;
+            ServerRuntimeExtension runtimeExt = extension.runtimeExtension;
 
             // Resolve client installation directory
             File clientServerJarFile = runtimeExt.resolveClientServerJarFile();

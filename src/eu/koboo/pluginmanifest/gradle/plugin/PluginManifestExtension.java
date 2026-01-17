@@ -1,17 +1,15 @@
-package eu.koboo.pluginmanifest.gradle.plugin.extension;
+package eu.koboo.pluginmanifest.gradle.plugin;
 
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.Action;
 import org.gradle.api.model.ObjectFactory;
 
 import javax.inject.Inject;
 
-@Getter
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class PluginManifestExtension {
 
     ManifestExtension manifestExtension;
