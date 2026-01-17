@@ -14,7 +14,7 @@ import javax.inject.Inject;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public abstract class ManifestExtension {
+public abstract class JsonManifestExtension {
 
     @Input
     @Optional
@@ -50,12 +50,12 @@ public abstract class ManifestExtension {
     Property<Boolean> minimizeJson;
 
     @Nested
-    ManifestAuthorsExtension authors;
+    ManifestAuthorsExtension manifestAuthors;
     @Nested
-    ManifestPluginDependencyExtension pluginDependencies;
+    ManifestPluginDependencyExtension manifestPluginDependencies;
 
     @Inject
-    public ManifestExtension(ObjectFactory objectFactory) {
+    public JsonManifestExtension(ObjectFactory objectFactory) {
         this.pluginGroup = objectFactory.property(String.class);
         this.pluginName = objectFactory.property(String.class);
         this.pluginVersion = objectFactory.property(String.class);
@@ -69,15 +69,15 @@ public abstract class ManifestExtension {
         this.includesAssetPack = objectFactory.property(Boolean.class);
         this.minimizeJson = objectFactory.property(Boolean.class);
 
-        this.authors = objectFactory.newInstance(ManifestAuthorsExtension.class);
-        this.pluginDependencies = objectFactory.newInstance(ManifestPluginDependencyExtension.class);
+        this.manifestAuthors = objectFactory.newInstance(ManifestAuthorsExtension.class);
+        this.manifestPluginDependencies = objectFactory.newInstance(ManifestPluginDependencyExtension.class);
     }
 
     public void authors(Action<ManifestAuthorsExtension> action) {
-        action.execute(authors);
+        action.execute(manifestAuthors);
     }
 
     public void pluginDependencies(Action<ManifestPluginDependencyExtension> action) {
-        action.execute(pluginDependencies);
+        action.execute(manifestPluginDependencies);
     }
 }

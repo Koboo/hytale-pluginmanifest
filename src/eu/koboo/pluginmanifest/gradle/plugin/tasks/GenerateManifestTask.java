@@ -2,7 +2,7 @@ package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorsExtension;
-import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestExtension;
+import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestPluginDependencyExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ManifestValidation;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ValidationException;
@@ -53,12 +53,12 @@ public abstract class GenerateManifestTask extends DefaultTask {
     public abstract Property<String> getOSUserName();
 
     @Nested
-    public abstract Property<ManifestExtension> getExtension();
+    public abstract Property<JsonManifestExtension> getExtension();
 
     @TaskAction
     public void runTask() throws IOException {
 
-        ManifestExtension extension = getExtension().get();
+        JsonManifestExtension extension = getExtension().get();
 
         Map<String, Object> manifestMap = new LinkedHashMap<>();
 
@@ -163,7 +163,7 @@ public abstract class GenerateManifestTask extends DefaultTask {
             }
 
             // "Authors"
-            ManifestAuthorsExtension authors = extension.getAuthors();
+            ManifestAuthorsExtension authors = extension.getManifestAuthors();
             List<ManifestAuthorExtension> authorListExtension = authors.getAuthorConfigList().get();
             List<Map<String, String>> authorList = new LinkedList<>();
             for (int i = 0; i < authorListExtension.size(); i++) {
@@ -216,7 +216,7 @@ public abstract class GenerateManifestTask extends DefaultTask {
             }
             manifestMap.put("Authors", authorList);
 
-            ManifestPluginDependencyExtension dependencies = extension.getPluginDependencies();
+            ManifestPluginDependencyExtension dependencies = extension.getManifestPluginDependencies();
 
             // "Dependencies"
             Map<String, String> requiredDependencies = dependencies.getRequiredDependencies().getOrNull();
