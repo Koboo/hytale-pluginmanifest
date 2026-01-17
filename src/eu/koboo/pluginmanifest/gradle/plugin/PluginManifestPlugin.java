@@ -85,6 +85,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
             }
             decompileServerSource(installExt);
 
+            File clientInstallationDirectory = installExt.resolveClientInstallDirectory();
             File clientServerDirectory = installExt.resolveClientServerDirectory();
 
             File archiveFile = JavaSourceUtils.resolveArchive(project);
@@ -211,34 +212,44 @@ public class PluginManifestPlugin implements Plugin<Project> {
             }
 
             // Parse versions by MANIFEST of client and runtime server jar
-            boolean matchesVersion = true;
-            Manifest clientServerManifest = JarManifestUtils.getManifest(clientServerJarFile);
-            Manifest runtimeServerManifest = JarManifestUtils.getManifest(runtimeServerJarFile);
-            String clientServerVersion = JarManifestUtils.getVersion(clientServerManifest);
-            String runtimeServerVersion = JarManifestUtils.getVersion(runtimeServerManifest);
+            String matchesVersion = "NO";
+            String clientServerVersion = JarManifestUtils.getVersion(clientServerJarFile);
+            String runtimeServerVersion = JarManifestUtils.getVersion(runtimeServerJarFile);
             if (!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
-                matchesVersion = clientServerVersion.equals(runtimeServerVersion);
+                if(clientServerVersion.equals(runtimeServerVersion)) {
+                    matchesVersion = "YES";
+                }
+            } else {
+                matchesVersion = "Both unknown";
             }
 
+            String mainClass = "Not found";
+            if(mainClassCandidates.size() == 1) {
+                mainClass =  mainClassCandidates.getFirst();
+            }
+
+            File clientServerSourcesFile = installExt.resolveClientServerSourcesFile();
+
             PluginLog.info("========= Files ========");
-            PluginLog.info(" - client installation > " + clientServerJarFile.getAbsolutePath());
-            PluginLog.info(" -  'HytaleServer.jar' > " + clientServerJarFile.getAbsolutePath());
-            PluginLog.info(" -  'HytaleServer.aot' > " + clientAOTFile.getAbsolutePath());
-            PluginLog.info(" -        'Assets.zip' > " + clientAssetsFile.getAbsolutePath());
-            PluginLog.info(" -           Patchline > " + pathlineName);
-            PluginLog.info("======= Sources ========");
-            PluginLog.info(" -    Includes assets? > " + booleanToHuman(hasAnyResources));
-            PluginLog.info(" -   Found main class? > " + booleanToHuman(hasMainClass));
-            PluginLog.info(" - JAR file build task > \"" + archiveTaskName + "\"");
-            PluginLog.info(" - JAR file build name > " + archiveFile.getName());
-            PluginLog.info(" - JAR file build path > " + archiveFile.getAbsolutePath());
+            PluginLog.info("  client-installation path > " + clientInstallationDirectory.getAbsolutePath());
+            PluginLog.info("                 Patchline > " + pathlineName);
+            PluginLog.info("            Server-Version > " + clientServerVersion);
+            PluginLog.info("        'HytaleServer.jar' > " + fileExists(clientServerJarFile));
+            PluginLog.info("        'HytaleServer.aot' > " + fileExists(clientAOTFile));
+            PluginLog.info("'HytaleServer-sources.jar' > " + fileExists(clientServerSourcesFile));
+            PluginLog.info("              'Assets.zip' > " + fileExists(clientAssetsFile));
+            PluginLog.info("===== This plugin =======");
+            PluginLog.info("     \"IncludesAssetPack\" > " + booleanToHuman(hasAnyResources));
+            PluginLog.info("                  \"Main\" > " + mainClass);
+            PluginLog.info("       JAR file build task > \"" + archiveTaskName + "\"");
+            PluginLog.info("       JAR file build name > " + archiveFile.getName());
+            PluginLog.info("       JAR file build path > " + archiveFile.getAbsolutePath());
             PluginLog.info("======= Runtime ========");
-            PluginLog.info(" -           Directory > " + infoRuntimeDirectory);
-            PluginLog.info(" -        Is runnable? > " + booleanToHuman(isServerRunnable));
+            PluginLog.info("  Server-Runtime-Directory > " + infoRuntimeDirectory);
+            PluginLog.info("    Runtime-Server-Version > " + runtimeServerVersion);
+            PluginLog.info("       Is server runnable? > " + booleanToHuman(isServerRunnable));
+            PluginLog.info("   Version matches client? > " + matchesVersion);
             PluginLog.info("======= Versions =======");
-            PluginLog.info(" -       Client-Server > " + clientServerVersion);
-            PluginLog.info(" -      Runtime-Server > " + runtimeServerVersion);
-            PluginLog.info(" -   Versions matching > " + booleanToHuman(matchesVersion));
         });
     }
 
@@ -246,8 +257,14 @@ public class PluginManifestPlugin implements Plugin<Project> {
         return value ? "YES" : "NO";
     }
 
+    private String fileExists(File file) {
+        if(file == null) {
+            return "Not found";
+        }
+        return file.exists() ? "Found" : "Not found";
+    }
+
     private void decompileServerSource(ClientInstallationExtension installExt) {
-        PluginLog.info("Decompiling server sources...");
         File clientServerJarFile = installExt.resolveClientServerJarFile();
         if (!clientServerJarFile.exists()) {
             throw new GradleException("Can't decompile server, because jar file doesn't exist: " + clientServerJarFile.getAbsolutePath());
@@ -263,13 +280,13 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 throw new GradleException("Couldn't check sources jar version: " + clientServerSourcesFile.getAbsolutePath());
             }
             if (jarVersion.equals(sourcesVersion)) {
-                PluginLog.info("Sources file is up-to-date: " + clientServerSourcesFile.getAbsolutePath());
                 return;
             }
-            PluginLog.info("Sources file is outdated: " + clientServerSourcesFile.getAbsolutePath());
+            PluginLog.info("Sources file is outdated!");
             clientServerSourcesFile.delete();
             PluginLog.info("Deleted previous sources file.");
         }
+        PluginLog.info("Decompiling server sources...");
         File clientServerServerDirectory = clientServerJarFile.getParentFile();
 
         File vineFlowerJarFile = new File(clientServerSourcesFile.getParent(), "vineflower.jar");
