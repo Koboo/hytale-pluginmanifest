@@ -238,9 +238,10 @@ public class PluginManifestPlugin implements Plugin<Project> {
             PluginLog.info("        'HytaleServer.aot' > " + fileExists(clientAOTFile));
             PluginLog.info("'HytaleServer-sources.jar' > " + fileExists(clientServerSourcesFile));
             PluginLog.info("              'Assets.zip' > " + fileExists(clientAssetsFile));
-            PluginLog.info("===== This plugin =======");
-            PluginLog.info("     \"IncludesAssetPack\" > " + booleanToHuman(hasAnyResources));
-            PluginLog.info("                  \"Main\" > " + mainClass);
+            PluginLog.info("====== Manifest =======");
+            PluginLog.info("       'IncludesAssetPack' > \"" + hasAnyResources + "\"");
+            PluginLog.info("                    'Main' > \"" + mainClass + "\"");
+            PluginLog.info("====== JAR file =======");
             PluginLog.info("       JAR file build task > \"" + archiveTaskName + "\"");
             PluginLog.info("       JAR file build name > " + archiveFile.getName());
             PluginLog.info("       JAR file build path > " + archiveFile.getAbsolutePath());
@@ -249,7 +250,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
             PluginLog.info("    Runtime-Server-Version > " + runtimeServerVersion);
             PluginLog.info("       Is server runnable? > " + booleanToHuman(isServerRunnable));
             PluginLog.info("   Version matches client? > " + matchesVersion);
-            PluginLog.info("======= Versions =======");
         });
     }
 
