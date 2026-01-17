@@ -317,3 +317,4 @@ Add this to your ``settings.gradle.kts`` for snapshot-versions.
 - [Kotlin Logo](https://commons.wikimedia.org/wiki/File:Kotlin_Icon.png)
 - [Groovy Logo](https://www.pngfind.com/mpng/iRwoTwo_file-groovy-logo-svg-groovy-language-logo-hd/)
 - [Maven Logo](https://www.stickpng.com/de/img/comics-und-fantasy/technologieunternehmen/apache-maven-federn)
+- [HytaleGradlePlugin](https://github.com/MrMineO5/HytaleGradlePlugin)
