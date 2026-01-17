@@ -30,20 +30,26 @@ public abstract class UpdateServerTask extends DefaultTask {
 
         File clientServerJarFile = installExt.resolveClientServerJarFile();
         File runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
-        runtimeServerJarFile.delete();
-        PluginLog.info("Deleted server jar file " + runtimeServerJarFile.getAbsolutePath());
+        if(runtimeServerJarFile.exists()) {
+            runtimeServerJarFile.delete();
+            PluginLog.info("Deleted server jar file " + runtimeServerJarFile.getAbsolutePath());
+        }
         FileUtils.copyClientFileToRuntime(clientServerJarFile, runtimeServerJarFile, "server jar file");
 
         File clientAOTFile = installExt.resolveClientAOTFile();
         File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
-        runtimeAOTFile.delete();
-        PluginLog.info("Deleted server aot file " + runtimeAOTFile.getAbsolutePath());
+        if(runtimeAOTFile.exists()) {
+            runtimeAOTFile.delete();
+            PluginLog.info("Deleted server aot file " + runtimeAOTFile.getAbsolutePath());
+        }
         FileUtils.copyClientFileToRuntime(clientAOTFile, runtimeAOTFile, "server aot file");
 
         File clientAssetsFile = installExt.resolveClientAssetsFile();
         File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
-        runtimeAssetsFile.delete();
-        PluginLog.info("Deleted assets file " + runtimeAssetsFile.getAbsolutePath());
+        if(runtimeAssetsFile.exists()) {
+            runtimeAssetsFile.delete();
+            PluginLog.info("Deleted assets file " + runtimeAssetsFile.getAbsolutePath());
+        }
         FileUtils.copyClientFileToRuntime(clientAssetsFile, runtimeAssetsFile, "assets zip file");
 
         PluginLog.info("");
