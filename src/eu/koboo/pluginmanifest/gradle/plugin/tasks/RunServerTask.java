@@ -57,9 +57,6 @@ public abstract class RunServerTask extends JavaExec {
         if (runtimeExt.getAllowOp().get()) {
             arguments.add("--allow-op");
         }
-        AuthMode authMode = runtimeExt.getAuthMode().get();
-        arguments.add("--auth-mode");
-        arguments.add(authMode.name().toLowerCase(Locale.ROOT));
 
         String bindAddress = runtimeExt.getBindAddress().get();
         arguments.add("--bind");

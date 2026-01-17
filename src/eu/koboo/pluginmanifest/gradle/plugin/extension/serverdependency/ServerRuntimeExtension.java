@@ -45,8 +45,6 @@ public abstract class ServerRuntimeExtension {
     @Input
     Property<Boolean> allowOp;
     @Input
-    Property<AuthMode> authMode;
-    @Input
     Property<String> bindAddress;
     @Input
     ListProperty<String> jvmArguments;
@@ -75,9 +73,6 @@ public abstract class ServerRuntimeExtension {
 
         allowOp = objectFactory.property(Boolean.class);
         allowOp.convention(true);
-
-        authMode = objectFactory.property(AuthMode.class);
-        authMode.convention(AuthMode.OFFLINE);
 
         bindAddress = objectFactory.property(String.class);
         bindAddress.convention("0.0.0.0:5520");
