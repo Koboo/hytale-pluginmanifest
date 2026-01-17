@@ -99,7 +99,6 @@ pluginManifest {
         runtimeDirectory = "D:/PluginManifestRuntime"
 
         // Shortcuts for the commonly used server arguments
-        disableSentry = true
         acceptEarlyPlugins = false
         allowOp = false
         enableNativeAcces = true
