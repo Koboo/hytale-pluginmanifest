@@ -138,6 +138,18 @@ public class ManifestValidation {
             String pluginId = pluginIdList.get(i);
             String key = "pluginDependency[index=" + i + ", type=" + type + "]";
             ManifestValidation.validateString(key + ".pluginId", pluginId, true, false);
+            if(!pluginId.contains(":")) {
+                throw new ValidationException(key, pluginId, "doesn't contain a ':'");
+            }
+            String[] pluginIdParts = pluginId.split(":");
+            int partsLength = pluginIdParts.length;
+            if(partsLength != 2) {
+                throw new ValidationException(key, pluginId, "has " + partsLength + " but can only contain 2");
+            }
+            String pluginGroup = pluginIdParts[0];
+            ManifestValidation.validateString(key + ".pluginId[pluginGroup]", pluginGroup);
+            String pluginName = pluginIdParts[1];
+            ManifestValidation.validateString(key + ".pluginId[pluginName]", pluginName);
             String semVerRange = dependencyMap.get(pluginId);
             ManifestValidation.validateSemanticVersionRange(key + ".versionRange", semVerRange);
         }
