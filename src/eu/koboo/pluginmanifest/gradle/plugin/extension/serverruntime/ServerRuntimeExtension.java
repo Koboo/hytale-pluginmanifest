@@ -1,4 +1,4 @@
-package eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency;
+package eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime;
 
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.AccessLevel;
