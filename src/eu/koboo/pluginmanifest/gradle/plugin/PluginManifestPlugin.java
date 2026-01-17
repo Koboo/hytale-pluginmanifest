@@ -201,12 +201,12 @@ public class PluginManifestPlugin implements Plugin<Project> {
             PluginLog.info(" - 'HytaleServer.aot' > " + clientAOTFile.getAbsolutePath());
             PluginLog.info(" -       'Assets.zip' > " + clientAssetsFile.getAbsolutePath());
             PluginLog.info(" -          Patchline > " + pathlineName);
-            PluginLog.info("Sources:");
             PluginLog.info(" -  Applied dependency? " + booleanToHuman(applyServerDependency));
-            PluginLog.info(" -     Found resources? " + booleanToHuman(hasAnyResources));
+            PluginLog.info("Sources:");
+            PluginLog.info(" -     Includes assets? " + booleanToHuman(hasAnyResources));
             PluginLog.info(" -    Found main class? " + booleanToHuman(hasMainClass));
-            PluginLog.info("JAR-File:");
-            PluginLog.info(" - JAR file build task: " + archiveTaskName);
+            PluginLog.info(" - JAR file build task: \"" + archiveTaskName + "\"");
+            PluginLog.info(" - JAR file build name: " + archiveFile.getName());
             PluginLog.info(" - JAR file build path: " + archiveFile.getAbsolutePath());
             PluginLog.info("Runtime:");
             PluginLog.info(" -           Directory: " + infoRuntimeDirectory);
