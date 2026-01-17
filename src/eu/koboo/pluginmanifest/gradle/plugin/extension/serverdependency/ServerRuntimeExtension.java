@@ -123,6 +123,10 @@ public abstract class ServerRuntimeExtension {
         return new File(resolveClientLatestDirectory(), "Server/HytaleServer.jar");
     }
 
+    public @NotNull File resolveClientServerSourcesFile() {
+        return new File(resolveClientLatestDirectory(), "Server/HytaleServer-sources.jar");
+    }
+
     public @NotNull File resolveClientAOTFile() {
         return new File(resolveClientLatestDirectory(), "Server/HytaleServer.aot");
     }

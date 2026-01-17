@@ -3,8 +3,6 @@ package eu.koboo.pluginmanifest.gradle.plugin;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.*;
-import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ValidationException;
-import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.semver.SemVer;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JarManifestUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
@@ -41,6 +39,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
     public static final String UPDATE_SERVER = "updateServer";
     public static final String RUN_SERVER = "runServer";
     public static final String INSTALL_PLUGIN = "installPlugin";
+    public static final String DECOMPILE_SERVER = "decompileServer";
     public static final String BUILD_AND_RUN = "buildAndRun";
 
     @Override
@@ -51,6 +50,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
         TaskProvider<DeleteServerTask> deleteServerProvider = target.getTasks().register(DELETE_SERVER, DeleteServerTask.class);
         TaskProvider<UpdateServerTask> updateServerProvider = target.getTasks().register(UPDATE_SERVER, UpdateServerTask.class);
         TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
+        TaskProvider<DecompileServerTask> decompileServer = target.getTasks().register(DECOMPILE_SERVER, DecompileServerTask.class);
         TaskProvider<InstallPluginTask> installPluginProvider = target.getTasks().register(INSTALL_PLUGIN, InstallPluginTask.class);
 
         target.getTasks().register(BUILD_AND_RUN, Task.class, task -> {
@@ -164,6 +164,13 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.dependsOn(project.getTasks().getByName(archiveTaskName));
             });
 
+            // Configure "decompileServer"
+            decompileServer.configure(task -> {
+                task.setGroup(TASK_GROUP_NAME);
+                task.setDescription("Decompiles the HytaleServer.jar and puts a separate jar into the client's installation.");
+                task.getRuntimeExtension().set(runtimeExt);
+            });
+
             // Parse runtime directory
             String infoRuntimeDirectory = "Not configured";
             String runtimeDirectoryPath = runtimeExt.getRuntimeDirectory().getOrNull();
@@ -175,25 +182,25 @@ public class PluginManifestPlugin implements Plugin<Project> {
             // Parse patchline name
             String pathlineName = runtimeExt.getPatchline().get().name().toLowerCase(Locale.ROOT);
 
-            // Parse versions by MANIFEST of client and runtime server jar
-            boolean matchesVersion = true;
-            Manifest clientServerManifest = JarManifestUtils.getManifest(clientServerJarFile);
-            Manifest runtimeServerManifest = JarManifestUtils.getManifest(clientServerJarFile);
-            String clientServerVersion = JarManifestUtils.getVersion(clientServerManifest);
-            String runtimeServerVersion = JarManifestUtils.getVersion(runtimeServerManifest);
-            if(!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
-                matchesVersion = clientServerVersion.equals(runtimeServerVersion);
-            }
-
-            // Check if the server is potentially runnable.
             boolean isServerRunnable = false;
+            File runtimeServerJarFile = null;
             if(runtimeDirectory != null && runtimeDirectory.exists()) {
-                File runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
+                runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
                 File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
                 File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
                 if(runtimeServerJarFile.exists() && runtimeAOTFile.exists() && runtimeAssetsFile.exists()) {
                     isServerRunnable = true;
                 }
+            }
+
+            // Parse versions by MANIFEST of client and runtime server jar
+            boolean matchesVersion = true;
+            Manifest clientServerManifest = JarManifestUtils.getManifest(clientServerJarFile);
+            Manifest runtimeServerManifest = JarManifestUtils.getManifest(runtimeServerJarFile);
+            String clientServerVersion = JarManifestUtils.getVersion(clientServerManifest);
+            String runtimeServerVersion = JarManifestUtils.getVersion(runtimeServerManifest);
+            if(!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
+                matchesVersion = clientServerVersion.equals(runtimeServerVersion);
             }
 
             PluginLog.info("========= Files ========");
@@ -212,8 +219,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
             PluginLog.info(" -           Directory > " + infoRuntimeDirectory);
             PluginLog.info(" -        Is runnable? > " + booleanToHuman(isServerRunnable));
             PluginLog.info("======= Versions =======");
-            PluginLog.info(" -       Client-Server > v" + clientServerVersion);
-            PluginLog.info(" -      Runtime-Server > v" + runtimeServerVersion);
+            PluginLog.info(" -       Client-Server > " + clientServerVersion);
+            PluginLog.info(" -      Runtime-Server > " + runtimeServerVersion);
             PluginLog.info(" -   Versions matching > " + booleanToHuman(matchesVersion));
         });
     }
