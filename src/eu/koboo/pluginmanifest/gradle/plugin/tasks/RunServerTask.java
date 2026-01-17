@@ -3,21 +3,34 @@ package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.extern.slf4j.Slf4j;
+import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.process.ExecOperations;
+import org.gradle.process.ExecResult;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public abstract class RunServerTask extends JavaExec {
+public abstract class RunServerTask extends DefaultTask {
 
     @Nested
     public abstract Property<ServerRuntimeExtension> getRuntimeExtension();
+
+    private final ObjectFactory objectFactory;
+    private final ExecOperations execOperations;
+
+    @Inject
+    public RunServerTask(ObjectFactory objectFactory, ExecOperations execOperations) {
+        this.objectFactory = objectFactory;
+        this.execOperations = execOperations;
+    }
 
     @TaskAction
     public void runTask() {
@@ -78,12 +91,18 @@ public abstract class RunServerTask extends JavaExec {
 
         PluginLog.info("Starting development server...");
 
-        workingDir(runtimeDirectory);
-        jvmArgs(jvmArguments);
-        args(arguments);
-        classpath(runtimeServerJarFile.getAbsolutePath());
-        setStandardInput(System.in);
-        setStandardOutput(System.out);
-        setErrorOutput(System.err);
+        ExecResult result = execOperations.javaexec(spec -> {
+            spec.setWorkingDir(runtimeDirectory);
+            spec.setClasspath(objectFactory.fileCollection().from(runtimeServerJarFile));
+            spec.setJvmArgs(jvmArguments);
+            spec.setArgs(arguments);
+            spec.setStandardInput(System.in);
+            spec.setStandardOutput(System.out);
+            spec.setErrorOutput(System.err);
+        });
+
+        PluginLog.info("");
+        PluginLog.info("Server stopped. exitCode=" + result.getExitValue());
+        PluginLog.info("");
     }
 }
