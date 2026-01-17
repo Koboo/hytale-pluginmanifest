@@ -196,25 +196,25 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 }
             }
 
-            PluginLog.info("Files:");
-            PluginLog.info(" - 'HytaleServer.jar' > " + clientServerJarFile.getAbsolutePath());
-            PluginLog.info(" - 'HytaleServer.aot' > " + clientAOTFile.getAbsolutePath());
-            PluginLog.info(" -       'Assets.zip' > " + clientAssetsFile.getAbsolutePath());
-            PluginLog.info(" -          Patchline > " + pathlineName);
-            PluginLog.info(" -  Applied dependency? " + booleanToHuman(applyServerDependency));
-            PluginLog.info("Sources:");
-            PluginLog.info(" -     Includes assets? " + booleanToHuman(hasAnyResources));
-            PluginLog.info(" -    Found main class? " + booleanToHuman(hasMainClass));
-            PluginLog.info(" - JAR file build task: \"" + archiveTaskName + "\"");
-            PluginLog.info(" - JAR file build name: " + archiveFile.getName());
-            PluginLog.info(" - JAR file build path: " + archiveFile.getAbsolutePath());
-            PluginLog.info("Runtime:");
-            PluginLog.info(" -           Directory: " + infoRuntimeDirectory);
-            PluginLog.info(" -         Is runnable? " + booleanToHuman(isServerRunnable));
-            PluginLog.info("Versions:");
-            PluginLog.info(" -       Client-Server: v" + clientServerVersion);
-            PluginLog.info(" -      Runtime-Server: v" + runtimeServerVersion);
-            PluginLog.info(" -   Versions matching? " + booleanToHuman(matchesVersion));
+            PluginLog.info("========= Files ========");
+            PluginLog.info(" -  'HytaleServer.jar' > " + clientServerJarFile.getAbsolutePath());
+            PluginLog.info(" -  'HytaleServer.aot' > " + clientAOTFile.getAbsolutePath());
+            PluginLog.info(" -        'Assets.zip' > " + clientAssetsFile.getAbsolutePath());
+            PluginLog.info(" -           Patchline > " + pathlineName);
+            PluginLog.info(" -  Applied dependency > " + booleanToHuman(applyServerDependency));
+            PluginLog.info("======= Sources ========");
+            PluginLog.info(" -     Includes assets > " + booleanToHuman(hasAnyResources));
+            PluginLog.info(" -    Found main class > " + booleanToHuman(hasMainClass));
+            PluginLog.info(" - JAR file build task > \"" + archiveTaskName + "\"");
+            PluginLog.info(" - JAR file build name > " + archiveFile.getName());
+            PluginLog.info(" - JAR file build path > " + archiveFile.getAbsolutePath());
+            PluginLog.info("======= Runtime ========");
+            PluginLog.info(" -           Directory > " + infoRuntimeDirectory);
+            PluginLog.info(" -         Is runnable > " + booleanToHuman(isServerRunnable));
+            PluginLog.info("======= Versions =======");
+            PluginLog.info(" -       Client-Server > v" + clientServerVersion);
+            PluginLog.info(" -      Runtime-Server > v" + runtimeServerVersion);
+            PluginLog.info(" -   Versions matching > " + booleanToHuman(matchesVersion));
         });
     }
 
