@@ -11,23 +11,28 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.*;
 import org.gradle.api.file.DuplicatesStrategy;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.language.jvm.tasks.ProcessResources;
+import org.gradle.process.ExecOperations;
+import org.gradle.process.ExecResult;
 
+import javax.inject.Inject;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Locale;
 import java.util.jar.Manifest;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PluginManifestPlugin implements Plugin<Project> {
-
-    public static final String MAVEN_PUBLISH = "maven-publish";
-    public static final String HYTALE_GROUP = "com.hypixel.hytale";
-    public static final String HYTALE_ARTIFACT = "Server";
 
     public static final String EXTENSION_NAME = "pluginManifest";
     public static final String TASK_GROUP_NAME = EXTENSION_NAME.toLowerCase(Locale.ROOT);
@@ -38,8 +43,19 @@ public class PluginManifestPlugin implements Plugin<Project> {
     public static final String UPDATE_SERVER = "updateServer";
     public static final String RUN_SERVER = "runServer";
     public static final String INSTALL_PLUGIN = "installPlugin";
-    public static final String DECOMPILE_SERVER = "decompileServer";
     public static final String BUILD_AND_RUN = "buildAndRun";
+
+    private static final String VINEFLOWER_URI = "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2-slim.jar";
+    private static final String decompilePackage = "com/hypixel";
+
+    private final ObjectFactory objectFactory;
+    private final ExecOperations execOperations;
+
+    @Inject
+    public PluginManifestPlugin(ObjectFactory objectFactory, ExecOperations execOperations) {
+        this.objectFactory = objectFactory;
+        this.execOperations = execOperations;
+    }
 
     @Override
     public void apply(Project target) {
@@ -49,7 +65,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
         TaskProvider<DeleteServerTask> deleteServerProvider = target.getTasks().register(DELETE_SERVER, DeleteServerTask.class);
         TaskProvider<UpdateServerTask> updateServerProvider = target.getTasks().register(UPDATE_SERVER, UpdateServerTask.class);
         TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
-        TaskProvider<DecompileServerTask> decompileServer = target.getTasks().register(DECOMPILE_SERVER, DecompileServerTask.class);
         TaskProvider<InstallPluginTask> installPluginProvider = target.getTasks().register(INSTALL_PLUGIN, InstallPluginTask.class);
 
         target.getTasks().register(BUILD_AND_RUN, Task.class, task -> {
@@ -68,6 +83,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
             if (!clientServerJarFile.exists()) {
                 throw new GradleException("Can't find server jar file at " + clientServerJarFile.getAbsolutePath());
             }
+            decompileServerSource(installExt);
+
             File clientServerDirectory = installExt.resolveClientServerDirectory();
 
             File archiveFile = JavaSourceUtils.resolveArchive(project);
@@ -167,19 +184,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.dependsOn(project.getTasks().getByName(archiveTaskName));
             });
 
-            // Configure "decompileServer"
-            decompileServer.configure(task -> {
-                task.setGroup(TASK_GROUP_NAME);
-                task.setDescription("Decompiles the HytaleServer.jar and puts a separate jar into the client's installation.");
-                task.getInstallExtension().set(installExt);
-            });
-
-            // Execute "decompileServer" on gradle resync
-            target.getPlugins().apply("idea");
-            target.getTasks().named("ideaModule", task -> {
-                task.dependsOn(decompileServer);
-            });
-
             //
             // ==== INFORMATION PRINTING ====
             //
@@ -240,5 +244,69 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
     private String booleanToHuman(boolean value) {
         return value ? "YES" : "NO";
+    }
+
+    private void decompileServerSource(ClientInstallationExtension installExt) {
+        PluginLog.info("Decompiling server sources...");
+        File clientServerJarFile = installExt.resolveClientServerJarFile();
+        if (!clientServerJarFile.exists()) {
+            throw new GradleException("Can't decompile server, because jar file doesn't exist: " + clientServerJarFile.getAbsolutePath());
+        }
+        File clientServerSourcesFile = installExt.resolveClientServerSourcesFile();
+        if (clientServerSourcesFile.exists()) {
+            String jarVersion = JarManifestUtils.getVersion(clientServerJarFile);
+            if (JarManifestUtils.isUnknown(jarVersion)) {
+                throw new GradleException("Couldn't check compiled jar version: " + clientServerSourcesFile.getAbsolutePath());
+            }
+            String sourcesVersion = JarManifestUtils.getVersion(clientServerSourcesFile);
+            if (JarManifestUtils.isUnknown(sourcesVersion)) {
+                throw new GradleException("Couldn't check sources jar version: " + clientServerSourcesFile.getAbsolutePath());
+            }
+            if (jarVersion.equals(sourcesVersion)) {
+                PluginLog.info("Sources file is up-to-date: " + clientServerSourcesFile.getAbsolutePath());
+                return;
+            }
+            PluginLog.info("Sources file is outdated: " + clientServerSourcesFile.getAbsolutePath());
+            clientServerSourcesFile.delete();
+            PluginLog.info("Deleted previous sources file.");
+        }
+        File clientServerServerDirectory = clientServerJarFile.getParentFile();
+
+        File vineFlowerJarFile = new File(clientServerSourcesFile.getParent(), "vineflower.jar");
+        if (!vineFlowerJarFile.exists()) {
+            PluginLog.info("Downloading vineflower from: " + VINEFLOWER_URI);
+            try {
+                Files.copy(URI.create(VINEFLOWER_URI).toURL().openStream(), vineFlowerJarFile.toPath());
+            } catch (IOException e) {
+                throw new GradleException("Can't decompile server: ", e);
+            }
+            PluginLog.info("Downloaded vineflower to: " + vineFlowerJarFile.getAbsolutePath());
+        }
+
+        List<String> decompileArguments = List.of(
+            "--only=" + decompilePackage,
+            "--simplify-switch=1",
+            "--decompile-generics=1",
+            "--remove-synthetic=0",
+            "--remove-bridge=1",
+            clientServerJarFile.getAbsolutePath(),
+            clientServerSourcesFile.getAbsolutePath()
+        );
+
+        PluginLog.info("Decompiling server sources.. ");
+        PluginLog.info("Please wait..");
+        ExecResult result = execOperations.javaexec(spec -> {
+            spec.setWorkingDir(clientServerServerDirectory);
+            spec.setClasspath(objectFactory.fileCollection().from(vineFlowerJarFile));
+            spec.setArgs(decompileArguments);
+            spec.setStandardInput(InputStream.nullInputStream());
+            spec.setStandardOutput(OutputStream.nullOutputStream());
+            spec.setErrorOutput(OutputStream.nullOutputStream());
+        });
+
+        PluginLog.info("");
+        PluginLog.info("Decompiled server sources resulted in exitCode=" + result.getExitValue());
+        PluginLog.info(clientServerSourcesFile.getAbsolutePath());
+        PluginLog.info("");
     }
 }
