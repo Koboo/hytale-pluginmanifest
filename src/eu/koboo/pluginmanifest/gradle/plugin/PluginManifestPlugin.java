@@ -3,6 +3,9 @@ package eu.koboo.pluginmanifest.gradle.plugin;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.*;
+import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ValidationException;
+import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.semver.SemVer;
+import eu.koboo.pluginmanifest.gradle.plugin.utils.JarManifestUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.AccessLevel;
@@ -24,6 +27,7 @@ import org.gradle.language.jvm.tasks.ProcessResources;
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
+import java.util.jar.Manifest;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PluginManifestPlugin implements Plugin<Project> {
@@ -160,12 +164,37 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.dependsOn(project.getTasks().getByName(archiveTaskName));
             });
 
-            String runtimeDirectory = "Not configured";
+            // Parse runtime directory
+            String infoRuntimeDirectory = "Not configured";
             String runtimeDirectoryPath = runtimeExt.getRuntimeDirectory().getOrNull();
+            File runtimeDirectory = null;
             if (runtimeDirectoryPath != null && !runtimeDirectoryPath.trim().isEmpty()) {
-                runtimeDirectory = new File(runtimeDirectoryPath).getAbsolutePath();
+                runtimeDirectory = new File(runtimeDirectoryPath);
+                infoRuntimeDirectory = runtimeDirectory.getAbsolutePath();
             }
+            // Parse patchline name
             String pathlineName = runtimeExt.getPatchline().get().name().toLowerCase(Locale.ROOT);
+
+            // Parse versions by MANIFEST of client and runtime server jar
+            boolean matchesVersion = true;
+            Manifest clientServerManifest = JarManifestUtils.getManifest(clientServerJarFile);
+            Manifest runtimeServerManifest = JarManifestUtils.getManifest(clientServerJarFile);
+            String clientServerVersion = JarManifestUtils.getVersion(clientServerManifest);
+            String runtimeServerVersion = JarManifestUtils.getVersion(runtimeServerManifest);
+            if(!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
+                matchesVersion = clientServerVersion.equals(runtimeServerVersion);
+            }
+
+            // Check if the server is potentially runnable.
+            boolean isServerRunnable = false;
+            if(runtimeDirectory != null && runtimeDirectory.exists()) {
+                File runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
+                File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
+                File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
+                if(runtimeServerJarFile.exists() && runtimeAOTFile.exists() && runtimeAssetsFile.exists()) {
+                    isServerRunnable = true;
+                }
+            }
 
             PluginLog.info("Resolved files:");
             PluginLog.info(" - 'HytaleServer.jar':");
@@ -176,14 +205,18 @@ public class PluginManifestPlugin implements Plugin<Project> {
             PluginLog.info("   > " + clientAssetsFile.getAbsolutePath());
             PluginLog.info(" - Patchline: " + pathlineName);
             PluginLog.info("Sources:");
-            PluginLog.info(" - applied dependency? " + booleanToHuman(applyServerDependency));
-            PluginLog.info(" - found resources? " + booleanToHuman(hasAnyResources));
-            PluginLog.info(" - found main class?: " + booleanToHuman(hasMainClass));
+            PluginLog.info(" - Applied dependency? " + booleanToHuman(applyServerDependency));
+            PluginLog.info(" - Found resources? " + booleanToHuman(hasAnyResources));
+            PluginLog.info(" - Found main class?: " + booleanToHuman(hasMainClass));
             PluginLog.info("JAR-File:");
             PluginLog.info(" - JAR file build task: " + archiveTaskName);
             PluginLog.info(" - JAR file build path: " + archiveFile.getAbsolutePath());
             PluginLog.info("Runtime:");
-            PluginLog.info(" - Server-Directory: " + runtimeDirectory);
+            PluginLog.info(" - Server-Directory: " + infoRuntimeDirectory);
+            PluginLog.info(" -  Client-Server: v" + clientServerVersion);
+            PluginLog.info(" - Runtime-Server: v" + runtimeServerVersion);
+            PluginLog.info(" - Versions matching? " + booleanToHuman(matchesVersion));
+            PluginLog.info(" - Is server runnable? " + booleanToHuman(isServerRunnable));
         });
     }
 
