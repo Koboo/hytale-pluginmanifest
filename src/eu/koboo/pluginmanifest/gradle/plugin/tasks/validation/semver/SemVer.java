@@ -20,6 +20,11 @@ public class SemVer {
     // MAJOR.MINOR.PATCH-RELEASE.RELEASE.RELEASE+BUILD
     public static SemVer parseString(String key, String versionString) throws ValidationException {
         versionString = versionString.trim();
+
+        if(versionString.startsWith("v")) {
+            versionString = versionString.substring(1);
+        }
+
         String build = null;
         if (versionString.contains("+")) {
             String[] buildSplit = versionString.split("\\+");
