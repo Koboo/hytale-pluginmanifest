@@ -46,6 +46,8 @@ public abstract class ServerRuntimeExtension {
     @Input
     Property<String> bindAddress;
     @Input
+    Property<Boolean> enableNativeAccess;
+    @Input
     ListProperty<String> jvmArguments;
     @Input
     ListProperty<String> serverArguments;
@@ -75,6 +77,9 @@ public abstract class ServerRuntimeExtension {
 
         bindAddress = objectFactory.property(String.class);
         bindAddress.convention("0.0.0.0:5520");
+
+        enableNativeAccess = objectFactory.property(Boolean.class);
+        enableNativeAccess.convention(true);
 
         jvmArguments = objectFactory.listProperty(String.class);
         jvmArguments.convention(new LinkedList<>());

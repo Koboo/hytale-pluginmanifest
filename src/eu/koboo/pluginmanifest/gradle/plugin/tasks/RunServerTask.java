@@ -40,6 +40,7 @@ public abstract class RunServerTask extends JavaExec {
 
         List<String> jvmArguments = new ArrayList<>();
         jvmArguments.add("-XX:AOTCache=" + runtimeAOTFile.getAbsolutePath());
+        jvmArguments.add("--enable-native-access=ALL-UNNAMED");
         List<String> userJvmArguments = runtimeExt.getJvmArguments().get();
         if (!userJvmArguments.isEmpty()) {
             jvmArguments.addAll(userJvmArguments);
