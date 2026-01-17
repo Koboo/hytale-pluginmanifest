@@ -180,30 +180,33 @@ public abstract class ServerRuntimeExtension {
         if (osName == null || osName.trim().isEmpty()) {
             throw new GradleException("Couldn't find operating system name by system property \"os.name\"");
         }
+        String userHome = System.getProperty("user.home");
         osName = osName.toLowerCase(Locale.ROOT);
         if (osName.startsWith("win")) {
             String appDataDirectory = System.getenv("APPDATA");
-            if (appDataDirectory == null || appDataDirectory.trim().isEmpty()) {
-                String userHome = System.getProperty("user.home");
-                if (userHome != null && !userHome.trim().isEmpty()) {
-                    appDataDirectory = userHome + "/AppData/Roaming";
-                }
+            if (appDataDirectory != null && appDataDirectory.trim().isEmpty()) {
+                return appDataDirectory;
             }
-            return appDataDirectory;
+            if (userHome != null && !userHome.trim().isEmpty()) {
+                return userHome + "/AppData/Roaming";
+            }
+            return null;
         }
         if (osName.startsWith("mac")) {
-            String userHome = System.getProperty("user.home");
-            if (userHome == null || userHome.trim().isEmpty()) {
-                return null;
+            if (userHome != null && !userHome.trim().isEmpty()) {
+                return userHome + "/Library/Application Support/";
             }
-            return userHome + "/Library/Application Support/";
+            return null;
         }
         if (osName.startsWith("linux")) {
+            if (userHome != null && userHome.trim().isEmpty()) {
+                return userHome + "/.var/app/com.hypixel.HytaleLauncher/data/";
+            }
             String dataHome = System.getenv("XDG_DATA_HOME");
             if (dataHome == null || dataHome.trim().isEmpty()) {
-                dataHome = "/.local/share/";
+                return dataHome + "/.local/share/";
             }
-            return dataHome;
+            return null;
         }
         throw new GradleException("Your operating system \"" + osName + "\" is not supported!");
     }
