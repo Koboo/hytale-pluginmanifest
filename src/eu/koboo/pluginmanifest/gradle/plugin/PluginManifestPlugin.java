@@ -219,6 +219,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
     }
 
     private String booleanToHuman(boolean value) {
-        return value ? "yes" : "no";
+        return value ? "YES" : "NO";
     }
 }
