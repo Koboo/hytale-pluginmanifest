@@ -119,16 +119,20 @@ public abstract class ServerRuntimeExtension {
         return new File(clientRootDirectory, latestDirectoryPath);
     }
 
+    public @NotNull File resolveClientServerDirectory() {
+        return new File(resolveClientLatestDirectory(), "Server/");
+    }
+
     public @NotNull File resolveClientServerJarFile() {
-        return new File(resolveClientLatestDirectory(), "Server/HytaleServer.jar");
+        return new File(resolveClientServerDirectory(), "HytaleServer.jar");
     }
 
     public @NotNull File resolveClientServerSourcesFile() {
-        return new File(resolveClientLatestDirectory(), "Server/HytaleServer-sources.jar");
+        return new File(resolveClientServerDirectory(), "HytaleServer-sources.jar");
     }
 
     public @NotNull File resolveClientAOTFile() {
-        return new File(resolveClientLatestDirectory(), "Server/HytaleServer.aot");
+        return new File(resolveClientServerDirectory(), "HytaleServer.aot");
     }
 
     public @NotNull File resolveClientAssetsFile() {

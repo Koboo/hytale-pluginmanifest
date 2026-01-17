@@ -25,10 +25,15 @@ import org.gradle.language.jvm.tasks.ProcessResources;
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.jar.Manifest;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PluginManifestPlugin implements Plugin<Project> {
+
+    public static final String MAVEN_PUBLISH = "maven-publish";
+    public static final String HYTALE_GROUP = "com.hypixel.hytale";
+    public static final String HYTALE_ARTIFACT = "Server";
 
     public static final String EXTENSION_NAME = "pluginManifest";
     public static final String TASK_GROUP_NAME = EXTENSION_NAME.toLowerCase(Locale.ROOT);
@@ -68,6 +73,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
             if (!clientServerJarFile.exists()) {
                 throw new GradleException("Can't find server jar file at " + clientServerJarFile.getAbsolutePath());
             }
+            File clientServerDirectory = runtimeExt.resolveClientServerDirectory();
+            File clientServerSourcesFile = runtimeExt.resolveClientServerSourcesFile();
 
             File archiveFile = JavaSourceUtils.resolveArchive(project);
             String archiveTaskName = JavaSourceUtils.resolveArchiveTaskName(project);
@@ -76,12 +83,12 @@ public class PluginManifestPlugin implements Plugin<Project> {
             File clientAOTFile = runtimeExt.resolveClientAOTFile();
 
             // Applying server dependency as a file.
-            boolean applyServerDependency = runtimeExt.getApplyServerDependency().getOrElse(true);
-            if (applyServerDependency) {
-                Provider<RegularFile> jarProvider = project.getLayout().file(project.provider(() -> clientServerJarFile));
-                DependencyHandler dependencies = project.getDependencies();
-                dependencies.add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, project.files(jarProvider));
-            }
+            project.getRepositories().flatDir(repository ->
+                repository.dirs(clientServerDirectory)
+            );
+            project.getDependencies().add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, Map.of(
+                "name", "HytaleServer"
+            ));
 
             // Adding PROJECT/build/generated/pluginmanifest/ to sourceSet resources.
             File buildDirectory = project
@@ -184,11 +191,11 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
             boolean isServerRunnable = false;
             File runtimeServerJarFile = null;
-            if(runtimeDirectory != null && runtimeDirectory.exists()) {
+            if (runtimeDirectory != null && runtimeDirectory.exists()) {
                 runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
                 File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
                 File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
-                if(runtimeServerJarFile.exists() && runtimeAOTFile.exists() && runtimeAssetsFile.exists()) {
+                if (runtimeServerJarFile.exists() && runtimeAOTFile.exists() && runtimeAssetsFile.exists()) {
                     isServerRunnable = true;
                 }
             }
@@ -199,16 +206,16 @@ public class PluginManifestPlugin implements Plugin<Project> {
             Manifest runtimeServerManifest = JarManifestUtils.getManifest(runtimeServerJarFile);
             String clientServerVersion = JarManifestUtils.getVersion(clientServerManifest);
             String runtimeServerVersion = JarManifestUtils.getVersion(runtimeServerManifest);
-            if(!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
+            if (!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
                 matchesVersion = clientServerVersion.equals(runtimeServerVersion);
             }
 
             PluginLog.info("========= Files ========");
+            PluginLog.info(" - client installation > " + clientServerJarFile.getAbsolutePath());
             PluginLog.info(" -  'HytaleServer.jar' > " + clientServerJarFile.getAbsolutePath());
             PluginLog.info(" -  'HytaleServer.aot' > " + clientAOTFile.getAbsolutePath());
             PluginLog.info(" -        'Assets.zip' > " + clientAssetsFile.getAbsolutePath());
             PluginLog.info(" -           Patchline > " + pathlineName);
-            PluginLog.info(" - Applied dependency? > " + booleanToHuman(applyServerDependency));
             PluginLog.info("======= Sources ========");
             PluginLog.info(" -    Includes assets? > " + booleanToHuman(hasAnyResources));
             PluginLog.info(" -   Found main class? > " + booleanToHuman(hasMainClass));
