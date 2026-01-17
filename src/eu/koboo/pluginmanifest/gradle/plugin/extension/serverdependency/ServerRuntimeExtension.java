@@ -1,7 +1,6 @@
 package eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency;
 
 import eu.koboo.pluginmanifest.gradle.plugin.PluginLog;
-import eu.koboo.pluginmanifest.gradle.plugin.extension.AuthMode;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.Patchline;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,7 +35,7 @@ public abstract class ServerRuntimeExtension {
 
     @Input
     @Optional
-    Property<String> serverRuntimePath;
+    Property<String> runtimeDirectory;
 
     @Input
     Property<Boolean> disableSentry;
@@ -63,13 +62,13 @@ public abstract class ServerRuntimeExtension {
         applyServerDependency = objectFactory.property(Boolean.class);
         applyServerDependency.set(true);
 
-        serverRuntimePath = objectFactory.property(String.class);
+        runtimeDirectory = objectFactory.property(String.class);
 
         disableSentry = objectFactory.property(Boolean.class);
         disableSentry.convention(false);
 
         acceptEarlyPlugins = objectFactory.property(Boolean.class);
-        acceptEarlyPlugins.convention(false);
+        acceptEarlyPlugins.convention(true);
 
         allowOp = objectFactory.property(Boolean.class);
         allowOp.convention(true);
@@ -85,7 +84,7 @@ public abstract class ServerRuntimeExtension {
     }
 
     public @NotNull File resolveRuntimeDirectory() {
-        String runtimeDirectoryPath = getServerRuntimePath().getOrNull();
+        String runtimeDirectoryPath = getRuntimeDirectory().getOrNull();
         if (runtimeDirectoryPath == null || runtimeDirectoryPath.trim().isEmpty()) {
             throw new GradleException("Can't resolve runtimeDirectory, no path set!");
         }
@@ -101,7 +100,7 @@ public abstract class ServerRuntimeExtension {
     }
 
     public boolean hasRuntimeDirectory() {
-        String runtimeDirectoryPath = getServerRuntimePath().getOrNull();
+        String runtimeDirectoryPath = getRuntimeDirectory().getOrNull();
         if (runtimeDirectoryPath == null || runtimeDirectoryPath.trim().isEmpty()) {
             return false;
         }

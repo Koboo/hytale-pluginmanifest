@@ -164,9 +164,9 @@ public class PluginManifestPlugin implements Plugin<Project> {
             });
 
             String runtimeDirectory = "Not configured";
-            String serverRuntimePath = runtimeExt.getServerRuntimePath().getOrNull();
-            if (serverRuntimePath != null && !serverRuntimePath.trim().isEmpty()) {
-                runtimeDirectory = new File(serverRuntimePath).getAbsolutePath();
+            String runtimeDirectoryPath = runtimeExt.getRuntimeDirectory().getOrNull();
+            if (runtimeDirectoryPath != null && !runtimeDirectoryPath.trim().isEmpty()) {
+                runtimeDirectory = new File(runtimeDirectoryPath).getAbsolutePath();
             }
             String pathlineName = runtimeExt.getPatchline().get().name().toLowerCase(Locale.ROOT);
 
