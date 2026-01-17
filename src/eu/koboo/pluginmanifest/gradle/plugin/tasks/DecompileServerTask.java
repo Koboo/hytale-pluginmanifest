@@ -1,15 +1,13 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
+import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JarManifestUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
-import lombok.extern.slf4j.Slf4j;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
-import org.gradle.api.file.FileCollection;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.process.ExecOperations;
@@ -21,7 +19,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.jar.Manifest;
 
 public abstract class DecompileServerTask extends DefaultTask {
 
@@ -40,25 +37,29 @@ public abstract class DecompileServerTask extends DefaultTask {
     @Nested
     public abstract Property<ServerRuntimeExtension> getRuntimeExtension();
 
+    @Nested
+    public abstract Property<ClientInstallationExtension> getInstallExtension();
+
     @TaskAction
     public void runTask() throws IOException {
         PluginLog.info("Decompiling server sources...");
-        ServerRuntimeExtension runtimeExt = getRuntimeExtension().get();
-        File clientServerJarFile = runtimeExt.resolveClientServerJarFile();
+        ClientInstallationExtension installExt = getInstallExtension().get();
+
+        File clientServerJarFile = installExt.resolveClientServerJarFile();
         if (!clientServerJarFile.exists()) {
             throw new GradleException("Can't decompile server, because jar file doesn't exist: " + clientServerJarFile.getAbsolutePath());
         }
-        File clientServerSourcesFile = runtimeExt.resolveClientServerSourcesFile();
+        File clientServerSourcesFile = installExt.resolveClientServerSourcesFile();
         if (clientServerSourcesFile.exists()) {
             String jarVersion = JarManifestUtils.getVersion(clientServerJarFile);
-            if(JarManifestUtils.isUnknown(jarVersion)) {
+            if (JarManifestUtils.isUnknown(jarVersion)) {
                 throw new GradleException("Couldn't check compiled jar version: " + clientServerSourcesFile.getAbsolutePath());
             }
             String sourcesVersion = JarManifestUtils.getVersion(clientServerSourcesFile);
-            if(JarManifestUtils.isUnknown(sourcesVersion)) {
+            if (JarManifestUtils.isUnknown(sourcesVersion)) {
                 throw new GradleException("Couldn't check sources jar version: " + clientServerSourcesFile.getAbsolutePath());
             }
-            if(jarVersion.equals(sourcesVersion)) {
+            if (jarVersion.equals(sourcesVersion)) {
                 PluginLog.info("Sources file is up-to-date: " + clientServerSourcesFile.getAbsolutePath());
                 return;
             }

@@ -1,5 +1,6 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
+import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,9 @@ public abstract class RunServerTask extends DefaultTask {
     @Nested
     public abstract Property<ServerRuntimeExtension> getRuntimeExtension();
 
+    @Nested
+    public abstract Property<ClientInstallationExtension> getInstallExtension();
+
     private final ObjectFactory objectFactory;
     private final ExecOperations execOperations;
 
@@ -36,6 +40,7 @@ public abstract class RunServerTask extends DefaultTask {
     public void runTask() {
         PluginLog.info("Building start command...");
         ServerRuntimeExtension runtimeExt = getRuntimeExtension().get();
+        ClientInstallationExtension installExt = getInstallExtension().get();
 
         File runtimeDirectory = runtimeExt.resolveRuntimeDirectory();
         File runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();

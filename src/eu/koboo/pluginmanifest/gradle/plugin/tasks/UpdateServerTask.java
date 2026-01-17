@@ -1,5 +1,6 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
+import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.FileUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
@@ -17,25 +18,29 @@ public abstract class UpdateServerTask extends DefaultTask {
     @Nested
     public abstract Property<ServerRuntimeExtension> getRuntimeExtension();
 
+    @Nested
+    public abstract Property<ClientInstallationExtension> getInstallExtension();
+
     @TaskAction
     public void runTask() {
         PluginLog.info("Updating server directory...");
         ServerRuntimeExtension runtimeExt = getRuntimeExtension().get();
+        ClientInstallationExtension installExt = getInstallExtension().get();
         File runtimeDirectory = runtimeExt.resolveRuntimeDirectory();
 
-        File clientServerJarFile = runtimeExt.resolveClientServerJarFile();
+        File clientServerJarFile = installExt.resolveClientServerJarFile();
         File runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
         runtimeServerJarFile.delete();
         PluginLog.info("Deleted server jar file " + runtimeServerJarFile.getAbsolutePath());
         FileUtils.copyClientFileToRuntime(clientServerJarFile, runtimeServerJarFile, "server jar file");
 
-        File clientAOTFile = runtimeExt.resolveClientAOTFile();
+        File clientAOTFile = installExt.resolveClientAOTFile();
         File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
         runtimeAOTFile.delete();
         PluginLog.info("Deleted server aot file " + runtimeAOTFile.getAbsolutePath());
         FileUtils.copyClientFileToRuntime(clientAOTFile, runtimeAOTFile, "server aot file");
 
-        File clientAssetsFile = runtimeExt.resolveClientAssetsFile();
+        File clientAssetsFile = installExt.resolveClientAssetsFile();
         File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
         runtimeAssetsFile.delete();
         PluginLog.info("Deleted assets file " + runtimeAssetsFile.getAbsolutePath());

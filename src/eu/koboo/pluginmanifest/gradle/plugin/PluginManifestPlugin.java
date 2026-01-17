@@ -1,5 +1,6 @@
 package eu.koboo.pluginmanifest.gradle.plugin;
 
+import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.*;
@@ -8,15 +9,9 @@ import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.gradle.api.GradleException;
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import org.gradle.api.Task;
-import org.gradle.api.artifacts.dsl.DependencyHandler;
+import org.gradle.api.*;
 import org.gradle.api.file.DuplicatesStrategy;
-import org.gradle.api.file.RegularFile;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
@@ -25,7 +20,6 @@ import org.gradle.language.jvm.tasks.ProcessResources;
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.jar.Manifest;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -66,29 +60,27 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
         target.afterEvaluate(project -> {
             ManifestExtension manifestExt = extension.manifestExtension;
-            ServerRuntimeExtension runtimeExt = extension.runtimeExtension;
+            ServerRuntimeExtension runtimeExt = extension.serverRuntimeExtension;
+            ClientInstallationExtension installExt = extension.installationExtension;
 
             // Resolve client installation directory
-            File clientServerJarFile = runtimeExt.resolveClientServerJarFile();
+            File clientServerJarFile = installExt.resolveClientServerJarFile();
             if (!clientServerJarFile.exists()) {
                 throw new GradleException("Can't find server jar file at " + clientServerJarFile.getAbsolutePath());
             }
-            File clientServerDirectory = runtimeExt.resolveClientServerDirectory();
-            File clientServerSourcesFile = runtimeExt.resolveClientServerSourcesFile();
+            File clientServerDirectory = installExt.resolveClientServerDirectory();
 
             File archiveFile = JavaSourceUtils.resolveArchive(project);
             String archiveTaskName = JavaSourceUtils.resolveArchiveTaskName(project);
 
-            File clientAssetsFile = runtimeExt.resolveClientAssetsFile();
-            File clientAOTFile = runtimeExt.resolveClientAOTFile();
+            File clientAssetsFile = installExt.resolveClientAssetsFile();
+            File clientAOTFile = installExt.resolveClientAOTFile();
 
             // Applying server dependency as a file.
             project.getRepositories().flatDir(repository ->
                 repository.dirs(clientServerDirectory)
             );
-            project.getDependencies().add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, Map.of(
-                "name", "HytaleServer"
-            ));
+            project.getDependencies().add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, ":HytaleServer");
 
             // Adding PROJECT/build/generated/pluginmanifest/ to sourceSet resources.
             File buildDirectory = project
@@ -100,6 +92,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
             SourceSet mainSourceSet = project.getExtensions()
                 .getByType(SourceSetContainer.class)
                 .getByName("main");
+
             // Resolve existing resources BEFORE applying our manifest-parent.
             boolean hasAnyResources = JavaSourceUtils.hasAnyResource(mainSourceSet);
             mainSourceSet.getResources().srcDir(generatedResourceDirectory);
@@ -139,6 +132,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Sets up the provided server directory with the server jar from your client–installation.");
                 task.getRuntimeExtension().set(runtimeExt);
+                task.getInstallationExtension().set(installExt);
             });
 
             // Configure "deleteServer"
@@ -152,6 +146,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Updates \"HytaleServer.jar\", \"HytaleServer.aot\" and \"Assets.zip\" in your server directory from your local client-installation.");
                 task.getRuntimeExtension().set(runtimeExt);
+                task.getInstallExtension().set(installExt);
             });
 
             // Configure "runServer"
@@ -159,6 +154,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Runs the server in your server directory with console support.");
                 task.getRuntimeExtension().set(runtimeExt);
+                task.getInstallExtension().set(installExt);
                 task.dependsOn(project.getTasks().getByName(SETUP_SERVER));
             });
 
@@ -175,8 +171,18 @@ public class PluginManifestPlugin implements Plugin<Project> {
             decompileServer.configure(task -> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Decompiles the HytaleServer.jar and puts a separate jar into the client's installation.");
-                task.getRuntimeExtension().set(runtimeExt);
+                task.getInstallExtension().set(installExt);
             });
+
+            // Execute "decompileServer" on gradle resync
+            target.getPlugins().apply("idea");
+            target.getTasks().named("ideaModule", task -> {
+                task.dependsOn(decompileServer);
+            });
+
+            //
+            // ==== INFORMATION PRINTING ====
+            //
 
             // Parse runtime directory
             String infoRuntimeDirectory = "Not configured";
@@ -187,7 +193,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 infoRuntimeDirectory = runtimeDirectory.getAbsolutePath();
             }
             // Parse patchline name
-            String pathlineName = runtimeExt.getPatchline().get().name().toLowerCase(Locale.ROOT);
+            String pathlineName = installExt.getPatchline().get().name().toLowerCase(Locale.ROOT);
 
             boolean isServerRunnable = false;
             File runtimeServerJarFile = null;

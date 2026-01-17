@@ -1,5 +1,6 @@
 package eu.koboo.pluginmanifest.gradle.plugin;
 
+import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import lombok.AccessLevel;
@@ -13,12 +14,14 @@ import javax.inject.Inject;
 public abstract class PluginManifestExtension {
 
     ManifestExtension manifestExtension;
-    ServerRuntimeExtension runtimeExtension;
+    ServerRuntimeExtension serverRuntimeExtension;
+    ClientInstallationExtension installationExtension;
 
     @Inject
     public PluginManifestExtension(ObjectFactory objectFactory) {
         this.manifestExtension = objectFactory.newInstance(ManifestExtension.class);
-        this.runtimeExtension = objectFactory.newInstance(ServerRuntimeExtension.class);
+        this.serverRuntimeExtension = objectFactory.newInstance(ServerRuntimeExtension.class);
+        this.installationExtension = objectFactory.newInstance(ClientInstallationExtension.class);
     }
 
     public void manifestConfiguration(Action<ManifestExtension> action) {
@@ -26,6 +29,10 @@ public abstract class PluginManifestExtension {
     }
 
     public void runtimeConfiguration(Action<ServerRuntimeExtension> action) {
-        action.execute(runtimeExtension);
+        action.execute(serverRuntimeExtension);
+    }
+
+    public void clientInstallation(Action<ClientInstallationExtension> action) {
+        action.execute(installationExtension);
     }
 }

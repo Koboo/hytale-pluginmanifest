@@ -1,5 +1,6 @@
-package eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency;
+package eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall;
 
+import eu.koboo.pluginmanifest.gradle.plugin.extension.Patchline;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,78 +22,62 @@ import java.util.Locale;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public abstract class ServerRuntimeExtension {
+public abstract class ClientInstallationExtension {
+    private static final String LATEST_DIRECTORY = "install/PATCHLINE/package/game/latest/";
 
     @Input
-    @Optional
-    Property<String> runtimeDirectory;
-
+    Property<Patchline> patchline;
     @Input
-    Property<Boolean> acceptEarlyPlugins;
-    @Input
-    Property<Boolean> allowOp;
-    @Input
-    Property<String> bindAddress;
-    @Input
-    Property<Boolean> enableNativeAccess;
-    @Input
-    ListProperty<String> jvmArguments;
-    @Input
-    ListProperty<String> serverArguments;
+    Property<String> clientInstallDirectory;
 
     @Inject
-    public ServerRuntimeExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
-        runtimeDirectory = objectFactory.property(String.class);
-
-        acceptEarlyPlugins = objectFactory.property(Boolean.class);
-        acceptEarlyPlugins.convention(true);
-
-        allowOp = objectFactory.property(Boolean.class);
-        allowOp.convention(true);
-
-        bindAddress = objectFactory.property(String.class);
-        bindAddress.convention("0.0.0.0:5520");
-
-        enableNativeAccess = objectFactory.property(Boolean.class);
-        enableNativeAccess.convention(true);
-
-        jvmArguments = objectFactory.listProperty(String.class);
-        jvmArguments.convention(new LinkedList<>());
-
-        serverArguments = objectFactory.listProperty(String.class);
-        serverArguments.convention(new LinkedList<>());
+    public ClientInstallationExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
+        patchline = objectFactory.property(Patchline.class);
+        patchline.set(Patchline.RELEASE);
+        clientInstallDirectory = objectFactory.property(String.class);
+        clientInstallDirectory.convention(
+            providerFactory.provider(ClientInstallationExtension::resolveDefaultClientDirectory)
+        );
     }
 
-    public @NotNull File resolveRuntimeDirectory() {
-        String runtimeDirectoryPath = getRuntimeDirectory().getOrNull();
-        if (runtimeDirectoryPath == null || runtimeDirectoryPath.trim().isEmpty()) {
-            throw new GradleException("Can't resolve runtimeDirectory, no path set!");
+    // APPDATA/Hytale/
+    public @NotNull File resolveClientLatestDirectory() {
+        String clientRootDirectoryPath = getClientInstallDirectory().getOrNull();
+        if (clientRootDirectoryPath == null || clientRootDirectoryPath.trim().isEmpty()) {
+            throw new GradleException("Can't resolve clientRootDirectory, because it can't be null or empty!");
         }
-        File runtimeDirectory = new File(runtimeDirectoryPath);
-        if (runtimeDirectory.exists() && !runtimeDirectory.isDirectory()) {
-            throw new GradleException("Can't resolve runtimeDirectory, path is not a directory: " + runtimeDirectory.getAbsolutePath());
+        File clientRootDirectory = new File(clientRootDirectoryPath);
+        if (!clientRootDirectory.exists()) {
+            throw new GradleException("Can't resolve clientRootDirectory, because it doesn't exists: " + clientRootDirectory.getAbsolutePath());
         }
-        if (!runtimeDirectory.exists()) {
-            runtimeDirectory.mkdirs();
-            PluginLog.info("Created serverRuntimeDirectory: " + runtimeDirectory.getAbsolutePath());
+        // APPDATA/Hytale/install/PATCHLINE/package/game/latest/
+        Patchline patchline = getPatchline().getOrNull();
+        if (patchline == null) {
+            throw new GradleException("patchline can't be null!");
         }
-        return runtimeDirectory;
+        String patchlineString = patchline.name().toLowerCase(Locale.ROOT);
+        String latestDirectoryPath = LATEST_DIRECTORY.replace("PATCHLINE", patchlineString);
+        return new File(clientRootDirectory, latestDirectoryPath);
     }
 
-    public @NotNull File resolveRuntimeServerJarFile() {
-        return new File(resolveRuntimeDirectory(), "HytaleServer.jar");
+    public @NotNull File resolveClientServerDirectory() {
+        return new File(resolveClientLatestDirectory(), "Server/");
     }
 
-    public @NotNull File resolveRuntimeAOTFile() {
-        return new File(resolveRuntimeDirectory(), "HytaleServer.aot");
+    public @NotNull File resolveClientServerJarFile() {
+        return new File(resolveClientServerDirectory(), "HytaleServer.jar");
     }
 
-    public @NotNull File resolveRuntimeAssetsFile() {
-        return new File(resolveRuntimeDirectory(), "Assets.zip");
+    public @NotNull File resolveClientServerSourcesFile() {
+        return new File(resolveClientServerDirectory(), "HytaleServer-sources.jar");
     }
 
-    public @NotNull File resolveRuntimeModDirectory() {
-        return new File(resolveRuntimeDirectory(), "mods/");
+    public @NotNull File resolveClientAOTFile() {
+        return new File(resolveClientServerDirectory(), "HytaleServer.aot");
+    }
+
+    public @NotNull File resolveClientAssetsFile() {
+        return new File(resolveClientLatestDirectory(), "Assets.zip");
     }
 
     public static @NotNull String resolveDefaultClientDirectory() {
