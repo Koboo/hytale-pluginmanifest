@@ -96,13 +96,13 @@ pluginManifest {
         // If you want to automatically build your plugin
         // and run it on the same HytaleServer.jar,
         // just set any directory here.
-        serverRuntimePath = "D:/PluginManifestRuntime";
+        runtimeDirectory = "D:/PluginManifestRuntime"
 
         // Shortcuts for the commonly used server arguments
         disableSentry = true
         acceptEarlyPlugins = false
         allowOp = false
-        authMode = AuthMode.OFFLINE
+        enableNativeAcces = true
         bindAddress = "0.0.0.0:5520"
 
         // Customize as you like
