@@ -35,19 +35,8 @@ public class PluginDoctor {
             infoRuntimeDirectory = runtimeDirectory.getAbsolutePath();
         }
 
-        // Parse versions by MANIFEST of client and runtime server jar
-        String runtimeServerVersion = JarManifestUtils.getVersion(runtimeDirectory);
-        String matchesVersion = "NO";
-        if (!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
-            if(clientServerVersion.equals(runtimeServerVersion)) {
-                matchesVersion = "YES";
-            }
-        } else {
-            matchesVersion = "Both unknown";
-        }
-
         boolean isServerRunnable = false;
-        File runtimeServerJarFile;
+        File runtimeServerJarFile = null;
         if (runtimeDirectory != null && runtimeDirectory.exists()) {
             runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
             File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
@@ -55,6 +44,17 @@ public class PluginDoctor {
             if (runtimeServerJarFile.exists() && runtimeAOTFile.exists() && runtimeAssetsFile.exists()) {
                 isServerRunnable = true;
             }
+        }
+
+        // Parse versions by MANIFEST of client and runtime server jar
+        String runtimeServerVersion = JarManifestUtils.getVersion(runtimeServerJarFile);
+        String matchesVersion = "NO";
+        if (!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
+            if(clientServerVersion.equals(runtimeServerVersion)) {
+                matchesVersion = "YES";
+            }
+        } else {
+            matchesVersion = "Both unknown";
         }
 
         File archiveFile = JavaSourceUtils.resolveArchive(project);
