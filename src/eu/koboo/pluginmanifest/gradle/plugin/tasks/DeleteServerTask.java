@@ -1,7 +1,7 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
-import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
+import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.extern.slf4j.Slf4j;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.provider.Property;
