@@ -40,8 +40,7 @@ public abstract class ClientInstallationExtension {
         );
     }
 
-    // APPDATA/Hytale/
-    public @NotNull File resolveClientLatestDirectory() {
+    public @NotNull File resolveClientInstallDirectory() {
         String clientRootDirectoryPath = getClientInstallDirectory().getOrNull();
         if (clientRootDirectoryPath == null || clientRootDirectoryPath.trim().isEmpty()) {
             throw new GradleException("Can't resolve clientRootDirectory, because it can't be null or empty!");
@@ -50,6 +49,12 @@ public abstract class ClientInstallationExtension {
         if (!clientRootDirectory.exists()) {
             throw new GradleException("Can't resolve clientRootDirectory, because it doesn't exists: " + clientRootDirectory.getAbsolutePath());
         }
+        return clientRootDirectory;
+    }
+
+    // APPDATA/Hytale/
+    public @NotNull File resolveClientLatestDirectory() {
+        File clientRootDirectory = resolveClientInstallDirectory();
         // APPDATA/Hytale/install/PATCHLINE/package/game/latest/
         Patchline patchline = getPatchline().getOrNull();
         if (patchline == null) {
