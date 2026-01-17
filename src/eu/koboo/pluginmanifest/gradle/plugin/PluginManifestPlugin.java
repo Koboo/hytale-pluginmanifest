@@ -94,10 +94,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
             mainSourceSet.getResources().srcDir(generatedResourceDirectory);
 
             List<String> mainClassCandidates = JavaSourceUtils.getMainClassCandidates(mainSourceSet);
-            boolean hasMainClass = false;
-            if (mainClassCandidates.size() == 1) {
-                hasMainClass = true;
-            }
+            boolean hasMainClass = mainClassCandidates.size() == 1;
 
             // Configure "generateManifestJson"
             generateManifestProvider.configure(task -> {
