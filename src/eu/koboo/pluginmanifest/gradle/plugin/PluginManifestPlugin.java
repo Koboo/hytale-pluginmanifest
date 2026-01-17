@@ -312,6 +312,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
         PluginLog.info("Decompiling server sources.. ");
         PluginLog.info("Please wait..");
+        PluginLog.info("This may take a few minutes..");
         ExecResult result = execOperations.javaexec(spec -> {
             spec.setWorkingDir(clientServerServerDirectory);
             spec.setClasspath(objectFactory.fileCollection().from(vineFlowerJarFile));
