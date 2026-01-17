@@ -1,6 +1,6 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
-import eu.koboo.pluginmanifest.gradle.plugin.PluginLog;
+import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorsExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestExtension;

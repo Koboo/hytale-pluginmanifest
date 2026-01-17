@@ -1,6 +1,5 @@
 package eu.koboo.pluginmanifest.gradle.plugin.utils;
 
-import eu.koboo.pluginmanifest.gradle.plugin.PluginLog;
 import lombok.experimental.UtilityClass;
 import org.gradle.api.GradleException;
 

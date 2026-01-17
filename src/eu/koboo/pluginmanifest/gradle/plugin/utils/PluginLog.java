@@ -1,4 +1,4 @@
-package eu.koboo.pluginmanifest.gradle.plugin;
+package eu.koboo.pluginmanifest.gradle.plugin.utils;
 
 import lombok.experimental.UtilityClass;
 import org.gradle.api.logging.Logger;

@@ -1,7 +1,6 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
-import eu.koboo.pluginmanifest.gradle.plugin.PluginLog;
-import eu.koboo.pluginmanifest.gradle.plugin.extension.AuthMode;
+import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverdependency.ServerRuntimeExtension;
 import lombok.extern.slf4j.Slf4j;
 import org.gradle.api.GradleException;
@@ -13,7 +12,6 @@ import org.gradle.api.tasks.TaskAction;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Slf4j
 public abstract class RunServerTask extends JavaExec {
