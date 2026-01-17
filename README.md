@@ -81,7 +81,7 @@ pluginManifest {
     // For more information see GitHub:
     // https://github.com/Koboo/hytale-pluginmanifest
 
-    runtimeConfiguration {
+    clientInstallation {
         // Where should we check for your Hytale installation?
         // If it's in the default installation directory,
         // the plugin will probably detect its location automatically.
@@ -89,10 +89,9 @@ pluginManifest {
 
         // Which patchline do you want to use?
         patchline = Patchline.RELEASE
+    }
 
-        // Should the HytaleServer.jar be added as dependency to the project?
-        applyServerDependency = true
-
+    runtimeConfiguration {
         // If you want to automatically build your plugin
         // and run it on the same HytaleServer.jar,
         // just set any directory here.
