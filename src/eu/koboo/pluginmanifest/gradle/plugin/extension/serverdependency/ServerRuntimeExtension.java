@@ -74,7 +74,7 @@ public abstract class ServerRuntimeExtension {
         acceptEarlyPlugins.convention(false);
 
         allowOp = objectFactory.property(Boolean.class);
-        allowOp.convention(false);
+        allowOp.convention(true);
 
         authMode = objectFactory.property(AuthMode.class);
         authMode.convention(AuthMode.OFFLINE);
