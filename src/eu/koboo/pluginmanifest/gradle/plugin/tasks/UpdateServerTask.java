@@ -30,7 +30,7 @@ public abstract class UpdateServerTask extends DefaultTask {
 
         File clientServerJarFile = installExt.resolveClientServerJarFile();
         File runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
-        if(runtimeServerJarFile.exists()) {
+        if (runtimeServerJarFile.exists()) {
             runtimeServerJarFile.delete();
             PluginLog.info("Deleted server jar file " + runtimeServerJarFile.getAbsolutePath());
         }
@@ -38,7 +38,7 @@ public abstract class UpdateServerTask extends DefaultTask {
 
         File clientAOTFile = installExt.resolveClientAOTFile();
         File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
-        if(runtimeAOTFile.exists()) {
+        if (runtimeAOTFile.exists()) {
             runtimeAOTFile.delete();
             PluginLog.info("Deleted server aot file " + runtimeAOTFile.getAbsolutePath());
         }
@@ -46,7 +46,7 @@ public abstract class UpdateServerTask extends DefaultTask {
 
         File clientAssetsFile = installExt.resolveClientAssetsFile();
         File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
-        if(runtimeAssetsFile.exists()) {
+        if (runtimeAssetsFile.exists()) {
             runtimeAssetsFile.delete();
             PluginLog.info("Deleted assets file " + runtimeAssetsFile.getAbsolutePath());
         }

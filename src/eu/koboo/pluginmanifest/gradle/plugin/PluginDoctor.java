@@ -50,7 +50,7 @@ public class PluginDoctor {
         String runtimeServerVersion = JarManifestUtils.getVersion(runtimeServerJarFile);
         String matchesVersion = "NO";
         if (!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
-            if(clientServerVersion.equals(runtimeServerVersion)) {
+            if (clientServerVersion.equals(runtimeServerVersion)) {
                 matchesVersion = "YES";
             }
         } else {
@@ -97,7 +97,7 @@ public class PluginDoctor {
     }
 
     private String fileExists(File file) {
-        if(file == null) {
+        if (file == null) {
             return NOT_FOUND;
         }
         return file.exists() ? FOUND : NOT_FOUND;

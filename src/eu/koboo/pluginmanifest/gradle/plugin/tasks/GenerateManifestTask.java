@@ -1,8 +1,8 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
+import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorsExtension;
-import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestPluginDependencyExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ManifestValidation;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ValidationException;

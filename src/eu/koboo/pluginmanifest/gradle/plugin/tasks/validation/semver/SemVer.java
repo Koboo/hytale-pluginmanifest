@@ -21,7 +21,7 @@ public class SemVer {
     public static SemVer parseString(String key, String versionString) throws ValidationException {
         versionString = versionString.trim();
 
-        if(versionString.startsWith("v")) {
+        if (versionString.startsWith("v")) {
             versionString = versionString.substring(1);
         }
 
@@ -37,7 +37,7 @@ public class SemVer {
             String[] releaseSplit = versionString.split("-");
             versionString = releaseSplit[0];
             String releaseString = releaseSplit[1];
-            if(releaseString.contains(".")) {
+            if (releaseString.contains(".")) {
                 releases = releaseString.split("\\.");
             } else {
                 releases = new String[]{releaseString};

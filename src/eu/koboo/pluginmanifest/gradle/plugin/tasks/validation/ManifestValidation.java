@@ -138,12 +138,12 @@ public class ManifestValidation {
             String pluginId = pluginIdList.get(i);
             String key = "pluginDependency[index=" + i + ", type=" + type + "]";
             ManifestValidation.validateString(key + ".pluginId", pluginId, true, false);
-            if(!pluginId.contains(":")) {
+            if (!pluginId.contains(":")) {
                 throw new ValidationException(key, pluginId, "doesn't contain a ':'");
             }
             String[] pluginIdParts = pluginId.split(":");
             int partsLength = pluginIdParts.length;
-            if(partsLength != 2) {
+            if (partsLength != 2) {
                 throw new ValidationException(key, pluginId, "has " + partsLength + " but can only contain 2");
             }
             String pluginGroup = pluginIdParts[0];

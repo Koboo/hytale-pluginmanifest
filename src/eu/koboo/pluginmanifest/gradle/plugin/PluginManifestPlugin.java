@@ -102,7 +102,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.dependsOn(generateManifestProvider);
                 task.doLast(t -> {
                     t.getOutputs().getFiles().forEach(outputFile -> {
-                        if(!outputFile.getName().endsWith("manifest.json")) {
+                        if (!outputFile.getName().endsWith("manifest.json")) {
                             return;
                         }
                         task.setDuplicatesStrategy(DuplicatesStrategy.INCLUDE);
