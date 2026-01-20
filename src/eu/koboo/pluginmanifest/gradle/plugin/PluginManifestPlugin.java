@@ -27,7 +27,6 @@ import org.jetbrains.java.decompiler.api.Decompiler;
 import org.jetbrains.java.decompiler.main.decompiler.SingleFileSaver;
 
 import java.io.File;
-import java.util.List;
 import java.util.Locale;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -37,19 +36,21 @@ public class PluginManifestPlugin implements Plugin<Project> {
     private static final String TASK_GROUP_NAME = EXTENSION_NAME.toLowerCase(Locale.ROOT);
 
     private static final String GENERATE_MANIFEST = "generateManifest";
-    private static final String SETUP_SERVER = "setupServer";
     private static final String UPDATE_SERVER = "updateServer";
     private static final String RUN_SERVER = "runServer";
     private static final String INSTALL_PLUGIN = "installPlugin";
     private static final String BUILD_AND_RUN = "buildAndRun";
 
     private static final String ONLY_DECOMPILE_PACKAGE = "com/hypixel";
+    private static final String TASK_PROCESS_RESOURCES = "processResources";
+
+    public static final String RESOURCE_DIRECTORY = "generated/pluginmanifest";
+    public static final String MANIFEST = "manifest.json";
 
     @Override
     public void apply(Project target) {
         PluginManifestExtension extension = target.getExtensions().create(EXTENSION_NAME, PluginManifestExtension.class);
         TaskProvider<GenerateManifestTask> generateManifestProvider = target.getTasks().register(GENERATE_MANIFEST, GenerateManifestTask.class);
-        TaskProvider<SetupServerTask> setupServerProvider = target.getTasks().register(SETUP_SERVER, SetupServerTask.class);
         TaskProvider<UpdateServerTask> updateServerProvider = target.getTasks().register(UPDATE_SERVER, UpdateServerTask.class);
         TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
         TaskProvider<InstallPluginTask> installPluginProvider = target.getTasks().register(INSTALL_PLUGIN, InstallPluginTask.class);
@@ -57,7 +58,11 @@ public class PluginManifestPlugin implements Plugin<Project> {
         target.getTasks().register(BUILD_AND_RUN, Task.class, task -> {
             task.setGroup(TASK_GROUP_NAME);
             task.setDescription("Builds your plugin, copies the jar into the mods folder and starts the server.");
-            task.dependsOn(installPluginProvider, runServerProvider);
+            task.dependsOn(
+                target.getProject().getTasks().getByName(TASK_PROCESS_RESOURCES),
+                installPluginProvider,
+                runServerProvider
+            );
         });
 
         target.afterEvaluate(project -> {
@@ -79,12 +84,12 @@ public class PluginManifestPlugin implements Plugin<Project> {
             project.getDependencies().add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, ":HytaleServer");
 
             // Depend "processResources" on "generateManifest"
-            // Exclude manual "manifest.json"
+            // Exclude/Override actual "src/resources/manifest.json"
             target.getTasks().withType(ProcessResources.class).configureEach(task -> {
                 task.dependsOn(generateManifestProvider);
                 task.doLast(t -> {
                     t.getOutputs().getFiles().forEach(outputFile -> {
-                        if (!outputFile.getName().endsWith("manifest.json")) {
+                        if (!outputFile.getName().endsWith(MANIFEST)) {
                             return;
                         }
                         task.setDuplicatesStrategy(DuplicatesStrategy.INCLUDE);
@@ -96,16 +101,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
             SourceSet mainSourceSet = project.getExtensions()
                 .getByType(SourceSetContainer.class)
                 .getByName("main");
-
-            // Check if the plugin has any resources BEFORE applying our directory to the sourceSet.
-            // Otherwise, the boolean would be true because it treats our directory as a resource too.
-            boolean hasAnyResources = JavaSourceUtils.hasAnyResource(mainSourceSet);
-
-            Provider<Directory> genResourceDir = project.getLayout().getBuildDirectory()
-                .dir("generated/pluginmanifest");
+            Provider<Directory> genResourceDir = project.getLayout().getBuildDirectory().dir(RESOURCE_DIRECTORY);
             mainSourceSet.getResources().srcDir(genResourceDir);
-
-            List<String> mainClassCandidates = JavaSourceUtils.getMainClassCandidates(mainSourceSet);
 
             // Configure "generateManifestJson"
             generateManifestProvider.configure(task -> {
@@ -115,18 +112,9 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getProjectGroupId().set(project.getGroup().toString());
                 task.getProjectArtifactId().set(project.getName());
                 task.getProjectVersion().set(project.getVersion().toString());
-                task.getHasAnyResources().set(hasAnyResources);
-                task.getMainClassCandidates().set(mainClassCandidates);
+                task.getHasAnyResources().set(JavaSourceUtils.hasAnyResource(mainSourceSet));
+                task.getMainClassCandidates().set(JavaSourceUtils.getMainClassCandidates(mainSourceSet));
                 task.getExtension().set(manifestExt);
-                //task.getOutputs().dir(genResourceDir);
-            });
-
-            // Configure "setupServer"
-            setupServerProvider.configure(task -> {
-                task.setGroup(TASK_GROUP_NAME);
-                task.setDescription("Sets up the provided server directory with the server jar from your client–installation.");
-                task.getRuntimeExtension().set(runtimeExt);
-                task.getInstallationExtension().set(installExt);
             });
 
             // Configure "updateServer"
@@ -142,32 +130,25 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Runs the server in your server directory with console support in the terminal.");
                 task.getRuntimeExtension().set(runtimeExt);
-                task.dependsOn(project.getTasks().getByName(SETUP_SERVER));
             });
 
             // Configure "installPlugin"
             installPluginProvider.configure(task -> {
                 Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
                 Provider<RegularFile> archiveFileProvider = archiveTask.getArchiveFile();
-                String archiveTaskName = archiveTask.getName();
 
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Execute the jar archive task and moves the plugin into your server's \"/mods\" directory.");
                 task.getRuntimeExtension().set(runtimeExt);
                 task.getArchiveFilePath().set(archiveFileProvider);
-                task.dependsOn(archiveTaskName);
+                task.dependsOn(archiveTask);
             });
 
             //
             // ==== INFORMATION PRINTING ====
             //
 
-            String mainClass = "Not found";
-            if (mainClassCandidates.size() == 1) {
-                mainClass = mainClassCandidates.getFirst();
-            }
-
-            PluginDoctor.printDoctor(project, runtimeExt, installExt, hasAnyResources, mainClass);
+            PluginDoctor.printDoctor(project, runtimeExt, installExt);
         });
     }
 

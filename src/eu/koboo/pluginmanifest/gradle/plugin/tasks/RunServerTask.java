@@ -1,6 +1,8 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
+import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
+import eu.koboo.pluginmanifest.gradle.plugin.utils.FileUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.extern.slf4j.Slf4j;
 import org.gradle.api.DefaultTask;
@@ -23,6 +25,9 @@ public abstract class RunServerTask extends DefaultTask {
     @Nested
     public abstract Property<ServerRuntimeExtension> getRuntimeExtension();
 
+    @Nested
+    public abstract Property<ClientInstallationExtension> getInstallExtension();
+
     @Inject
     public abstract ObjectFactory getObjects();
 
@@ -33,17 +38,26 @@ public abstract class RunServerTask extends DefaultTask {
     public void runTask() {
         PluginLog.info("Building start command...");
         ServerRuntimeExtension runtimeExt = getRuntimeExtension().get();
+        ClientInstallationExtension installExt = getInstallExtension().get();
 
-        File runtimeDirectory = runtimeExt.resolveRuntimeDirectory();
+        File clientServerJarFile = installExt.resolveClientServerJarFile();
         File runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
+        FileUtils.copyClientFileToRuntime(clientServerJarFile, runtimeServerJarFile, "server jar file");
+
+        File clientAOTFile = installExt.resolveClientAOTFile();
+        File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
+        FileUtils.copyClientFileToRuntime(clientAOTFile, runtimeAOTFile, "server aot file");
+
+        File clientAssetsFile = installExt.resolveClientAssetsFile();
+        File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
+        FileUtils.copyClientFileToRuntime(clientAssetsFile, runtimeAssetsFile, "assets zip file");
+
         if (!runtimeServerJarFile.exists()) {
             throw new GradleException("Can't find server jar file: " + runtimeServerJarFile.getAbsolutePath());
         }
-        File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
         if (!runtimeAssetsFile.exists()) {
             throw new GradleException("Can't find assets file: " + runtimeAssetsFile.getAbsolutePath());
         }
-        File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
         if (!runtimeAOTFile.exists()) {
             throw new GradleException("Can't find AOT file: " + runtimeAOTFile.getAbsolutePath());
         }
@@ -89,7 +103,7 @@ public abstract class RunServerTask extends DefaultTask {
         PluginLog.info("Starting development server...");
 
         ExecResult result = getExecOperations().javaexec(spec -> {
-            spec.setWorkingDir(runtimeDirectory);
+            spec.setWorkingDir(runtimeExt.resolveRuntimeDirectory());
             spec.setClasspath(getObjects().fileCollection().from(runtimeServerJarFile));
             spec.setJvmArgs(jvmArguments);
             spec.setArgs(arguments);
