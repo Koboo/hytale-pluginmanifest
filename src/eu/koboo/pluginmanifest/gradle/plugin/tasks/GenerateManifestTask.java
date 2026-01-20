@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 public abstract class GenerateManifestTask extends DefaultTask {
 
     private static final String FALLBACK_PLUGIN_VERSION = "0.0.0";
