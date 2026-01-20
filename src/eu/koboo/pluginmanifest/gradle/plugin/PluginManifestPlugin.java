@@ -133,6 +133,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Runs the server in your server directory with console support in the terminal.");
                 task.getRuntimeExtension().set(runtimeExt);
+                task.getInstallExtension().set(installExt);
             });
 
             // Configure "installPlugin"
