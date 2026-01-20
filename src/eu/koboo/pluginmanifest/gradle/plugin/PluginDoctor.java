@@ -7,9 +7,12 @@ import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.experimental.UtilityClass;
 import org.gradle.api.Project;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.jvm.tasks.Jar;
 
 import java.io.File;
+import java.util.List;
 
 @UtilityClass
 public class PluginDoctor {
@@ -19,9 +22,7 @@ public class PluginDoctor {
 
     public void printDoctor(Project project,
                             ServerRuntimeExtension runtimeExt,
-                            ClientInstallationExtension installExt,
-                            boolean hasAnyResources,
-                            String mainClass) {
+                            ClientInstallationExtension installExt) {
 
         File clientInstallDirectory = installExt.resolveClientInstallDirectory();
         File clientServerJarFile = installExt.resolveClientServerJarFile();
@@ -61,6 +62,19 @@ public class PluginDoctor {
         Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
         File archiveFile = archiveTask.getArchiveFile().get().getAsFile();
         String archiveTaskName = archiveTask.getName();
+
+        SourceSet mainSourceSet = project.getExtensions()
+            .getByType(SourceSetContainer.class)
+            .getByName("main");
+
+        boolean hasAnyResources = JavaSourceUtils.hasAnyResource(mainSourceSet);
+
+        List<String> mainClassCandidates = JavaSourceUtils.getMainClassCandidates(mainSourceSet);
+
+        String mainClass = "Not found";
+        if (mainClassCandidates.size() == 1) {
+            mainClass = mainClassCandidates.getFirst();
+        }
 
         PluginLog.info("PluginManifest doctor results for \"" + project.getName() + "\":");
         PluginLog.print("========= Client Installation ========");
