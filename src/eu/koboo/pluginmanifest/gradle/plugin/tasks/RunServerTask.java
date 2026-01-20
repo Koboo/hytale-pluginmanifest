@@ -1,6 +1,5 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
-import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.extern.slf4j.Slf4j;
@@ -24,23 +23,16 @@ public abstract class RunServerTask extends DefaultTask {
     @Nested
     public abstract Property<ServerRuntimeExtension> getRuntimeExtension();
 
-    @Nested
-    public abstract Property<ClientInstallationExtension> getInstallExtension();
-
-    private final ObjectFactory objectFactory;
-    private final ExecOperations execOperations;
+    @Inject
+    public abstract ObjectFactory getObjects();
 
     @Inject
-    public RunServerTask(ObjectFactory objectFactory, ExecOperations execOperations) {
-        this.objectFactory = objectFactory;
-        this.execOperations = execOperations;
-    }
+    public abstract ExecOperations getExecOperations();
 
     @TaskAction
     public void runTask() {
         PluginLog.info("Building start command...");
         ServerRuntimeExtension runtimeExt = getRuntimeExtension().get();
-        ClientInstallationExtension installExt = getInstallExtension().get();
 
         File runtimeDirectory = runtimeExt.resolveRuntimeDirectory();
         File runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
@@ -96,9 +88,9 @@ public abstract class RunServerTask extends DefaultTask {
 
         PluginLog.info("Starting development server...");
 
-        ExecResult result = execOperations.javaexec(spec -> {
+        ExecResult result = getExecOperations().javaexec(spec -> {
             spec.setWorkingDir(runtimeDirectory);
-            spec.setClasspath(objectFactory.fileCollection().from(runtimeServerJarFile));
+            spec.setClasspath(getObjects().fileCollection().from(runtimeServerJarFile));
             spec.setJvmArgs(jvmArguments);
             spec.setArgs(arguments);
             spec.setStandardInput(System.in);
