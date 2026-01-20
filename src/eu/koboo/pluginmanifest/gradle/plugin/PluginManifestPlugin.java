@@ -36,7 +36,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
     private static final String GENERATE_MANIFEST = "generateManifest";
     private static final String SETUP_SERVER = "setupServer";
-    private static final String DELETE_SERVER = "deleteServer";
     private static final String UPDATE_SERVER = "updateServer";
     private static final String RUN_SERVER = "runServer";
     private static final String INSTALL_PLUGIN = "installPlugin";
@@ -49,7 +48,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
         PluginManifestExtension extension = target.getExtensions().create(EXTENSION_NAME, PluginManifestExtension.class);
         TaskProvider<GenerateManifestTask> generateManifestProvider = target.getTasks().register(GENERATE_MANIFEST, GenerateManifestTask.class);
         TaskProvider<SetupServerTask> setupServerProvider = target.getTasks().register(SETUP_SERVER, SetupServerTask.class);
-        TaskProvider<DeleteServerTask> deleteServerProvider = target.getTasks().register(DELETE_SERVER, DeleteServerTask.class);
         TaskProvider<UpdateServerTask> updateServerProvider = target.getTasks().register(UPDATE_SERVER, UpdateServerTask.class);
         TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
         TaskProvider<InstallPluginTask> installPluginProvider = target.getTasks().register(INSTALL_PLUGIN, InstallPluginTask.class);
@@ -130,13 +128,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setDescription("Sets up the provided server directory with the server jar from your client–installation.");
                 task.getRuntimeExtension().set(runtimeExt);
                 task.getInstallationExtension().set(installExt);
-            });
-
-            // Configure "deleteServer"
-            deleteServerProvider.configure(task -> {
-                task.setGroup(TASK_GROUP_NAME);
-                task.setDescription("Deletes the provided server directory.");
-                task.getRuntimeExtension().set(runtimeExt);
             });
 
             // Configure "updateServer"
