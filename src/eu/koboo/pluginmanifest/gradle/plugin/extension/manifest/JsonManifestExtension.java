@@ -66,8 +66,12 @@ public abstract class JsonManifestExtension {
         this.pluginWebsite = objectFactory.property(String.class);
 
         this.disabledByDefault = objectFactory.property(Boolean.class);
+        this.disabledByDefault.convention(false);
         this.includesAssetPack = objectFactory.property(Boolean.class);
+        this.includesAssetPack.convention(false);
+
         this.minimizeJson = objectFactory.property(Boolean.class);
+        this.minimizeJson.convention(false);
 
         this.manifestAuthors = objectFactory.newInstance(ManifestAuthorsExtension.class);
         this.manifestPluginDependencies = objectFactory.newInstance(ManifestPluginDependencyExtension.class);
