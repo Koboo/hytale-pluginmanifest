@@ -7,6 +7,7 @@ import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.experimental.UtilityClass;
 import org.gradle.api.Project;
+import org.gradle.jvm.tasks.Jar;
 
 import java.io.File;
 
@@ -57,8 +58,9 @@ public class PluginDoctor {
             matchesVersion = "Both unknown";
         }
 
-        File archiveFile = JavaSourceUtils.resolveArchive(project);
-        String archiveTaskName = JavaSourceUtils.resolveArchiveTaskName(project);
+        Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
+        File archiveFile = archiveTask.getArchiveFile().get().getAsFile();
+        String archiveTaskName = archiveTask.getName();
 
         PluginLog.info("PluginManifest doctor results for \"" + project.getName() + "\":");
         PluginLog.print("========= Client Installation ========");

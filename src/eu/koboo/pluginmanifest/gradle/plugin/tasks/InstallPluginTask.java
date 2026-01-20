@@ -6,6 +6,7 @@ import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.extern.slf4j.Slf4j;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Nested;
@@ -18,7 +19,7 @@ import java.io.IOException;
 public abstract class InstallPluginTask extends DefaultTask {
 
     @Input
-    public abstract Property<String> getArchiveFilePath();
+    public abstract RegularFileProperty getArchiveFilePath();
 
     @Nested
     public abstract Property<ServerRuntimeExtension> getRuntimeExtension();
@@ -32,7 +33,7 @@ public abstract class InstallPluginTask extends DefaultTask {
             throw new GradleException("Can't find mod directory in server: " + runtimeModDirectory.getAbsolutePath());
         }
 
-        File archiveFile = new File(getArchiveFilePath().get());
+        File archiveFile = getArchiveFilePath().get().getAsFile();
         if (!archiveFile.exists()) {
             throw new GradleException("Can't install plugin into server, because it doesn't exists: " + archiveFile.getAbsolutePath());
         }

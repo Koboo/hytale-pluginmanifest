@@ -15,11 +15,13 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DuplicatesStrategy;
+import org.gradle.api.file.RegularFile;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
+import org.gradle.jvm.tasks.Jar;
 import org.gradle.language.jvm.tasks.ProcessResources;
 import org.jetbrains.java.decompiler.api.Decompiler;
 import org.jetbrains.java.decompiler.main.decompiler.SingleFileSaver;
@@ -69,9 +71,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 throw new GradleException("Can't find server jar file at " + clientServerJarFile.getAbsolutePath());
             }
             decompileServerSource(installExt);
-
-            File archiveFile = JavaSourceUtils.resolveArchive(project);
-            String archiveTaskName = JavaSourceUtils.resolveArchiveTaskName(project);
 
             // Applying server dependency as a file.
             project.getRepositories().flatDir(repository ->
@@ -148,11 +147,15 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
             // Configure "installPlugin"
             installPluginProvider.configure(task -> {
+                Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
+                Provider<RegularFile> archiveFileProvider = archiveTask.getArchiveFile();
+                String archiveTaskName = archiveTask.getName();
+
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Execute the jar archive task and moves the plugin into your server's \"/mods\" directory.");
                 task.getRuntimeExtension().set(runtimeExt);
-                task.getArchiveFilePath().set(JavaSourceUtils.resolveArchiveProvider(target));
-                task.dependsOn(project.getTasks().getByName(archiveTaskName));
+                task.getArchiveFilePath().set(archiveFileProvider);
+                task.dependsOn(archiveTaskName);
             });
 
             //

@@ -108,35 +108,17 @@ public class JavaSourceUtils {
         return candidates;
     }
 
-    public @NotNull File resolveArchive(@NotNull Project project) {
-        Jar shadowJarTask = project.getTasks()
-            .withType(Jar.class)
-            .stream()
-            .filter(t -> t.getName().equals(SHADOW))
-            .findFirst()
-            .orElse(null);
-        if (shadowJarTask != null) {
-            return shadowJarTask.getArchiveFile()
-                .get()
-                .getAsFile();
-        }
-        return project.getTasks()
-            .named(DEFAULT, Jar.class)
-            .flatMap(Jar::getArchiveFile)
-            .get()
-            .getAsFile();
-    }
 
-    public @NotNull String resolveArchiveTaskName(@NotNull Project project) {
-        Jar shadowJarTask = project.getTasks()
-            .withType(Jar.class)
-            .stream()
-            .filter(t -> t.getName().equals(SHADOW))
-            .findFirst()
-            .orElse(null);
-        if (shadowJarTask != null) {
-            return SHADOW;
+    public Jar resolveArchiveTask(@NotNull Project project) {
+        for (Jar jarTask : project.getTasks().withType(Jar.class)) {
+            if(jarTask.getName().equals(SHADOW)) {
+                return jarTask;
+            }
+            if(jarTask.getName().equals(DEFAULT)) {
+                return jarTask;
+            }
+            return jarTask;
         }
-        return DEFAULT;
+        throw new GradleException("No archive task found!");
     }
 }
