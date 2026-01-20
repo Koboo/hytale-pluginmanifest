@@ -3,7 +3,10 @@ package eu.koboo.pluginmanifest.gradle.plugin;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
-import eu.koboo.pluginmanifest.gradle.plugin.tasks.*;
+import eu.koboo.pluginmanifest.gradle.plugin.tasks.GenerateManifestTask;
+import eu.koboo.pluginmanifest.gradle.plugin.tasks.InstallPluginTask;
+import eu.koboo.pluginmanifest.gradle.plugin.tasks.RunServerTask;
+import eu.koboo.pluginmanifest.gradle.plugin.tasks.UpdateServerTask;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JarManifestUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
@@ -153,7 +156,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
     }
 
     private void decompileServerSource(ClientInstallationExtension installExt) {
-        if(!installExt.getDecompileServer().get()) {
+        if (!installExt.getDecompileServer().get()) {
             PluginLog.info("Decompiling server sources is disabled.");
             return;
         }

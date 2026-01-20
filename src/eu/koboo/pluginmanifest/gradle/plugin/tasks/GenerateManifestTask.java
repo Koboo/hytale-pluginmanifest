@@ -16,7 +16,10 @@ import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.*;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Nested;
+import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
 import java.io.IOException;
@@ -159,7 +162,7 @@ public abstract class GenerateManifestTask extends DefaultTask {
             // "IncludesAssetPack"
             boolean includesAssetPack = extension.getIncludesAssetPack().get();
             boolean hasAnyResources = getHasAnyResources().get();
-            if(!includesAssetPack && hasAnyResources) {
+            if (!includesAssetPack && hasAnyResources) {
                 includesAssetPack = true;
                 PluginLog.info("IncludesAssetPack is set to false, but resources were found! Setting to true..");
             }

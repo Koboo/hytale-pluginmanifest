@@ -37,7 +37,7 @@ public class JavaSourceUtils {
 
     private boolean containsFile(File dir) {
         // This is our generated resource directory.
-        if(dir.getAbsolutePath().contains(PluginManifestPlugin.RESOURCE_DIRECTORY)) {
+        if (dir.getAbsolutePath().contains(PluginManifestPlugin.RESOURCE_DIRECTORY)) {
             return false;
         }
         File[] files = dir.listFiles();
@@ -116,10 +116,10 @@ public class JavaSourceUtils {
 
     public Jar resolveArchiveTask(@NotNull Project project) {
         for (Jar jarTask : project.getTasks().withType(Jar.class)) {
-            if(jarTask.getName().equals(TASK_SHADOW)) {
+            if (jarTask.getName().equals(TASK_SHADOW)) {
                 return jarTask;
             }
-            if(jarTask.getName().equals(TASK_DEFAULT)) {
+            if (jarTask.getName().equals(TASK_DEFAULT)) {
                 return jarTask;
             }
             return jarTask;
