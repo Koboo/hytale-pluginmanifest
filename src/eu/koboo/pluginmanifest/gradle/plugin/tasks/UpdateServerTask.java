@@ -9,10 +9,11 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
 
-@Slf4j
+@DisableCachingByDefault(because = "Updates files of the configured hytale server using the client installation")
 public abstract class UpdateServerTask extends DefaultTask {
 
     @Nested

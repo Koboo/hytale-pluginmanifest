@@ -4,7 +4,6 @@ import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInsta
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.FileUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
-import lombok.extern.slf4j.Slf4j;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.model.ObjectFactory;
@@ -13,13 +12,14 @@ import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.process.ExecOperations;
 import org.gradle.process.ExecResult;
+import org.gradle.work.DisableCachingByDefault;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
+@DisableCachingByDefault(because = "Starts the configured hytale server")
 public abstract class RunServerTask extends DefaultTask {
 
     @Nested

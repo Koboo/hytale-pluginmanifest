@@ -11,11 +11,12 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
 import java.io.IOException;
 
-@Slf4j
+@DisableCachingByDefault(because = "Builds and copies the plugin into the configured hytale server")
 public abstract class InstallPluginTask extends DefaultTask {
 
     @Input
