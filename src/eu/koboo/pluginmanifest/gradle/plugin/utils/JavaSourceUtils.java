@@ -22,8 +22,8 @@ import java.util.Set;
 
 @UtilityClass
 public class JavaSourceUtils {
-    private static final String DEFAULT = "jar";
-    private static final String SHADOW = "shadowJar";
+    private static final String TASK_DEFAULT = "jar";
+    private static final String TASK_SHADOW = "shadowJar";
 
     public boolean hasAnyResource(@NotNull SourceSet sourceSet) {
         for (File srcDir : sourceSet.getResources().getSrcDirs()) {
@@ -111,10 +111,10 @@ public class JavaSourceUtils {
 
     public Jar resolveArchiveTask(@NotNull Project project) {
         for (Jar jarTask : project.getTasks().withType(Jar.class)) {
-            if(jarTask.getName().equals(SHADOW)) {
+            if(jarTask.getName().equals(TASK_SHADOW)) {
                 return jarTask;
             }
-            if(jarTask.getName().equals(DEFAULT)) {
+            if(jarTask.getName().equals(TASK_DEFAULT)) {
                 return jarTask;
             }
             return jarTask;
