@@ -107,7 +107,9 @@ public class PluginManifestPlugin implements Plugin<Project> {
             Provider<Directory> genResourceDir = project.getLayout().getBuildDirectory().dir(RESOURCE_DIRECTORY);
             mainSourceSet.getResources().srcDir(genResourceDir);
 
-            // Configure "generateManifestJson"
+            //
+            // ==== "generateManifestJson" ====
+            //
             generateManifestProvider.configure(task -> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Generates the manifest.json and puts into plugins jar file.");
@@ -120,7 +122,9 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getExtension().set(manifestExt);
             });
 
-            // Configure "updateServer"
+            //
+            // ==== "updateServer" ====
+            //
             updateServerProvider.configure(task -> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Updates \"HytaleServer.jar\", \"HytaleServer.aot\" and \"Assets.zip\" in your server directory from your local client-installation.");
@@ -128,7 +132,9 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getInstallExtension().set(installExt);
             });
 
-            // Configure "runServer"
+            //
+            // ==== "runServer" ====
+            //
             runServerProvider.configure(task -> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Runs the server in your server directory with console support in the terminal.");
@@ -136,7 +142,9 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getInstallExtension().set(installExt);
             });
 
-            // Configure "installPlugin"
+            //
+            // ==== "installPlugin" ====
+            //
             installPluginProvider.configure(task -> {
                 Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
                 Provider<RegularFile> archiveFileProvider = archiveTask.getArchiveFile();
