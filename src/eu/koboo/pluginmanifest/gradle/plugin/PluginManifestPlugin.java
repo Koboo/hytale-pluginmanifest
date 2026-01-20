@@ -151,7 +151,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Execute the jar archive task and moves the plugin into your server's \"/mods\" directory.");
                 task.getRuntimeExtension().set(runtimeExt);
-                task.getArchiveFilePath().set(archiveFile.getAbsolutePath());
+                task.getArchiveFilePath().set(JavaSourceUtils.resolveArchiveProvider(target));
                 task.dependsOn(project.getTasks().getByName(archiveTaskName));
             });
 
@@ -169,6 +169,10 @@ public class PluginManifestPlugin implements Plugin<Project> {
     }
 
     private void decompileServerSource(ClientInstallationExtension installExt) {
+        if(!installExt.getDecompileServer().get()) {
+            PluginLog.info("Decompiling server sources is disabled.");
+            return;
+        }
         File clientServerJarFile = installExt.resolveClientServerJarFile();
         if (!clientServerJarFile.exists()) {
             throw new GradleException("Can't decompile server, because jar file doesn't exist: " + clientServerJarFile.getAbsolutePath());

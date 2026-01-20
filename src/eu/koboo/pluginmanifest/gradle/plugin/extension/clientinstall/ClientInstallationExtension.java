@@ -25,15 +25,21 @@ public abstract class ClientInstallationExtension {
     Property<Patchline> patchline;
     @Input
     Property<String> clientInstallDirectory;
+    @Input
+    Property<Boolean> decompileServer;
 
     @Inject
     public ClientInstallationExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
         patchline = objectFactory.property(Patchline.class);
         patchline.set(Patchline.RELEASE);
+
         clientInstallDirectory = objectFactory.property(String.class);
         clientInstallDirectory.convention(
             providerFactory.provider(ClientInstallationExtension::resolveDefaultClientDirectory)
         );
+
+        decompileServer = objectFactory.property(Boolean.class);
+        decompileServer.convention(true);
     }
 
     public @NotNull File resolveClientInstallDirectory() {
