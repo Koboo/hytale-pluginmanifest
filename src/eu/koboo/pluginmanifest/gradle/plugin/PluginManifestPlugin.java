@@ -13,23 +13,18 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.file.Directory;
 import org.gradle.api.file.DuplicatesStrategy;
-import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.language.jvm.tasks.ProcessResources;
-import org.gradle.process.ExecOperations;
-import org.gradle.process.ExecResult;
+import org.jetbrains.java.decompiler.api.Decompiler;
+import org.jetbrains.java.decompiler.main.decompiler.SingleFileSaver;
 
-import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Locale;
 
@@ -47,17 +42,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
     private static final String INSTALL_PLUGIN = "installPlugin";
     private static final String BUILD_AND_RUN = "buildAndRun";
 
-    private static final String VINEFLOWER_URI = "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2-slim.jar";
-    private static final String decompilePackage = "com/hypixel";
-
-    private final ObjectFactory objectFactory;
-    private final ExecOperations execOperations;
-
-    @Inject
-    public PluginManifestPlugin(ObjectFactory objectFactory, ExecOperations execOperations) {
-        this.objectFactory = objectFactory;
-        this.execOperations = execOperations;
-    }
+    private static final String ONLY_DECOMPILE_PACKAGE = "com/hypixel";
 
     @Override
     public void apply(Project target) {
@@ -71,7 +56,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
         target.getTasks().register(BUILD_AND_RUN, Task.class, task -> {
             task.setGroup(TASK_GROUP_NAME);
-            task.setDescription("Builds your plugin and starts the server.");
+            task.setDescription("Builds your plugin, copies the jar into the mods folder and starts the server.");
             task.dependsOn(installPluginProvider, runServerProvider);
         });
 
@@ -80,7 +65,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
             ServerRuntimeExtension runtimeExt = extension.serverRuntimeExtension;
             ClientInstallationExtension installExt = extension.installationExtension;
 
-            // Resolve client installation directory
+            // Resolve the client installation directory
             File clientServerJarFile = installExt.resolveClientServerJarFile();
             if (!clientServerJarFile.exists()) {
                 throw new GradleException("Can't find server jar file at " + clientServerJarFile.getAbsolutePath());
@@ -111,11 +96,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
             });
 
             // Adding PROJECT/build/generated/pluginmanifest/ to sourceSet resources.
-            File buildDirectory = project
-                .getLayout()
-                .getBuildDirectory()
-                .get()
-                .getAsFile();
             SourceSet mainSourceSet = project.getExtensions()
                 .getByType(SourceSetContainer.class)
                 .getByName("main");
@@ -124,8 +104,9 @@ public class PluginManifestPlugin implements Plugin<Project> {
             // Otherwise, the boolean would be true because it treats our directory as a resource too.
             boolean hasAnyResources = JavaSourceUtils.hasAnyResource(mainSourceSet);
 
-            File generatedResourceDirectory = new File(buildDirectory, "generated/pluginmanifest/");
-            mainSourceSet.getResources().srcDir(generatedResourceDirectory);
+            Provider<Directory> genResourceDir = project.getLayout().getBuildDirectory()
+                .dir("generated/pluginmanifest");
+            mainSourceSet.getResources().srcDir(genResourceDir);
 
             List<String> mainClassCandidates = JavaSourceUtils.getMainClassCandidates(mainSourceSet);
 
@@ -133,14 +114,14 @@ public class PluginManifestPlugin implements Plugin<Project> {
             generateManifestProvider.configure(task -> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Generates the manifest.json and puts into plugins jar file.");
-                task.getResourceDirectory().set(generatedResourceDirectory.getAbsolutePath());
+                task.getResourceDirectory().set(genResourceDir);
                 task.getProjectGroupId().set(project.getGroup().toString());
                 task.getProjectArtifactId().set(project.getName());
                 task.getProjectVersion().set(project.getVersion().toString());
+                task.getHasAnyResources().set(hasAnyResources);
                 task.getMainClassCandidates().set(mainClassCandidates);
-                task.getOSUserName().set(System.getProperty("user.name"));
                 task.getExtension().set(manifestExt);
-                task.getOutputs().dir(generatedResourceDirectory);
+                //task.getOutputs().dir(genResourceDir);
             });
 
             // Configure "setupServer"
@@ -169,16 +150,15 @@ public class PluginManifestPlugin implements Plugin<Project> {
             // Configure "runServer"
             runServerProvider.configure(task -> {
                 task.setGroup(TASK_GROUP_NAME);
-                task.setDescription("Runs the server in your server directory with console support.");
+                task.setDescription("Runs the server in your server directory with console support in the terminal.");
                 task.getRuntimeExtension().set(runtimeExt);
-                task.getInstallExtension().set(installExt);
                 task.dependsOn(project.getTasks().getByName(SETUP_SERVER));
             });
 
             // Configure "installPlugin"
             installPluginProvider.configure(task -> {
                 task.setGroup(TASK_GROUP_NAME);
-                task.setDescription("Installs and builds your plugin and moves it to your server directory.");
+                task.setDescription("Execute the jar archive task and moves the plugin into your server's \"/mods\" directory.");
                 task.getRuntimeExtension().set(runtimeExt);
                 task.getArchiveFilePath().set(archiveFile.getAbsolutePath());
                 task.dependsOn(project.getTasks().getByName(archiveTaskName));
@@ -209,9 +189,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 throw new GradleException("Couldn't check compiled jar version: " + clientServerSourcesFile.getAbsolutePath());
             }
             String sourcesVersion = JarManifestUtils.getVersion(clientServerSourcesFile);
-            if (JarManifestUtils.isUnknown(sourcesVersion)) {
-                throw new GradleException("Couldn't check sources jar version: " + clientServerSourcesFile.getAbsolutePath());
-            }
             if (jarVersion.equals(sourcesVersion)) {
                 return;
             }
@@ -220,43 +197,27 @@ public class PluginManifestPlugin implements Plugin<Project> {
             PluginLog.info("Deleted previous sources file.");
         }
         PluginLog.info("Decompiling server sources...");
-        File clientServerServerDirectory = clientServerJarFile.getParentFile();
 
-        File vineFlowerJarFile = new File(clientServerSourcesFile.getParent(), "vineflower.jar");
-        if (!vineFlowerJarFile.exists()) {
-            PluginLog.info("Downloading vineflower from: " + VINEFLOWER_URI);
-            try {
-                Files.copy(URI.create(VINEFLOWER_URI).toURL().openStream(), vineFlowerJarFile.toPath());
-            } catch (IOException e) {
-                throw new GradleException("Can't decompile server: ", e);
-            }
-            PluginLog.info("Downloaded vineflower to: " + vineFlowerJarFile.getAbsolutePath());
-        }
-
-        List<String> decompileArguments = List.of(
-            "--only=" + decompilePackage,
-            "--simplify-switch=1",
-            "--decompile-generics=1",
-            "--remove-synthetic=0",
-            "--remove-bridge=1",
-            clientServerJarFile.getAbsolutePath(),
-            clientServerSourcesFile.getAbsolutePath()
-        );
+        Decompiler decompiler = new Decompiler.Builder()
+            .inputs(clientServerJarFile)
+            .output(new SingleFileSaver(clientServerSourcesFile))
+            .option("only", ONLY_DECOMPILE_PACKAGE)
+            .option("simplify-switch", "1")
+            .option("decompile-generics", "1")
+            .option("remove-synthetic", "0")
+            .option("remove-bridge", "0")
+            .option("hide-empty-super", "1")
+            .option("hide-default-constructor", "1")
+            .option("remove-empty-try-catch", "1")
+            .build();
 
         PluginLog.info("Decompiling server sources.. ");
         PluginLog.info("Please wait..");
         PluginLog.info("This may take a few minutes..");
-        ExecResult result = execOperations.javaexec(spec -> {
-            spec.setWorkingDir(clientServerServerDirectory);
-            spec.setClasspath(objectFactory.fileCollection().from(vineFlowerJarFile));
-            spec.setArgs(decompileArguments);
-            spec.setStandardInput(InputStream.nullInputStream());
-            spec.setStandardOutput(OutputStream.nullOutputStream());
-            spec.setErrorOutput(OutputStream.nullOutputStream());
-        });
+        decompiler.decompile();
 
         PluginLog.info("");
-        PluginLog.info("Decompiled server sources resulted in exitCode=" + result.getExitValue());
+        PluginLog.info("Decompiled server sources.");
         PluginLog.info(clientServerSourcesFile.getAbsolutePath());
         PluginLog.info("");
     }
