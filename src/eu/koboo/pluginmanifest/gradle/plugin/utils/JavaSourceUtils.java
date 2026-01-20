@@ -4,6 +4,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
+import eu.koboo.pluginmanifest.gradle.plugin.PluginManifestPlugin;
 import lombok.experimental.UtilityClass;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -35,6 +36,10 @@ public class JavaSourceUtils {
     }
 
     private boolean containsFile(File dir) {
+        // This is our generated resource directory.
+        if(dir.getAbsolutePath().contains(PluginManifestPlugin.RESOURCE_DIRECTORY)) {
+            return false;
+        }
         File[] files = dir.listFiles();
         if (files == null) {
             return false;
