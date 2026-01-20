@@ -38,18 +38,18 @@ public class PluginDoctor {
         }
 
         boolean isServerRunnable = false;
-        File runtimeServerJarFile = null;
+        File serverJarFile = null;
         if (runtimeDirectory != null && runtimeDirectory.exists()) {
-            runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
-            File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
-            File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
-            if (runtimeServerJarFile.exists() && runtimeAOTFile.exists() && runtimeAssetsFile.exists()) {
+            serverJarFile = installExt.resolveClientServerJarFile();
+            File aotFile = installExt.resolveClientAOTFile();
+            File assetsFile = installExt.resolveClientAssetsFile();
+            if (serverJarFile.exists() && aotFile.exists() && assetsFile.exists()) {
                 isServerRunnable = true;
             }
         }
 
         // Parse versions by MANIFEST of client and runtime server jar
-        String runtimeServerVersion = JarManifestUtils.getVersion(runtimeServerJarFile);
+        String runtimeServerVersion = JarManifestUtils.getVersion(serverJarFile);
         String matchesVersion = "NO";
         if (!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
             if (clientServerVersion.equals(runtimeServerVersion)) {

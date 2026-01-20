@@ -6,7 +6,6 @@ import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRunti
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.GenerateManifestTask;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.InstallPluginTask;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.RunServerTask;
-import eu.koboo.pluginmanifest.gradle.plugin.tasks.UpdateServerTask;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JarManifestUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
@@ -39,7 +38,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
     private static final String TASK_GROUP_NAME = EXTENSION_NAME.toLowerCase(Locale.ROOT);
 
     private static final String GENERATE_MANIFEST = "generateManifest";
-    private static final String UPDATE_SERVER = "updateServer";
     private static final String RUN_SERVER = "runServer";
     private static final String INSTALL_PLUGIN = "installPlugin";
     private static final String BUILD_AND_RUN = "buildAndRun";
@@ -54,9 +52,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
     public void apply(Project target) {
         PluginManifestExtension extension = target.getExtensions().create(EXTENSION_NAME, PluginManifestExtension.class);
         TaskProvider<GenerateManifestTask> generateManifestProvider = target.getTasks().register(GENERATE_MANIFEST, GenerateManifestTask.class);
-        TaskProvider<UpdateServerTask> updateServerProvider = target.getTasks().register(UPDATE_SERVER, UpdateServerTask.class);
-        TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
         TaskProvider<InstallPluginTask> installPluginProvider = target.getTasks().register(INSTALL_PLUGIN, InstallPluginTask.class);
+        TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
 
         target.getTasks().register(BUILD_AND_RUN, Task.class, task -> {
             task.setGroup(TASK_GROUP_NAME);
@@ -123,23 +120,22 @@ public class PluginManifestPlugin implements Plugin<Project> {
             });
 
             //
-            // ==== "updateServer" ====
-            //
-            updateServerProvider.configure(task -> {
-                task.setGroup(TASK_GROUP_NAME);
-                task.setDescription("Updates \"HytaleServer.jar\", \"HytaleServer.aot\" and \"Assets.zip\" in your server directory from your local client-installation.");
-                task.getRuntimeExtension().set(runtimeExt);
-                task.getInstallExtension().set(installExt);
-            });
-
-            //
             // ==== "runServer" ====
             //
             runServerProvider.configure(task -> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Runs the server in your server directory with console support in the terminal.");
-                task.getRuntimeExtension().set(runtimeExt);
-                task.getInstallExtension().set(installExt);
+
+                task.getClientServerJarFile().set(installExt.resolveClientServerJarFile());
+                task.getClientAOTFile().set(installExt.resolveClientAOTFile());
+                task.getClientAssetsFile().set(installExt.resolveClientAssetsFile());
+
+                File runtimeDirectory = runtimeExt.resolveRuntimeDirectory();
+                task.getRuntimeDirectory().set(runtimeDirectory.getAbsolutePath());
+
+                task.getAllowOp().set(runtimeExt.getAllowOp());
+                task.getJvmArguments().set(runtimeExt.getJvmArguments());
+                task.getServerArguments().set(runtimeExt.getServerArguments());
             });
 
             //

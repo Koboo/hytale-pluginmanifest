@@ -1,14 +1,14 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
-import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
-import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
-import eu.koboo.pluginmanifest.gradle.plugin.utils.FileUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Nested;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.process.ExecOperations;
 import org.gradle.process.ExecResult;
@@ -22,11 +22,26 @@ import java.util.List;
 @DisableCachingByDefault(because = "Starts the configured hytale server")
 public abstract class RunServerTask extends DefaultTask {
 
-    @Nested
-    public abstract Property<ServerRuntimeExtension> getRuntimeExtension();
+    @InputFile
+    public abstract RegularFileProperty getClientServerJarFile();
 
-    @Nested
-    public abstract Property<ClientInstallationExtension> getInstallExtension();
+    @InputFile
+    public abstract RegularFileProperty getClientAOTFile();
+
+    @InputFile
+    public abstract RegularFileProperty getClientAssetsFile();
+
+    @Input
+    public abstract Property<String> getRuntimeDirectory();
+
+    @Input
+    public abstract Property<Boolean> getAllowOp();
+
+    @Input
+    public abstract ListProperty<String> getJvmArguments();
+
+    @Input
+    public abstract ListProperty<String> getServerArguments();
 
     @Inject
     public abstract ObjectFactory getObjects();
@@ -37,63 +52,54 @@ public abstract class RunServerTask extends DefaultTask {
     @TaskAction
     public void runTask() {
         PluginLog.info("Building start command...");
-        ServerRuntimeExtension runtimeExt = getRuntimeExtension().get();
-        ClientInstallationExtension installExt = getInstallExtension().get();
-
-        File clientServerJarFile = installExt.resolveClientServerJarFile();
-        File runtimeServerJarFile = runtimeExt.resolveRuntimeServerJarFile();
-        FileUtils.copyClientFileToRuntime(clientServerJarFile, runtimeServerJarFile, "server jar file");
-
-        File clientAOTFile = installExt.resolveClientAOTFile();
-        File runtimeAOTFile = runtimeExt.resolveRuntimeAOTFile();
-        FileUtils.copyClientFileToRuntime(clientAOTFile, runtimeAOTFile, "server aot file");
-
-        File clientAssetsFile = installExt.resolveClientAssetsFile();
-        File runtimeAssetsFile = runtimeExt.resolveRuntimeAssetsFile();
-        FileUtils.copyClientFileToRuntime(clientAssetsFile, runtimeAssetsFile, "assets zip file");
-
-        if (!runtimeServerJarFile.exists()) {
-            throw new GradleException("Can't find server jar file: " + runtimeServerJarFile.getAbsolutePath());
+        File serverJarFile = getClientServerJarFile().getAsFile().getOrNull();
+        if (serverJarFile == null || !serverJarFile.exists()) {
+            throw new GradleException("HytaleServer.jar doesn't exist!");
         }
-        if (!runtimeAssetsFile.exists()) {
-            throw new GradleException("Can't find assets file: " + runtimeAssetsFile.getAbsolutePath());
+        File serverAOTFile = getClientAOTFile().getAsFile().getOrNull();
+        if (serverAOTFile == null || !serverAOTFile.exists()) {
+            throw new GradleException("HytaleServer.aot doesn't exist!");
         }
-        if (!runtimeAOTFile.exists()) {
-            throw new GradleException("Can't find AOT file: " + runtimeAOTFile.getAbsolutePath());
+        File serverAssetsFile = getClientAssetsFile().getAsFile().getOrNull();
+        if (serverAssetsFile == null || !serverAssetsFile.exists()) {
+            throw new GradleException("Assets.zip doesn't exist!");
+        }
+        String runtimeDirectoryPath = getRuntimeDirectory().getOrNull();
+        if(runtimeDirectoryPath == null || runtimeDirectoryPath.trim().isEmpty()) {
+            throw new GradleException("runtimeDirectory can't be null or empty!");
+        }
+        File runtimeDirectory = new File(runtimeDirectoryPath);
+        if (!runtimeDirectory.exists()) {
+            runtimeDirectory.mkdirs();
         }
 
         List<String> jvmArguments = new ArrayList<>();
-        jvmArguments.add("-XX:AOTCache=" + runtimeAOTFile.getAbsolutePath());
+        jvmArguments.add("-XX:AOTCache=" + serverAOTFile.getAbsolutePath());
         jvmArguments.add("--enable-native-access=ALL-UNNAMED");
-        List<String> userJvmArguments = runtimeExt.getJvmArguments().get();
-        if (!userJvmArguments.isEmpty()) {
+        List<String> userJvmArguments = getJvmArguments().getOrNull();
+        if (userJvmArguments != null && !userJvmArguments.isEmpty()) {
             jvmArguments.addAll(userJvmArguments);
         }
 
-        List<String> arguments = new ArrayList<>();
+        List<String> serverArguments = new ArrayList<>();
         // We disable sentry by default. Don't spam Hypixel, please.
-        arguments.add("--disable-sentry");
-        if (runtimeExt.getAcceptEarlyPlugins().get()) {
-            arguments.add("--accept-early-plugins");
+        serverArguments.add("--disable-sentry");
+        serverArguments.add("--accept-early-plugins");
+        boolean allowOp = getAllowOp().getOrElse(true);
+        if (allowOp) {
+            serverArguments.add("--allow-op");
         }
-        if (runtimeExt.getAllowOp().get()) {
-            arguments.add("--allow-op");
-        }
 
-        String bindAddress = runtimeExt.getBindAddress().get();
-        arguments.add("--bind");
-        arguments.add(bindAddress);
+        serverArguments.add("--assets");
+        serverArguments.add(serverAssetsFile.getAbsolutePath());
 
-        arguments.add("--assets");
-        arguments.add(runtimeAssetsFile.getAbsolutePath());
-
-        List<String> userServerArguments = runtimeExt.getServerArguments().get();
-        if (!userServerArguments.isEmpty()) {
-            arguments.addAll(userServerArguments);
+        List<String> userServerArguments = getServerArguments().getOrNull();
+        if (userServerArguments != null && !userServerArguments.isEmpty()) {
+            serverArguments.addAll(userServerArguments);
         }
 
         String jvmArgumentsString = String.join(" ", jvmArguments);
-        String argumentsString = String.join(" ", arguments);
+        String argumentsString = String.join(" ", serverArguments);
         String startCommand = "java " + jvmArgumentsString + " -jar HytaleServer.jar " + argumentsString;
         PluginLog.info("");
         PluginLog.info("Successfully build start command:");
@@ -103,10 +109,10 @@ public abstract class RunServerTask extends DefaultTask {
         PluginLog.info("Starting development server...");
 
         ExecResult result = getExecOperations().javaexec(spec -> {
-            spec.setWorkingDir(runtimeExt.resolveRuntimeDirectory());
-            spec.setClasspath(getObjects().fileCollection().from(runtimeServerJarFile));
+            spec.setWorkingDir(runtimeDirectory);
+            spec.setClasspath(getObjects().fileCollection().from(serverJarFile));
             spec.setJvmArgs(jvmArguments);
-            spec.setArgs(arguments);
+            spec.setArgs(serverArguments);
             spec.setStandardInput(System.in);
             spec.setStandardOutput(System.out);
             spec.setErrorOutput(System.err);

@@ -20,38 +20,21 @@ import java.util.LinkedList;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public abstract class ServerRuntimeExtension {
 
-    @Input
-    @Optional
     Property<String> runtimeDirectory;
-
-    @Input
-    Property<Boolean> acceptEarlyPlugins;
-    @Input
     Property<Boolean> allowOp;
-    @Input
     Property<String> bindAddress;
-    @Input
-    Property<Boolean> enableNativeAccess;
-    @Input
     ListProperty<String> jvmArguments;
-    @Input
     ListProperty<String> serverArguments;
 
     @Inject
     public ServerRuntimeExtension(ObjectFactory objectFactory) {
         runtimeDirectory = objectFactory.property(String.class);
 
-        acceptEarlyPlugins = objectFactory.property(Boolean.class);
-        acceptEarlyPlugins.convention(true);
-
         allowOp = objectFactory.property(Boolean.class);
         allowOp.convention(true);
 
         bindAddress = objectFactory.property(String.class);
         bindAddress.convention("0.0.0.0:5520");
-
-        enableNativeAccess = objectFactory.property(Boolean.class);
-        enableNativeAccess.convention(true);
 
         jvmArguments = objectFactory.listProperty(String.class);
         jvmArguments.convention(new LinkedList<>());
@@ -74,18 +57,6 @@ public abstract class ServerRuntimeExtension {
             PluginLog.info("Created serverRuntimeDirectory: " + runtimeDirectory.getAbsolutePath());
         }
         return runtimeDirectory;
-    }
-
-    public @NotNull File resolveRuntimeServerJarFile() {
-        return new File(resolveRuntimeDirectory(), "HytaleServer.jar");
-    }
-
-    public @NotNull File resolveRuntimeAOTFile() {
-        return new File(resolveRuntimeDirectory(), "HytaleServer.aot");
-    }
-
-    public @NotNull File resolveRuntimeAssetsFile() {
-        return new File(resolveRuntimeDirectory(), "Assets.zip");
     }
 
     public @NotNull File resolveRuntimeModDirectory() {
