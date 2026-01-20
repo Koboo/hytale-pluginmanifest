@@ -11,12 +11,11 @@ import groovy.json.JsonOutput;
 import lombok.extern.slf4j.Slf4j;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.file.Directory;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.Nested;
-import org.gradle.api.tasks.Optional;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +32,8 @@ public abstract class GenerateManifestTask extends DefaultTask {
     private static final String FALLBACK_PLUGIN_VERSION = "0.0.0";
     private static final String FALLBACK_SERVER_VERSION = "*";
 
-    @Input
-    public abstract Property<String> getResourceDirectory();
+    @OutputDirectory
+    public abstract DirectoryProperty getResourceDirectory();
 
     @Input
     public abstract Property<String> getProjectGroupId();
@@ -46,11 +45,10 @@ public abstract class GenerateManifestTask extends DefaultTask {
     public abstract Property<String> getProjectVersion();
 
     @Input
-    public abstract ListProperty<String> getMainClassCandidates();
+    public abstract Property<Boolean> getHasAnyResources();
 
     @Input
-    @Optional
-    public abstract Property<String> getOSUserName();
+    public abstract ListProperty<String> getMainClassCandidates();
 
     @Nested
     public abstract Property<JsonManifestExtension> getExtension();
@@ -152,12 +150,19 @@ public abstract class GenerateManifestTask extends DefaultTask {
 
             // "DisabledByDefault"
             boolean disabledByDefault = extension.getDisabledByDefault().getOrElse(false);
+            PluginLog.info("DisabledByDefault: " + disabledByDefault);
             if (disabledByDefault) {
                 manifestMap.put("DisabledByDefault", true);
             }
 
             // "IncludesAssetPack"
-            boolean includesAssetPack = extension.getIncludesAssetPack().getOrElse(false);
+            boolean includesAssetPack = extension.getIncludesAssetPack().get();
+            boolean hasAnyResources = getHasAnyResources().get();
+            if(!includesAssetPack && hasAnyResources) {
+                includesAssetPack = true;
+                PluginLog.info("IncludesAssetPack is set to false, but resources were found! Setting to true..");
+            }
+            PluginLog.info("IncludesAssetPack: " + includesAssetPack);
             if (includesAssetPack) {
                 manifestMap.put("IncludesAssetPack", true);
             }
@@ -204,7 +209,7 @@ public abstract class GenerateManifestTask extends DefaultTask {
             // Default author
             if (authorList.isEmpty()) {
                 Map<String, String> authorObject = new LinkedHashMap<>();
-                String userName = getOSUserName().getOrNull();
+                String userName = System.getProperty("user.name");
                 if (userName == null || userName.trim().isEmpty()) {
                     userName = pluginName + "-Author";
                     PluginLog.info("Used project name as authorName \"" + userName + "\".");
@@ -246,9 +251,13 @@ public abstract class GenerateManifestTask extends DefaultTask {
             manifestJson = JsonOutput.prettyPrint(manifestJson);
         }
 
-        File resourceDirectory = new File(getResourceDirectory().get());
+        Directory directory = getResourceDirectory().getOrNull();
+        if (directory == null) {
+            throw new InvalidUserDataException("Can't resolve resourceDirectory, because it can't be null!");
+        }
+        File resourceDirectory = directory.getAsFile();
         if (!resourceDirectory.exists()) {
-            resourceDirectory.mkdir();
+            resourceDirectory.mkdirs();
         }
         File manifestFile = new File(resourceDirectory, "manifest.json");
 
