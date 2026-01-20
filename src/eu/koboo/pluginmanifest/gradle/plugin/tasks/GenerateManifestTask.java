@@ -1,5 +1,6 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
+import eu.koboo.pluginmanifest.gradle.plugin.PluginManifestPlugin;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorsExtension;
@@ -259,7 +260,7 @@ public abstract class GenerateManifestTask extends DefaultTask {
         if (!resourceDirectory.exists()) {
             resourceDirectory.mkdirs();
         }
-        File manifestFile = new File(resourceDirectory, "manifest.json");
+        File manifestFile = new File(resourceDirectory, PluginManifestPlugin.MANIFEST);
 
         Files.writeString(manifestFile.toPath(), manifestJson, StandardCharsets.UTF_8);
 
