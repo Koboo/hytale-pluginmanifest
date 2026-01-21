@@ -1,26 +1,22 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
-import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.process.ExecOperations;
-import org.gradle.process.ExecResult;
 import org.gradle.work.DisableCachingByDefault;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 @DisableCachingByDefault(because = "Starts the configured hytale server")
-public abstract class RunServerTask extends DefaultTask {
+public abstract class RunServerTask extends JavaExec {
 
     @InputFile
     public abstract RegularFileProperty getClientServerJarFile();
@@ -45,12 +41,6 @@ public abstract class RunServerTask extends DefaultTask {
 
     @Input
     public abstract ListProperty<String> getServerArguments();
-
-    @Inject
-    public abstract ObjectFactory getObjects();
-
-    @Inject
-    public abstract ExecOperations getExecOperations();
 
     @TaskAction
     public void runTask() {
@@ -87,7 +77,7 @@ public abstract class RunServerTask extends DefaultTask {
         List<String> serverArguments = new ArrayList<>();
         // We disable sentry by default. Don't spam Hypixel, please.
         serverArguments.add("--disable-sentry");
-        serverArguments.add("--accept-early-plugins");
+
         boolean allowOp = getAllowOp().getOrElse(true);
         if (allowOp) {
             serverArguments.add("--allow-op");
@@ -118,18 +108,12 @@ public abstract class RunServerTask extends DefaultTask {
 
         PluginLog.info("Starting development server...");
 
-        ExecResult result = getExecOperations().javaexec(spec -> {
-            spec.setWorkingDir(runtimeDirectory);
-            spec.setClasspath(getObjects().fileCollection().from(serverJarFile));
-            spec.setJvmArgs(jvmArguments);
-            spec.setArgs(serverArguments);
-            spec.setStandardInput(System.in);
-            spec.setStandardOutput(System.out);
-            spec.setErrorOutput(System.err);
-        });
-
-        PluginLog.info("");
-        PluginLog.info("Server stopped. exitCode=" + result.getExitValue());
-        PluginLog.info("");
+        workingDir(runtimeDirectory);
+        classpath(serverJarFile);
+        jvmArgs(jvmArguments);
+        args(serverArguments);
+        setStandardInput(System.in);
+        setStandardOutput(System.out);
+        setErrorOutput(System.err);
     }
 }
