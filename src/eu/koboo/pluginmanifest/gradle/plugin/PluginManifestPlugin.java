@@ -9,6 +9,7 @@ import eu.koboo.pluginmanifest.gradle.plugin.tasks.RunServerTask;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JarManifestUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
+import eu.koboo.pluginmanifest.gradle.plugin.utils.ProviderUtils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.GradleException;
@@ -51,6 +52,13 @@ public class PluginManifestPlugin implements Plugin<Project> {
     @Override
     public void apply(Project target) {
         PluginManifestExtension extension = target.getExtensions().create(EXTENSION_NAME, PluginManifestExtension.class);
+
+        JsonManifestExtension manifestExt = extension.jsonManifestExtension;
+        applyDefaults(target, manifestExt);
+
+        ServerRuntimeExtension runtimeExt = extension.serverRuntimeExtension;
+        ClientInstallationExtension installExt = extension.installationExtension;
+
         TaskProvider<GenerateManifestTask> generateManifestProvider = target.getTasks().register(GENERATE_MANIFEST, GenerateManifestTask.class);
         TaskProvider<InstallPluginTask> installPluginProvider = target.getTasks().register(INSTALL_PLUGIN, InstallPluginTask.class);
         TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
@@ -66,9 +74,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
         });
 
         target.afterEvaluate(project -> {
-            JsonManifestExtension manifestExt = extension.jsonManifestExtension;
-            ServerRuntimeExtension runtimeExt = extension.serverRuntimeExtension;
-            ClientInstallationExtension installExt = extension.installationExtension;
 
             // Resolve the client installation directory
             File clientServerJarFile = installExt.resolveClientServerJarFile();
@@ -114,12 +119,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Generates the manifest.json and puts into plugins jar file.");
                 task.getResourceDirectory().set(genResourceDir);
-                task.getProjectGroupId().set(project.getGroup().toString());
-                task.getProjectArtifactId().set(project.getName());
-                task.getProjectVersion().set(project.getVersion().toString());
-                task.getHasAnyResources().set(JavaSourceUtils.hasAnyResource(mainSourceSet));
-                task.getMainClassCandidates().set(JavaSourceUtils.getMainClassCandidates(mainSourceSet));
-                task.getExtension().set(manifestExt);
+                task.getManifestMap().set(ProviderUtils.createManifestProvider(project));
+                task.getMinimizeJson().set(manifestExt.getMinimizeJson());
             });
 
             //
@@ -209,5 +210,16 @@ public class PluginManifestPlugin implements Plugin<Project> {
         PluginLog.info("Decompiled server sources.");
         PluginLog.info(clientServerSourcesFile.getAbsolutePath());
         PluginLog.info("");
+    }
+
+    private void applyDefaults(Project project, JsonManifestExtension manifestExt) {
+        manifestExt.getPluginGroup().convention(ProviderUtils.createPluginGroupProvider(project));
+        manifestExt.getPluginName().convention(ProviderUtils.createPluginNameProvider(project));
+        manifestExt.getPluginVersion().convention(ProviderUtils.createPluginVersionProvider(project));
+        manifestExt.getPluginMainClass().convention(ProviderUtils.createPluginMainClassCandidateProvider(project));
+        manifestExt.getServerVersion().convention("*");
+        manifestExt.getDisabledByDefault().convention(false);
+        manifestExt.getIncludesAssetPack().convention(ProviderUtils.createHasResourcesProvider(project));
+        manifestExt.getMinimizeJson().convention(false);
     }
 }

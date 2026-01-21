@@ -7,8 +7,6 @@ import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import lombok.experimental.UtilityClass;
 import org.gradle.api.Project;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.jvm.tasks.Jar;
 
 import java.io.File;
@@ -63,13 +61,8 @@ public class PluginDoctor {
         File archiveFile = archiveTask.getArchiveFile().get().getAsFile();
         String archiveTaskName = archiveTask.getName();
 
-        SourceSet mainSourceSet = project.getExtensions()
-            .getByType(SourceSetContainer.class)
-            .getByName("main");
-
-        boolean hasAnyResources = JavaSourceUtils.hasAnyResource(mainSourceSet);
-
-        List<String> mainClassCandidates = JavaSourceUtils.getMainClassCandidates(mainSourceSet);
+        boolean hasResources = JavaSourceUtils.hasResources(project);
+        List<String> mainClassCandidates = JavaSourceUtils.getMainClassCandidates(project);
 
         String mainClass = "Not found";
         if (mainClassCandidates.size() == 1) {
@@ -89,7 +82,7 @@ public class PluginDoctor {
         PluginLog.print("");
         PluginLog.print("============== Manifest ==============");
         PluginLog.print("");
-        PluginLog.print(" 'IncludesAssetPack' > \"" + hasAnyResources + "\"");
+        PluginLog.print(" 'IncludesAssetPack' > \"" + hasResources + "\"");
         PluginLog.print("              'Main' > \"" + mainClass + "\"");
         PluginLog.print("");
         PluginLog.print("============== JAR file ==============");
