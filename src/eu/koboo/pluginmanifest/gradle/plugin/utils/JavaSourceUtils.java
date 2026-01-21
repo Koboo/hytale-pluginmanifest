@@ -9,6 +9,7 @@ import lombok.experimental.UtilityClass;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.jvm.tasks.Jar;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,10 +24,15 @@ import java.util.Set;
 
 @UtilityClass
 public class JavaSourceUtils {
-    private static final String TASK_DEFAULT = "jar";
     private static final String TASK_SHADOW = "shadowJar";
 
-    public boolean hasAnyResource(@NotNull SourceSet sourceSet) {
+    public boolean hasResources(Project project) {
+        if(project == null) {
+            return false;
+        }
+        SourceSet sourceSet = project.getExtensions()
+            .getByType(SourceSetContainer.class)
+            .getByName("main");
         for (File srcDir : sourceSet.getResources().getSrcDirs()) {
             if (srcDir.exists() && containsFile(srcDir)) {
                 return true;
@@ -58,8 +64,13 @@ public class JavaSourceUtils {
         return false;
     }
 
-    public List<String> getMainClassCandidates(SourceSet mainSourceSet) {
-        Set<File> javaSrcDirs = mainSourceSet.getJava().getSrcDirs();
+    public List<String> getMainClassCandidates(Project project) {
+
+        SourceSet sourceSet = project.getExtensions()
+            .getByType(SourceSetContainer.class)
+            .getByName("main");
+
+        Set<File> javaSrcDirs = sourceSet.getJava().getSrcDirs();
         List<String> candidates = new ArrayList<>();
 
         JavaParser parser = new JavaParser();
