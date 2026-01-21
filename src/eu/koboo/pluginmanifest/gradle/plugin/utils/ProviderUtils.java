@@ -7,14 +7,15 @@ import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorsE
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestPluginDependencyExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ManifestValidation;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.validation.ValidationException;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import lombok.experimental.UtilityClass;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Provider;
+
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @UtilityClass
 public class ProviderUtils {

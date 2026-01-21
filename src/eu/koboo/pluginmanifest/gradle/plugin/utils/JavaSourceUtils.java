@@ -27,7 +27,7 @@ public class JavaSourceUtils {
     private static final String TASK_SHADOW = "shadowJar";
 
     public boolean hasResources(Project project) {
-        if(project == null) {
+        if (project == null) {
             return false;
         }
         SourceSet sourceSet = project.getExtensions()

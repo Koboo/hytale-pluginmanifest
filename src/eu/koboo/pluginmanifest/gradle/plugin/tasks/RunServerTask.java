@@ -68,7 +68,7 @@ public abstract class RunServerTask extends DefaultTask {
             throw new GradleException("Assets.zip doesn't exist!");
         }
         String runtimeDirectoryPath = getRuntimeDirectory().getOrNull();
-        if(runtimeDirectoryPath == null || runtimeDirectoryPath.trim().isEmpty()) {
+        if (runtimeDirectoryPath == null || runtimeDirectoryPath.trim().isEmpty()) {
             throw new GradleException("runtimeDirectory can't be null or empty!");
         }
         File runtimeDirectory = new File(runtimeDirectoryPath);
@@ -97,7 +97,7 @@ public abstract class RunServerTask extends DefaultTask {
         serverArguments.add(serverAssetsFile.getAbsolutePath());
 
         File archiveFile = getArchiveFile().getAsFile().getOrNull();
-        if(archiveFile == null || !archiveFile.exists()) {
+        if (archiveFile == null || !archiveFile.exists()) {
             throw new GradleException("Archive file doesn't exist!");
         }
         serverArguments.add("--mods");
