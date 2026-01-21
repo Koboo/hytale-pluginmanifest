@@ -20,16 +20,12 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 
 ## Features
 
-- Validates provided properties
-- Logs user-friendly errors on validation issues
-- Generates ``manifest.json``
-- Includes generated ``manifest.json`` file into JAR-file
-- Overrides existing ``manifest.json``
+- Validates, generates and includes ``manifest.json`` for your plugin
+- Automatically detects your client-installation
+- Runs a development server using your client-installation
+- Adds ``HytaleServer.jar`` as a dependency to your project
+- Decompiles ``HytaleServer.jar`` into ``HytaleServer-sources.jar``
 - Supports ``Windows``, ``Linux`` and ``Mac``
-- Resolves properties automatically
-- Exposes configuration in ``build.gradle.kts``
-- Automatically detects ``HytaleServer.jar``
-- Automatically adds ``HytaleServer.jar`` as dependency
 - Supports ``com.gradleup.shadow`` (shadowJar)
 - Supports ``org.gradle.configuration-cache``
 - Supports ``org.gradle.configureondemand``
