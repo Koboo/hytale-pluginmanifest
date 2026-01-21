@@ -1,5 +1,6 @@
 package eu.koboo.pluginmanifest.gradle.plugin.utils;
 
+import eu.koboo.pluginmanifest.gradle.plugin.PluginManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.ManifestAuthorsExtension;
@@ -52,7 +53,8 @@ public class ProviderUtils {
 
     public Provider<Map<String, Object>> createManifestProvider(Project project) {
         return project.provider(() -> {
-            JsonManifestExtension extension = project.getExtensions().getByType(JsonManifestExtension.class);
+            PluginManifestExtension pluginManifestExt = project.getExtensions().getByType(PluginManifestExtension.class);
+            JsonManifestExtension extension = pluginManifestExt.getJsonManifestExtension();
 
             Map<String, Object> manifestMap = new LinkedHashMap<>();
 
