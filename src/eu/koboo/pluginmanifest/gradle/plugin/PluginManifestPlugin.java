@@ -104,6 +104,9 @@ public class PluginManifestPlugin implements Plugin<Project> {
             Provider<Directory> genResourceDir = project.getLayout().getBuildDirectory().dir(RESOURCE_DIRECTORY);
             mainSourceSet.getResources().srcDir(genResourceDir);
 
+            Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
+            Provider<RegularFile> archiveFileProvider = archiveTask.getArchiveFile();
+
             //
             // ==== "generateManifestJson" ====
             //
@@ -129,6 +132,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getClientServerJarFile().set(installExt.resolveClientServerJarFile());
                 task.getClientAOTFile().set(installExt.resolveClientAOTFile());
                 task.getClientAssetsFile().set(installExt.resolveClientAssetsFile());
+                task.getArchiveFile().set(archiveFileProvider);
 
                 File runtimeDirectory = runtimeExt.resolveRuntimeDirectory();
                 task.getRuntimeDirectory().set(runtimeDirectory.getAbsolutePath());
@@ -142,8 +146,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
             // ==== "installPlugin" ====
             //
             installPluginProvider.configure(task -> {
-                Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
-                Provider<RegularFile> archiveFileProvider = archiveTask.getArchiveFile();
 
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Execute the jar archive task and moves the plugin into your server's \"/mods\" directory.");

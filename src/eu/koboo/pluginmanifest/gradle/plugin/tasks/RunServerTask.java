@@ -31,6 +31,9 @@ public abstract class RunServerTask extends DefaultTask {
     @InputFile
     public abstract RegularFileProperty getClientAssetsFile();
 
+    @InputFile
+    public abstract RegularFileProperty getArchiveFile();
+
     @Input
     public abstract Property<String> getRuntimeDirectory();
 
@@ -92,6 +95,13 @@ public abstract class RunServerTask extends DefaultTask {
 
         serverArguments.add("--assets");
         serverArguments.add(serverAssetsFile.getAbsolutePath());
+
+        File archiveFile = getArchiveFile().getAsFile().getOrNull();
+        if(archiveFile == null || !archiveFile.exists()) {
+            throw new GradleException("Archive file doesn't exist!");
+        }
+        serverArguments.add("--mods");
+        serverArguments.add(archiveFile.getParentFile().getAbsolutePath());
 
         List<String> userServerArguments = getServerArguments().getOrNull();
         if (userServerArguments != null && !userServerArguments.isEmpty()) {
