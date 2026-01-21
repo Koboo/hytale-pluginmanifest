@@ -113,7 +113,6 @@ public class JavaSourceUtils {
         return candidates;
     }
 
-
     public Jar resolveArchiveTask(@NotNull Project project) {
         Jar shadowTask = project.getTasks().withType(Jar.class)
             .findByName(TASK_SHADOW);
