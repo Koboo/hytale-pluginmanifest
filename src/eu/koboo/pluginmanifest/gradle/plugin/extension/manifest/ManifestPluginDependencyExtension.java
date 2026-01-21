@@ -24,11 +24,12 @@ public abstract class ManifestPluginDependencyExtension {
     @Inject
     public ManifestPluginDependencyExtension(ObjectFactory objectFactory) {
         requiredDependencies = objectFactory.mapProperty(String.class, String.class);
-        optionalDependencies = objectFactory.mapProperty(String.class, String.class);
-        loadBeforeDependencies = objectFactory.mapProperty(String.class, String.class);
-
         requiredDependencies.convention(new LinkedHashMap<>());
+
+        optionalDependencies = objectFactory.mapProperty(String.class, String.class);
         optionalDependencies.convention(new LinkedHashMap<>());
+
+        loadBeforeDependencies = objectFactory.mapProperty(String.class, String.class);
         loadBeforeDependencies.convention(new LinkedHashMap<>());
     }
 
