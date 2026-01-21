@@ -18,7 +18,7 @@ public class ManifestValidation {
 
     public void validateString(String key, String value, boolean isSeparatorAllowed, boolean isWhiteSpaceAllowed) throws ValidationException {
         if (value == null) {
-            throw new ValidationException(key, value, "cannot be null");
+            throw new ValidationException(key, null, "cannot be null");
         }
         value = value.trim();
         if (value.isEmpty()) {
@@ -40,7 +40,7 @@ public class ManifestValidation {
 
     public void validateSemanticVersion(String key, String versionString) throws ValidationException {
         if (versionString == null) {
-            throw new ValidationException(key, versionString, "cannot be null");
+            throw new ValidationException(key, null, "cannot be null");
         }
         versionString = versionString.trim();
         if (versionString.isEmpty()) {
@@ -70,7 +70,7 @@ public class ManifestValidation {
             if (isEmptyAllowed) {
                 return;
             }
-            throw new ValidationException(key, uriString, "cannot be null");
+            throw new ValidationException(key, null, "cannot be null");
         }
         uriString = uriString.trim();
         if (uriString.isEmpty()) {
@@ -157,7 +157,7 @@ public class ManifestValidation {
 
     public void validateFullyQualifiedClass(String key, String className) throws ValidationException {
         if (className == null) {
-            throw new ValidationException(key, className, "must not be null");
+            throw new ValidationException(key, null, "must not be null");
         }
         if (className.startsWith(".") || className.endsWith(".")) {
             throw new ValidationException(key, className, "cannot start or end with '.'");

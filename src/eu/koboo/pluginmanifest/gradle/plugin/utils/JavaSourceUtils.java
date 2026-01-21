@@ -17,13 +17,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @UtilityClass
 public class JavaSourceUtils {
+
     private static final String TASK_SHADOW = "shadowJar";
 
     public boolean hasResources(Project project) {
@@ -71,8 +69,12 @@ public class JavaSourceUtils {
             .getByName("main");
 
         Set<File> javaSrcDirs = sourceSet.getJava().getSrcDirs();
-        List<String> candidates = new ArrayList<>();
+        if(javaSrcDirs.isEmpty()) {
+            PluginLog.info("No java sources found. Can't automatically detect mainClass!");
+            return Collections.emptyList();
+        }
 
+        List<String> candidates = new ArrayList<>();
         JavaParser parser = new JavaParser();
 
         for (File srcDir : javaSrcDirs) {
