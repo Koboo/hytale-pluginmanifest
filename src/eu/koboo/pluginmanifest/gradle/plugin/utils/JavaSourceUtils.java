@@ -42,7 +42,7 @@ public class JavaSourceUtils {
     }
 
     private boolean containsFile(File dir) {
-        // This is our generated resource directory.
+        // This is our generated resource directory. Skip that.
         if (dir.getAbsolutePath().contains(PluginManifestPlugin.RESOURCE_DIRECTORY)) {
             return false;
         }
