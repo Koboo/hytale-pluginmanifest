@@ -1,15 +1,12 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
-import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.FileUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.Nested;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
@@ -18,17 +15,16 @@ import java.io.IOException;
 @DisableCachingByDefault(because = "Builds and copies the plugin into the configured hytale server")
 public abstract class InstallPluginTask extends DefaultTask {
 
-    @Input
+    @InputFile
     public abstract RegularFileProperty getArchiveFilePath();
 
-    @Nested
-    public abstract Property<ServerRuntimeExtension> getRuntimeExtension();
+    @InputDirectory
+    public abstract DirectoryProperty getRuntimeModDirectory();
 
     @TaskAction
     public void runTask() {
         PluginLog.info("Installing plugin into server runtime..");
-        ServerRuntimeExtension runtimeExt = getRuntimeExtension().get();
-        File runtimeModDirectory = runtimeExt.resolveRuntimeModDirectory();
+        File runtimeModDirectory = getRuntimeModDirectory().getAsFile().get();
         if (!runtimeModDirectory.exists()) {
             throw new GradleException("Can't find mod directory in server: " + runtimeModDirectory.getAbsolutePath());
         }
