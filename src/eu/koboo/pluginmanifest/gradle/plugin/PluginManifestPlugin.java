@@ -46,7 +46,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
     private static final String ONLY_DECOMPILE_PACKAGE = "com/hypixel";
     private static final String TASK_PROCESS_RESOURCES = "processResources";
 
-    public static final String RESOURCE_DIRECTORY = "generated/pluginmanifest";
+    public static final String RESOURCE_DIRECTORY = "generated" + File.separator + "pluginmanifest";
     public static final String MANIFEST = "manifest.json";
 
     @Override

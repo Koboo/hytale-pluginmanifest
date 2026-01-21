@@ -4,12 +4,14 @@ import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInsta
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.Action;
 import org.gradle.api.model.ObjectFactory;
 
 import javax.inject.Inject;
 
+@Getter
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
 public abstract class PluginManifestExtension {
 

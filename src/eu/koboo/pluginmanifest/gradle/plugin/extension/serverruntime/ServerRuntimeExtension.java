@@ -8,8 +8,6 @@ import org.gradle.api.GradleException;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.Optional;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
@@ -60,6 +58,6 @@ public abstract class ServerRuntimeExtension {
     }
 
     public @NotNull File resolveRuntimeModDirectory() {
-        return new File(resolveRuntimeDirectory(), "mods/");
+        return new File(resolveRuntimeDirectory(), "mods" + File.separator);
     }
 }
