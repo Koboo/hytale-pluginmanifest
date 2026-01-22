@@ -52,7 +52,6 @@ public abstract class RunServerTask extends JavaExec {
             throw new StopExecutionException("HytaleServer.jar doesn't exist!");
         }
         File runtimeDirectory = getRuntimeDirectory().getAsFile().getOrNull();
-        ;
         if (runtimeDirectory == null) {
             throw new StopExecutionException("runtimeDirectory cannot be null!");
         }

@@ -3,6 +3,7 @@ package eu.koboo.pluginmanifest.gradle.plugin;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
+import eu.koboo.pluginmanifest.gradle.plugin.tasks.DecompileServerTask;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.GenerateManifestTask;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.RunServerTask;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
@@ -34,6 +35,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
     private static final String GENERATE_MANIFEST = "generateManifest";
     private static final String RUN_SERVER = "runServer";
+    private static final String DECOMPILE_SERVER = "decompileServer";
 
     public static final String RESOURCE_DIRECTORY = "generated" + File.separator + "pluginmanifest";
     public static final String MANIFEST = "manifest.json";
@@ -50,6 +52,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
         TaskProvider<GenerateManifestTask> generateManifestProvider = target.getTasks().register(GENERATE_MANIFEST, GenerateManifestTask.class);
         TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
+        TaskProvider<DecompileServerTask> decompileServerProvider = target.getTasks().register(DECOMPILE_SERVER, DecompileServerTask.class);
 
         target.afterEvaluate(project -> {
 
@@ -63,7 +66,10 @@ public class PluginManifestPlugin implements Plugin<Project> {
             project.getRepositories().flatDir(repository ->
                 repository.dirs(installExt.resolveClientServerDirectory())
             );
-            project.getDependencies().add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, ":HytaleServer");
+            project.getDependencies().add(
+                JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME,
+                ":HytaleServer"
+            );
 
             // Depend "processResources" on "generateManifest"
             // Exclude/Override actual "src/resources/manifest.json"
@@ -120,6 +126,12 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getAllowOp().set(runtimeExt.getAllowOp());
                 task.getUserJvmArguments().set(runtimeExt.getJvmArguments());
                 task.getUserServerArguments().set(runtimeExt.getServerArguments());
+            });
+
+            decompileServerProvider.configure(task -> {
+                task.setGroup(TASK_GROUP_NAME);
+                task.setDescription("Decompiles the server sources from the clients installation path");
+                task.getClientServerJarFile().set(installExt.resolveClientServerJarFile());
             });
 
             //
