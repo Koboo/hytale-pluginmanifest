@@ -14,7 +14,7 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 - [Automatic configuration example](#automatic-configuration-example)
 - [Manifest specification](#manifest-specification)
 - [Add snapshots repository](#add-snapshots-repository)
-- [Dependencies](#dependencies)
+- [Dependencies](https://github.com/Koboo/hytale-pluginmanifest/blob/main/build.gradle.kts#L18)
 - [Credits](#credits)
 - [MIT LICENSE](LICENSE)
 
@@ -296,12 +296,6 @@ Add this to your ``settings.gradle.kts`` for snapshot-versions.
      }
    }
    ````
-
-## Dependencies
-
-- ``org.projectlombok:lombok:1.18.42``
-- ``org.jetbrains:annotations:26.0.2-1``
-- ``com.github.javaparser:javaparser-core:3.25.9``
 
 ## Credits
 
