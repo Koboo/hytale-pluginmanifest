@@ -51,10 +51,6 @@ public abstract class RunServerTask extends JavaExec {
         if (serverJarFile == null || !serverJarFile.exists()) {
             throw new StopExecutionException("HytaleServer.jar doesn't exist!");
         }
-        File serverAssetsFile = getClientAssetsFile().getAsFile().getOrNull();
-        if (serverAssetsFile == null || !serverAssetsFile.exists()) {
-            throw new StopExecutionException("Assets.zip doesn't exist!");
-        }
         File runtimeDirectory = getRuntimeDirectory().getAsFile().getOrNull();;
         if(runtimeDirectory == null) {
             throw new StopExecutionException("runtimeDirectory cannot be null!");
@@ -65,12 +61,16 @@ public abstract class RunServerTask extends JavaExec {
 
         List<String> taskJvmArguments = new ArrayList<>();
 
+        // Add optional aot file for faster startup
         File serverAOTFile = getClientAOTFile().getAsFile().getOrNull();
         if (serverAOTFile != null && serverAOTFile.exists()) {
             taskJvmArguments.add("-XX:AOTCache=" + serverAOTFile.getAbsolutePath());
         }
 
+        // Disable warnings
         taskJvmArguments.add("--enable-native-access=ALL-UNNAMED");
+
+        // Include users jvm arguments
         List<String> userJvmArguments = getUserJvmArguments().getOrNull();
         if (userJvmArguments != null && !userJvmArguments.isEmpty()) {
             taskJvmArguments.addAll(userJvmArguments);
@@ -78,33 +78,45 @@ public abstract class RunServerTask extends JavaExec {
 
         List<String> taskServerArguments = new ArrayList<>();
 
-        // We disable sentry by default. Don't spam Hypixel, please.
+        // Disable sentry by default
         taskServerArguments.add("--disable-sentry");
 
+        // Adding self-op command allowance
         boolean allowOp = getAllowOp().getOrElse(true);
         if (allowOp) {
             taskServerArguments.add("--allow-op");
         }
 
+        // Adding assets.zip arguments
+        File serverAssetsFile = getClientAssetsFile().getAsFile().getOrNull();
+        if (serverAssetsFile == null || !serverAssetsFile.exists()) {
+            throw new StopExecutionException("Assets.zip doesn't exist!");
+        }
         taskServerArguments.add("--assets");
         taskServerArguments.add(serverAssetsFile.getAbsolutePath());
 
+        // Adding plugin by copying or including build directory.
         File pluginArchiveFile = getArchiveFile().getAsFile().getOrNull();
         if (pluginArchiveFile == null || !pluginArchiveFile.exists()) {
             throw new StopExecutionException("Archive file doesn't exist!");
         }
+        File modsDirectory = new File(runtimeDirectory, "mods");
+        if(!modsDirectory.exists()) {
+            modsDirectory.mkdirs();
+        }
+        File modsArchiveFile = new File(modsDirectory, pluginArchiveFile.getName());
+
         boolean copyPluginToRuntimeModsFolder = getCopyPluginToRuntime().get();
         if(!copyPluginToRuntimeModsFolder) {
+            PluginLog.info("Using \"--mods\" as argument to include build directory as mods!");
+            if(modsArchiveFile.exists()) {
+                modsDirectory.delete();
+                PluginLog.info("Deleted existing plugin from runtime \"mods/\" directory!");
+            }
             taskServerArguments.add("--mods");
             taskServerArguments.add(pluginArchiveFile.getParentFile().getAbsolutePath());
-            PluginLog.info("Using \"--mods\" as argument to include build directory as mods!");
         } else {
-            PluginLog.info("Copying plugin jar into runtime \"mods/\" directory!");
-            File modsDirectory = new File(runtimeDirectory, "mods");
-            if(!modsDirectory.exists()) {
-                modsDirectory.mkdirs();
-            }
-            File modsArchiveFile = new File(modsDirectory, pluginArchiveFile.getName());
+            PluginLog.info("Copying plugin into runtime \"mods/\" directory!");
             try {
                 FileUtils.copyFileTo(pluginArchiveFile, modsArchiveFile);
             } catch (IOException e) {
@@ -112,6 +124,7 @@ public abstract class RunServerTask extends JavaExec {
             }
         }
 
+        // Include users server arguments
         List<String> userServerArguments = getUserServerArguments().getOrNull();
         if (userServerArguments != null && !userServerArguments.isEmpty()) {
             taskServerArguments.addAll(userServerArguments);
@@ -122,7 +135,15 @@ public abstract class RunServerTask extends JavaExec {
         String serverJarFilePath = serverJarFile.getAbsolutePath();
         String startCommand = "java " + jvmArgumentsString + " -jar " + serverJarFilePath + " " + argumentsString;
         PluginLog.info("");
-        PluginLog.info("Successfully build start command:");
+        PluginLog.info("Successfully parsed arguments:");
+        PluginLog.info("");
+        PluginLog.info("JavaVM arguments:");
+        PluginLog.info(jvmArgumentsString);
+        PluginLog.info("");
+        PluginLog.info("Server arguments:");
+        PluginLog.info(argumentsString);
+        PluginLog.info("");
+        PluginLog.info("Start command:");
         PluginLog.info(startCommand);
         PluginLog.info("");
 
