@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "eu.koboo"
-version = "1.0.24-rc.1"
+version = "1.0.24"
 
 repositories {
     mavenCentral()
@@ -21,7 +21,6 @@ dependencies {
 
     implementation("org.jetbrains:annotations:26.0.2-1")
     implementation("com.github.javaparser:javaparser-core:3.25.9")
-    implementation("org.vineflower:vineflower:1.11.2")
 }
 
 gradlePlugin {
