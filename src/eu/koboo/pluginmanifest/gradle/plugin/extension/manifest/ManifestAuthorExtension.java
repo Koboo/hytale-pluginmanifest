@@ -14,13 +14,8 @@ import javax.inject.Inject;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public abstract class ManifestAuthorExtension {
 
-    @Input
     Property<String> name;
-    @Input
-    @Optional
     Property<String> email;
-    @Input
-    @Optional
     Property<String> url;
 
     @Inject

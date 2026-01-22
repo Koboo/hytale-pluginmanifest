@@ -14,11 +14,8 @@ import java.util.LinkedHashMap;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public abstract class ManifestPluginDependencyExtension {
 
-    @Input
     MapProperty<String, String> requiredDependencies;
-    @Input
     MapProperty<String, String> optionalDependencies;
-    @Input
     MapProperty<String, String> loadBeforeDependencies;
 
     @Inject

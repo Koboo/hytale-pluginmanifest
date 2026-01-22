@@ -16,42 +16,20 @@ import javax.inject.Inject;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public abstract class JsonManifestExtension {
 
-    @Input
-    @Optional
     Property<String> pluginGroup;
-    @Input
-    @Optional
     Property<String> pluginName;
-    @Input
-    @Optional
     Property<String> pluginVersion;
-    @Input
-    @Optional
     Property<String> serverVersion;
-    @Input
-    @Optional
     Property<String> pluginMainClass;
 
-    @Input
-    @Optional
     Property<String> pluginDescription;
-    @Input
-    @Optional
     Property<String> pluginWebsite;
 
-    @Input
-    @Optional
     Property<Boolean> disabledByDefault;
-    @Input
-    @Optional
     Property<Boolean> includesAssetPack;
-    @Input
-    @Optional
     Property<Boolean> minimizeJson;
 
-    @Nested
     ManifestAuthorsExtension manifestAuthors;
-    @Nested
     ManifestPluginDependencyExtension manifestPluginDependencies;
 
     @Inject
