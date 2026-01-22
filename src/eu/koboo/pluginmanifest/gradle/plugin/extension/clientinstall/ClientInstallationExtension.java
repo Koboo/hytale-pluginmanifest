@@ -25,8 +25,6 @@ public abstract class ClientInstallationExtension {
     Property<Patchline> patchline;
     @Input
     Property<String> clientInstallDirectory;
-    @Input
-    Property<Boolean> decompileServer;
 
     @Inject
     public ClientInstallationExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
@@ -37,9 +35,6 @@ public abstract class ClientInstallationExtension {
         clientInstallDirectory.convention(
             providerFactory.provider(ClientInstallationExtension::resolveDefaultClientDirectory)
         );
-
-        decompileServer = objectFactory.property(Boolean.class);
-        decompileServer.convention(true);
     }
 
     public @NotNull File resolveClientInstallDirectory() {
