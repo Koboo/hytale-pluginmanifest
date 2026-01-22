@@ -1,8 +1,8 @@
 # Hytale Plugin Manifest Generator
 
 <a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/badge/gradle-plugin_portal-blue" alt="PluginPortal"></a>
-<a href="https://discord.koboo.eu/"><img src="https://img.shields.io/badge/discord-server-blue" alt="PluginPortal"></a>
-<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version" alt="PluginPortal"></a>
+<a href="https://discord.koboo.eu/"><img src="https://img.shields.io/badge/discord-server-blue?color=purple" alt="PluginPortal"></a>
+<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version?color=green" alt="PluginPortal"></a>
 
 This project enables you to generate your Hytale Plugin's ``manifest.json`` automatically.
 
@@ -41,7 +41,8 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 
 - [Hosted @ GradlePluginPortal](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
 - [Hosted @ EntixReposilite](https://repo.entix.eu/#/releases/eu/koboo/pluginmanifest-plugin)
-- ![Latest version](https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version)
+
+![Latest version](https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version)
 
 **Required environment**
 
