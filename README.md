@@ -20,16 +20,12 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 
 ## Features
 
-- Validates provided properties
-- Logs user-friendly errors on validation issues
-- Generates ``manifest.json``
-- Includes generated ``manifest.json`` file into JAR-file
-- Overrides existing ``manifest.json``
+- Validates, generates and includes ``manifest.json`` for your plugin
+- Automatically detects your client-installation
+- Runs a development server using your client-installation
+- Adds ``HytaleServer.jar`` as a dependency to your project
+- Decompiles ``HytaleServer.jar`` into ``HytaleServer-sources.jar``
 - Supports ``Windows``, ``Linux`` and ``Mac``
-- Resolves properties automatically
-- Exposes configuration in ``build.gradle.kts``
-- Automatically detects ``HytaleServer.jar``
-- Automatically adds ``HytaleServer.jar`` as dependency
 - Supports ``com.gradleup.shadow`` (shadowJar)
 - Supports ``org.gradle.configuration-cache``
 - Supports ``org.gradle.configureondemand``
@@ -81,7 +77,7 @@ pluginManifest {
     // For more information see GitHub:
     // https://github.com/Koboo/hytale-pluginmanifest
 
-    runtimeConfiguration {
+    clientInstallation {
         // Where should we check for your Hytale installation?
         // If it's in the default installation directory,
         // the plugin will probably detect its location automatically.
@@ -89,22 +85,24 @@ pluginManifest {
 
         // Which patchline do you want to use?
         patchline = Patchline.RELEASE
+    }
 
-        // Should the HytaleServer.jar be added as dependency to the project?
-        applyServerDependency = true
-
+    runtimeConfiguration {
         // If you want to automatically build your plugin
         // and run it on the same HytaleServer.jar,
         // just set any directory here.
         runtimeDirectory = "D:/PluginManifestRuntime"
 
+        // Should we copy the plugin to the "mods/" directory of the server
+        // Or just use the jar file from the "build/libs/" directory?
+        copyPluginToRuntime = false
+
         // Shortcuts for the commonly used server arguments
-        acceptEarlyPlugins = false
         allowOp = false
-        enableNativeAcces = true
         bindAddress = "0.0.0.0:5520"
 
         // Customize as you like
+        // These are just example values
         jvmArguments = listOf("-Xmx2048m")
         serverArguments = listOf("--assets CustomAssets.zip")
     }
@@ -262,16 +260,16 @@ The Gradle plugin's generated ``manifest.json``:
 | ``Group``                | UTF-8 ``String``                                            | ✅        | ``Koboos-Plugins``                     |
 | ``Name``                 | UTF-8 ``String``                                            | ✅        | ``my-plugin``                          |
 | ``Version``              | SemVer format ``MAJOR.MINOR.PATCH-RELEASE1.RELEASE2+BUILD`` | ✅        | ``1.0.0-SNAPSHOT.PRERELEASE+1d27cwq``  |
-| ``Description``          | UTF-8 ``String``                                            | ❌        | ``My awesome plugin that does things`` |
+| ``ServerVersion``        | SemVerRange format                                          | ✅        | ``*``, ``>=1.0.0``                     |
+| ``Main``                 | Fully qualified class name                                  | ✅        | ``eu.koboo.myplugin.MyPlugin``         |
 | ``Authors`` - ``Name``   | UTF-8 ``String``                                            | ✅        | ``Koboo``                              |
 | ``Authors`` - ``Email``  | E-Mail-Address format ``{PREFIX}@{DOMAIN}.{TLD}``           | ❌        | ``admin@koboo.eu``                     |
 | ``Authors`` - ``Url``    | URI format ``{https\|http}://{DOMAIN}.{TLD}``               | ❌        | ``https://koboo.eu``                   |
+| ``Description``          | UTF-8 ``String``                                            | ❌        | ``My awesome plugin that does things`` |
 | ``Website``              | URI format ``{https\|http}://{DOMAIN}.{TLD}``               | ❌        | ``https://github.com/Koboo/MyPlugin``  |
-| ``ServerVersion``        | SemVerRange format                                          | ✅        | ``*``, ``>=1.0.0``                     |
 | ``Dependencies``         | ``"{PluginGroup:PluginName}": "{SemVerRange}"``             | ❌        | ``"Koboos-Plugins": "*"``              |
 | ``OptionalDependencies`` | See above, same as ``Dependencies``                         | ❌        | See above, same as ``Dependencies``    |
 | ``LoadBefore``           | See above, same as ``Dependencies``                         | ❌        | See above, same as ``Dependencies``    |
-| ``Main``                 | Fully qualified class name                                  | ✅        | ``eu.koboo.myplugin.MyPlugin``         |
 
 ## Add EntixReposilite as repository
 
@@ -318,3 +316,4 @@ Add this to your ``settings.gradle.kts`` for snapshot-versions.
 - [Kotlin Logo](https://commons.wikimedia.org/wiki/File:Kotlin_Icon.png)
 - [Groovy Logo](https://www.pngfind.com/mpng/iRwoTwo_file-groovy-logo-svg-groovy-language-logo-hd/)
 - [Maven Logo](https://www.stickpng.com/de/img/comics-und-fantasy/technologieunternehmen/apache-maven-federn)
+- [HytaleGradlePlugin](https://github.com/MrMineO5/HytaleGradlePlugin)

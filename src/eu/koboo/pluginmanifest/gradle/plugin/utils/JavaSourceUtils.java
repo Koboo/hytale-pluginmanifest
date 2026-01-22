@@ -4,10 +4,12 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
+import eu.koboo.pluginmanifest.gradle.plugin.PluginManifestPlugin;
 import lombok.experimental.UtilityClass;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.jvm.tasks.Jar;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,17 +17,20 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @UtilityClass
 public class JavaSourceUtils {
-    private static final String DEFAULT = "jar";
-    private static final String SHADOW = "shadowJar";
 
-    public boolean hasAnyResource(@NotNull SourceSet sourceSet) {
+    private static final String TASK_SHADOW = "shadowJar";
+
+    public boolean hasResources(Project project) {
+        if (project == null) {
+            return false;
+        }
+        SourceSet sourceSet = project.getExtensions()
+            .getByType(SourceSetContainer.class)
+            .getByName("main");
         for (File srcDir : sourceSet.getResources().getSrcDirs()) {
             if (srcDir.exists() && containsFile(srcDir)) {
                 return true;
@@ -35,6 +40,10 @@ public class JavaSourceUtils {
     }
 
     private boolean containsFile(File dir) {
+        // This is our generated resource directory. Skip that.
+        if (dir.getAbsolutePath().contains(PluginManifestPlugin.RESOURCE_DIRECTORY)) {
+            return false;
+        }
         File[] files = dir.listFiles();
         if (files == null) {
             return false;
@@ -53,10 +62,19 @@ public class JavaSourceUtils {
         return false;
     }
 
-    public List<String> getMainClassCandidates(SourceSet mainSourceSet) {
-        Set<File> javaSrcDirs = mainSourceSet.getJava().getSrcDirs();
-        List<String> candidates = new ArrayList<>();
+    public List<String> getMainClassCandidates(Project project) {
 
+        SourceSet sourceSet = project.getExtensions()
+            .getByType(SourceSetContainer.class)
+            .getByName("main");
+
+        Set<File> javaSrcDirs = sourceSet.getJava().getSrcDirs();
+        if (javaSrcDirs.isEmpty()) {
+            PluginLog.info("No java sources found. Can't automatically detect mainClass!");
+            return Collections.emptyList();
+        }
+
+        List<String> candidates = new ArrayList<>();
         JavaParser parser = new JavaParser();
 
         for (File srcDir : javaSrcDirs) {
@@ -108,35 +126,20 @@ public class JavaSourceUtils {
         return candidates;
     }
 
-    public @NotNull File resolveArchive(@NotNull Project project) {
-        Jar shadowJarTask = project.getTasks()
+    public Jar resolveArchiveTask(@NotNull Project project) {
+        Jar shadowTask = project.getTasks().withType(Jar.class)
+            .findByName(TASK_SHADOW);
+        if (shadowTask != null) {
+            return shadowTask;
+        }
+        Jar defaultTask = project.getTasks()
             .withType(Jar.class)
             .stream()
-            .filter(t -> t.getName().equals(SHADOW))
             .findFirst()
             .orElse(null);
-        if (shadowJarTask != null) {
-            return shadowJarTask.getArchiveFile()
-                .get()
-                .getAsFile();
+        if (defaultTask == null) {
+            throw new GradleException("No jar task found!");
         }
-        return project.getTasks()
-            .named(DEFAULT, Jar.class)
-            .flatMap(Jar::getArchiveFile)
-            .get()
-            .getAsFile();
-    }
-
-    public @NotNull String resolveArchiveTaskName(@NotNull Project project) {
-        Jar shadowJarTask = project.getTasks()
-            .withType(Jar.class)
-            .stream()
-            .filter(t -> t.getName().equals(SHADOW))
-            .findFirst()
-            .orElse(null);
-        if (shadowJarTask != null) {
-            return SHADOW;
-        }
-        return DEFAULT;
+        return defaultTask;
     }
 }

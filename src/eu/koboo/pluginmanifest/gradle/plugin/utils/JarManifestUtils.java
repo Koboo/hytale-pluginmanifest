@@ -15,7 +15,7 @@ public class JarManifestUtils {
     private static final String VERSION_KEY = "Implementation-Version";
 
     public @Nullable Manifest getManifest(@Nullable File file) {
-        if(file == null || !file.isFile() || file.isDirectory() || !file.exists()) {
+        if (file == null || !file.isFile() || file.isDirectory() || !file.exists()) {
             return null;
         }
         Manifest manifest;
@@ -29,12 +29,17 @@ public class JarManifestUtils {
         return manifest;
     }
 
+    public @NotNull String getVersion(@Nullable File file) {
+        Manifest manifest = getManifest(file);
+        return getVersion(manifest);
+    }
+
     public @NotNull String getVersion(@Nullable Manifest manifest) {
-        if(manifest == null) {
+        if (manifest == null) {
             return VERSION_UNKNOWN;
         }
         String version = manifest.getMainAttributes().getValue(VERSION_KEY);
-        if(version == null || version.trim().isEmpty()) {
+        if (version == null || version.trim().isEmpty()) {
             return VERSION_UNKNOWN;
         }
         return version;

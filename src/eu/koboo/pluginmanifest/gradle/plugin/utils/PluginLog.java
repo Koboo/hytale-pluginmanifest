@@ -7,9 +7,14 @@ import org.gradle.api.logging.Logging;
 @UtilityClass
 public class PluginLog {
 
-    public static final Logger LOGGER = Logging.getLogger(PluginLog.class);
+    private static final String PREFIX = "> PluginManifest: ";
+    private static final Logger LOGGER = Logging.getLogger(PluginLog.class);
 
     public void info(String message) {
-        LOGGER.lifecycle("> PluginManifest: " + message);
+        print(PREFIX + message);
+    }
+
+    public void print(String message) {
+        LOGGER.lifecycle(message);
     }
 }

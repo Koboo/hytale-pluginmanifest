@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.Optional;
 
 import javax.inject.Inject;
 
@@ -14,13 +12,8 @@ import javax.inject.Inject;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public abstract class ManifestAuthorExtension {
 
-    @Input
     Property<String> name;
-    @Input
-    @Optional
     Property<String> email;
-    @Input
-    @Optional
     Property<String> url;
 
     @Inject

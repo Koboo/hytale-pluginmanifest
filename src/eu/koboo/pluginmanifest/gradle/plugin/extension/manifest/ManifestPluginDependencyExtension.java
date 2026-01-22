@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.MapProperty;
-import org.gradle.api.tasks.Input;
 
 import javax.inject.Inject;
 import java.util.LinkedHashMap;
@@ -14,21 +13,19 @@ import java.util.LinkedHashMap;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public abstract class ManifestPluginDependencyExtension {
 
-    @Input
     MapProperty<String, String> requiredDependencies;
-    @Input
     MapProperty<String, String> optionalDependencies;
-    @Input
     MapProperty<String, String> loadBeforeDependencies;
 
     @Inject
     public ManifestPluginDependencyExtension(ObjectFactory objectFactory) {
         requiredDependencies = objectFactory.mapProperty(String.class, String.class);
-        optionalDependencies = objectFactory.mapProperty(String.class, String.class);
-        loadBeforeDependencies = objectFactory.mapProperty(String.class, String.class);
-
         requiredDependencies.convention(new LinkedHashMap<>());
+
+        optionalDependencies = objectFactory.mapProperty(String.class, String.class);
         optionalDependencies.convention(new LinkedHashMap<>());
+
+        loadBeforeDependencies = objectFactory.mapProperty(String.class, String.class);
         loadBeforeDependencies.convention(new LinkedHashMap<>());
     }
 
