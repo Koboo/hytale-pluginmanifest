@@ -4,7 +4,6 @@ import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInsta
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.GenerateManifestTask;
-import eu.koboo.pluginmanifest.gradle.plugin.tasks.InstallPluginTask;
 import eu.koboo.pluginmanifest.gradle.plugin.tasks.RunServerTask;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.ProviderUtils;
@@ -35,7 +34,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
     private static final String GENERATE_MANIFEST = "generateManifest";
     private static final String RUN_SERVER = "runServer";
-    private static final String INSTALL_PLUGIN = "installPlugin";
 
     public static final String RESOURCE_DIRECTORY = "generated" + File.separator + "pluginmanifest";
     public static final String MANIFEST = "manifest.json";
@@ -51,7 +49,6 @@ public class PluginManifestPlugin implements Plugin<Project> {
         ClientInstallationExtension installExt = extension.installationExtension;
 
         TaskProvider<GenerateManifestTask> generateManifestProvider = target.getTasks().register(GENERATE_MANIFEST, GenerateManifestTask.class);
-        TaskProvider<InstallPluginTask> installPluginProvider = target.getTasks().register(INSTALL_PLUGIN, InstallPluginTask.class);
         TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
 
         target.afterEvaluate(project -> {
@@ -86,7 +83,9 @@ public class PluginManifestPlugin implements Plugin<Project> {
             SourceSet mainSourceSet = project.getExtensions()
                 .getByType(SourceSetContainer.class)
                 .getByName("main");
-            Provider<Directory> genResourceDir = project.getLayout().getBuildDirectory().dir(RESOURCE_DIRECTORY);
+            Provider<Directory> genResourceDir = project.getLayout()
+                .getBuildDirectory()
+                .dir(RESOURCE_DIRECTORY);
             mainSourceSet.getResources().srcDir(genResourceDir);
 
             Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
@@ -115,24 +114,11 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getClientAssetsFile().set(installExt.resolveClientAssetsFile());
                 task.getArchiveFile().set(archiveFileProvider);
 
-                File runtimeDirectory = runtimeExt.resolveRuntimeDirectory();
-                task.getRuntimeDirectory().set(runtimeDirectory.getAbsolutePath());
+                task.getRuntimeDirectoryPath().set(ServerRuntimeExtension.provideDirectoryPath(project));
 
                 task.getAllowOp().set(runtimeExt.getAllowOp());
-                task.getJvmArguments().set(runtimeExt.getJvmArguments());
-                task.getServerArguments().set(runtimeExt.getServerArguments());
-            });
-
-            //
-            // ==== "installPlugin" ====
-            //
-            installPluginProvider.configure(task -> {
-
-                task.setGroup(TASK_GROUP_NAME);
-                task.setDescription("Execute the jar archive task and moves the plugin into your server's \"/mods\" directory.");
-                task.getRuntimeModDirectory().set(runtimeExt.resolveRuntimeModDirectory());
-                task.getArchiveFilePath().set(archiveFileProvider);
-                task.dependsOn(archiveTask);
+                task.getUserJvmArguments().set(runtimeExt.getJvmArguments());
+                task.getUserServerArguments().set(runtimeExt.getServerArguments());
             });
 
             //
