@@ -93,13 +93,16 @@ pluginManifest {
         // just set any directory here.
         runtimeDirectory = "D:/PluginManifestRuntime"
 
+        // Should we copy the plugin to the "mods/" directory of the server
+        // Or just use the jar file from the "build/libs/" directory?
+        copyPluginToRuntime = false
+
         // Shortcuts for the commonly used server arguments
-        acceptEarlyPlugins = false
         allowOp = false
-        enableNativeAcces = true
         bindAddress = "0.0.0.0:5520"
 
         // Customize as you like
+        // These are just example values
         jvmArguments = listOf("-Xmx2048m")
         serverArguments = listOf("--assets CustomAssets.zip")
     }
