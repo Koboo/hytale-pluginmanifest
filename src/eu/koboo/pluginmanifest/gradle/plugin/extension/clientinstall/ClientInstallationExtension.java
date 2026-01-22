@@ -59,7 +59,9 @@ public abstract class ClientInstallationExtension {
         if (patchline == null) {
             throw new GradleException("patchline can't be null!");
         }
-        return patchline.name().toLowerCase(Locale.ROOT);
+        return patchline.name()
+            .toLowerCase(Locale.ROOT)
+            .replace('_', '-');
     }
 
     // APPDATA/Hytale/
