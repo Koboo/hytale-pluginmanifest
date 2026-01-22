@@ -1,8 +1,8 @@
 # Hytale Plugin Manifest Generator
 
-<a href="https://central.sonatype.com/artifact/eu.koboo/pluginmanifest-api"><img src="https://img.shields.io/badge/maven-central-blue" alt="MavenCentral"></a>
 <a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/badge/gradle-plugin_portal-blue" alt="PluginPortal"></a>
 <a href="https://discord.koboo.eu/"><img src="https://img.shields.io/badge/discord-server-blue" alt="PluginPortal"></a>
+<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version" alt="PluginPortal"></a>
 
 This project enables you to generate your Hytale Plugin's ``manifest.json`` automatically.
 
