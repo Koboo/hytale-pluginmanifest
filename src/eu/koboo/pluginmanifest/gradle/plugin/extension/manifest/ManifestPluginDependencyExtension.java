@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.MapProperty;
-import org.gradle.api.tasks.Input;
 
 import javax.inject.Inject;
 import java.util.LinkedHashMap;

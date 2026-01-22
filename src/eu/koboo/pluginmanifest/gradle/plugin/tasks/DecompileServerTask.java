@@ -1,19 +1,17 @@
 package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
-import eu.koboo.pluginmanifest.gradle.plugin.utils.FileUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
-import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.provider.ListProperty;
-import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.*;
+import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.JavaExec;
+import org.gradle.api.tasks.StopExecutionException;
+import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 
 @DisableCachingByDefault(because = "Starts the configured hytale server")
@@ -36,13 +34,13 @@ public abstract class DecompileServerTask extends JavaExec {
         File serverDirectory = serverJarFile.getParentFile();
 
         File serverSourcesFile = new File(serverDirectory, "HytaleServer-sources.jar");
-        if(serverSourcesFile.exists()) {
+        if (serverSourcesFile.exists()) {
             PluginLog.info("Deleting old server sources...");
             serverSourcesFile.delete();
         }
 
         File vineflowerJarFile = new File(serverDirectory, "vineflower.jar");
-        if(!vineflowerJarFile.exists()) {
+        if (!vineflowerJarFile.exists()) {
             PluginLog.info("Downloading vineflower...");
             try {
                 Files.copy(URI.create(VINEFLOWER_DOWNLOAD).toURL().openStream(), vineflowerJarFile.toPath());
