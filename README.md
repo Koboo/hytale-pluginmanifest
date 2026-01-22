@@ -36,28 +36,24 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 - [Hosted @ GradlePluginPortal](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
 - [Hosted @ EntixReposilite](https://repo.entix.eu/#/releases/eu/koboo/pluginmanifest-plugin)
 
-![Latest version](https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version)
-
 **Required environment**
 
 - ``Gradle 9.2.1`` or newer
 - ``JDK 25`` or newer
 
 1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``build.gradle``**
-    ````groovy
-    plugins {
-        id 'eu.koboo.pluginmanifest' version 'LATEST_VERSION'
-    }
-    ````
+````groovy
+plugins {
+    id 'eu.koboo.pluginmanifest' version 'LATEST_VERSION'
+}
+````
 
 2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``build.gradle.kts``**
-    ````kotlin
-    plugins {
-        id("eu.koboo.pluginmanifest") version("LATEST_VERSION")
-    }
-    ````
-
-[See latest version](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
+````kotlin
+plugins {
+    id("eu.koboo.pluginmanifest") version("LATEST_VERSION")
+}
+````
 
 ## Configuration
 
@@ -271,31 +267,31 @@ The Gradle plugin's generated ``manifest.json``:
 Add this to your ``settings.gradle.kts`` for snapshot-versions.
 
 1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``settings.gradle``**
-
-  ````groovy
-   pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven {
-            name 'entixReposilite'
-            url 'https://repo.entix.eu/snapshots'
-        }
-    }
+````groovy
+pluginManagement {
+  repositories {
+      gradlePluginPortal()
+      maven {
+          name 'entixReposilite'
+          url 'https://repo.entix.eu/snapshots'
+      }
+  }
 }
   ````
 
+
 2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``settings.gradle.kts``**
-   ````kotlin
-   pluginManagement {
-     repositories {
-       gradlePluginPortal()
-       maven {
-         name = "entixReposilite"
-         url = uri("https://repo.entix.eu/snapshots")
-       }
-     }
-   }
-   ````
+````kotlin
+pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    maven {
+      name = "entixReposilite"
+      url = uri("https://repo.entix.eu/snapshots")
+    }
+  }
+}
+````
 
 ## Credits
 
