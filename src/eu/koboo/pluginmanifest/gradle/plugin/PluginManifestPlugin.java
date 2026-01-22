@@ -114,7 +114,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getClientAssetsFile().set(installExt.resolveClientAssetsFile());
                 task.getArchiveFile().set(archiveFileProvider);
 
-                task.getRuntimeDirectoryPath().set(ServerRuntimeExtension.provideDirectoryPath(project));
+                task.getRuntimeDirectory().set(runtimeExt.resolveRuntimeDirectory());
+                task.getCopyPluginToRuntime().set(runtimeExt.getCopyPluginToRuntime());
 
                 task.getAllowOp().set(runtimeExt.getAllowOp());
                 task.getUserJvmArguments().set(runtimeExt.getJvmArguments());
