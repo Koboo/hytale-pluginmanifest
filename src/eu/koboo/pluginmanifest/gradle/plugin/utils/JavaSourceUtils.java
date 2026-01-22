@@ -69,7 +69,7 @@ public class JavaSourceUtils {
             .getByName("main");
 
         Set<File> javaSrcDirs = sourceSet.getJava().getSrcDirs();
-        if(javaSrcDirs.isEmpty()) {
+        if (javaSrcDirs.isEmpty()) {
             PluginLog.info("No java sources found. Can't automatically detect mainClass!");
             return Collections.emptyList();
         }

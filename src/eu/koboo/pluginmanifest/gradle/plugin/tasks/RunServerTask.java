@@ -51,8 +51,9 @@ public abstract class RunServerTask extends JavaExec {
         if (serverJarFile == null || !serverJarFile.exists()) {
             throw new StopExecutionException("HytaleServer.jar doesn't exist!");
         }
-        File runtimeDirectory = getRuntimeDirectory().getAsFile().getOrNull();;
-        if(runtimeDirectory == null) {
+        File runtimeDirectory = getRuntimeDirectory().getAsFile().getOrNull();
+        ;
+        if (runtimeDirectory == null) {
             throw new StopExecutionException("runtimeDirectory cannot be null!");
         }
         if (!runtimeDirectory.exists()) {
@@ -101,15 +102,15 @@ public abstract class RunServerTask extends JavaExec {
             throw new StopExecutionException("Archive file doesn't exist!");
         }
         File modsDirectory = new File(runtimeDirectory, "mods");
-        if(!modsDirectory.exists()) {
+        if (!modsDirectory.exists()) {
             modsDirectory.mkdirs();
         }
         File modsArchiveFile = new File(modsDirectory, pluginArchiveFile.getName());
 
         boolean copyPluginToRuntimeModsFolder = getCopyPluginToRuntime().get();
-        if(!copyPluginToRuntimeModsFolder) {
+        if (!copyPluginToRuntimeModsFolder) {
             PluginLog.info("Using \"--mods\" as argument to include build directory as mods!");
-            if(modsArchiveFile.exists()) {
+            if (modsArchiveFile.exists()) {
                 modsDirectory.delete();
                 PluginLog.info("Deleted existing plugin from runtime \"mods/\" directory!");
             }
