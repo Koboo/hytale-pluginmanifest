@@ -1,20 +1,20 @@
 # Hytale Plugin Manifest Generator
 
-<a href="https://central.sonatype.com/artifact/eu.koboo/pluginmanifest-api"><img src="https://img.shields.io/badge/maven-central-blue" alt="MavenCentral"></a>
 <a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/badge/gradle-plugin_portal-blue" alt="PluginPortal"></a>
-<a href="https://discord.koboo.eu/"><img src="https://img.shields.io/badge/discord-server-blue" alt="PluginPortal"></a>
+<a href="https://discord.koboo.eu/"><img src="https://img.shields.io/badge/discord-server-blue?color=purple" alt="PluginPortal"></a>
+<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version?color=green" alt="PluginPortal"></a>
 
 This project enables you to generate your Hytale Plugin's ``manifest.json`` automatically.
 
 ## Overview
 
-- [Gradle Plugin](#gradle-plugin)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Automatic properties](#automatic-properties)
 - [Automatic configuration example](#automatic-configuration-example)
 - [Manifest specification](#manifest-specification)
-- [Dependencies](#dependencies)
+- [Add snapshots repository](#add-snapshots-repository)
+- [Dependencies](https://github.com/Koboo/hytale-pluginmanifest/blob/main/build.gradle.kts#L18)
 - [Credits](#credits)
 - [MIT LICENSE](LICENSE)
 
@@ -31,17 +31,12 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 - Supports ``org.gradle.configureondemand``
 - Supports ``org.gradle.cache``
 
-## Gradle Plugin
-
-- Exposes a configuration for manually setting properties.
-- Tries to resolve required properties by current project and OS information.
-- Can override automatically resolved properties
-
-### Installation
+## Installation
 
 - [Hosted @ GradlePluginPortal](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
 - [Hosted @ EntixReposilite](https://repo.entix.eu/#/releases/eu/koboo/pluginmanifest-plugin)
-- ![Latest version](https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version)
+
+![Latest version](https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version)
 
 **Required environment**
 
@@ -64,7 +59,7 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 
 [See latest version](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
 
-### Configuration
+## Configuration
 
 You can override properties of the generated ``manifest.json``.
 
@@ -176,7 +171,7 @@ pluginManifest {
 }
 ````
 
-### Automatic properties
+## Automatic properties
 
 Because we all hate writing the same stuff all over again, and we love automation, the Gradle plugin tries
 to resolve the required properties automatically.
@@ -205,7 +200,7 @@ Table description:
 > If more than one class is found, a warning is logged
 > If only one class is found, it's used as pluginMainClass
 
-#### Automatic configuration example
+## Automatic configuration example
 
 Here you can see a complete example, where and how the properties are generated,
 based on a common Gradle project structure with a single module.
@@ -271,7 +266,7 @@ The Gradle plugin's generated ``manifest.json``:
 | ``OptionalDependencies`` | See above, same as ``Dependencies``                         | ❌        | See above, same as ``Dependencies``    |
 | ``LoadBefore``           | See above, same as ``Dependencies``                         | ❌        | See above, same as ``Dependencies``    |
 
-## Add EntixReposilite as repository
+## Add snapshots repository
 
 Add this to your ``settings.gradle.kts`` for snapshot-versions.
 
@@ -301,12 +296,6 @@ Add this to your ``settings.gradle.kts`` for snapshot-versions.
      }
    }
    ````
-
-## Dependencies
-
-- ``org.projectlombok:lombok:1.18.42``
-- ``org.jetbrains:annotations:26.0.2-1``
-- ``com.github.javaparser:javaparser-core:3.25.9``
 
 ## Credits
 
