@@ -21,9 +21,7 @@ import java.util.Locale;
 public abstract class ClientInstallationExtension {
     private static final String LATEST_DIRECTORY = "install/PATCHLINE/package/game/latest/";
 
-    @Input
     Property<Patchline> patchline;
-    @Input
     Property<String> clientInstallDirectory;
 
     @Inject
