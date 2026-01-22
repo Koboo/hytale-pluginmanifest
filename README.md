@@ -8,12 +8,12 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 
 ## Overview
 
-- [Gradle Plugin](#gradle-plugin)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Automatic properties](#automatic-properties)
 - [Automatic configuration example](#automatic-configuration-example)
 - [Manifest specification](#manifest-specification)
+- [Add snapshots repository](#add-snapshots-repository)
 - [Dependencies](#dependencies)
 - [Credits](#credits)
 - [MIT LICENSE](LICENSE)
@@ -31,13 +31,7 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 - Supports ``org.gradle.configureondemand``
 - Supports ``org.gradle.cache``
 
-## Gradle Plugin
-
-- Exposes a configuration for manually setting properties.
-- Tries to resolve required properties by current project and OS information.
-- Can override automatically resolved properties
-
-### Installation
+## Installation
 
 - [Hosted @ GradlePluginPortal](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
 - [Hosted @ EntixReposilite](https://repo.entix.eu/#/releases/eu/koboo/pluginmanifest-plugin)
@@ -65,7 +59,7 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 
 [See latest version](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
 
-### Configuration
+## Configuration
 
 You can override properties of the generated ``manifest.json``.
 
@@ -177,7 +171,7 @@ pluginManifest {
 }
 ````
 
-### Automatic properties
+## Automatic properties
 
 Because we all hate writing the same stuff all over again, and we love automation, the Gradle plugin tries
 to resolve the required properties automatically.
@@ -206,7 +200,7 @@ Table description:
 > If more than one class is found, a warning is logged
 > If only one class is found, it's used as pluginMainClass
 
-#### Automatic configuration example
+## Automatic configuration example
 
 Here you can see a complete example, where and how the properties are generated,
 based on a common Gradle project structure with a single module.
@@ -272,7 +266,7 @@ The Gradle plugin's generated ``manifest.json``:
 | ``OptionalDependencies`` | See above, same as ``Dependencies``                         | ❌        | See above, same as ``Dependencies``    |
 | ``LoadBefore``           | See above, same as ``Dependencies``                         | ❌        | See above, same as ``Dependencies``    |
 
-## Add EntixReposilite as repository
+## Add snapshots repository
 
 Add this to your ``settings.gradle.kts`` for snapshot-versions.
 
