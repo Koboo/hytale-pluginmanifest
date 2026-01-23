@@ -61,46 +61,64 @@ You can override properties of the generated ``manifest.json``.
 
 ````kotlin
 pluginManifest {
-    // Here you can configure:
-    // 1. manifest.json generation properties
-    // 2. If and where your HytaleServer.jar is
-    //
-    // For more information see GitHub:
-    // https://github.com/Koboo/hytale-pluginmanifest
-
+    // Configuration for your client installation detection
     clientInstallation {
         // Where should we check for your Hytale installation?
         // If it's in the default installation directory,
-        // the plugin will probably detect its location automatically.
+        // the plugin will detect it automatically.
         clientInstallDirectory = "C:/Users/Koboo/AppData/Roaming/Hytale"
 
         // Which patchline do you want to use?
+        // Currently supported:
+        // - RELEASE
+        // - PRE_RELEASE
+        // Both patchlines use an own directory in the client-installation.
+        // So you can switch between both anytime.
+        // You have to make sure, the client already downloaded the patchline previously.
         patchline = Patchline.RELEASE
     }
 
+    // Configuration for the server runtime directory
     runtimeConfiguration {
         // If you want to automatically build your plugin
         // and run it on the same HytaleServer.jar,
         // just set any directory here.
-        runtimeDirectory = "D:/PluginManifestRuntime"
+        runtimeDirectory = "run/" // Defaults to "null" (Not configured)
+
+        // Set this to false if you provide an absolute path in "runtimeDirectory",
+        // otherwise the file resolving will be buggy.
+        isProjectRelative = true // Defaults to "true"
 
         // Should we copy the plugin to the "mods/" directory of the server
-        // Or just use the jar file from the "build/libs/" directory?
-        copyPluginToRuntime = false
+        // or should we append the projects "build/libs/" as mod directory?
+        // If you have multiple jar inside your "build/libs/" i.e.
+        // - "*-sources.jar"
+        // - "*-javadoc.jar"
+        // - "*-all.jar"
+        // You should enable this option,
+        // because the server tries to load every jar file as a plugin.
+        // We try to automatically copy the correct plugin jar,
+        // if there is more than 1 jar file inside "build/libs/".
+        copyPluginToRuntime = false // Defaults to "false"
+
+        // We delete the logs directory before we start the server.
+        // Why? Because we save diskSpace then ever we can.
+        deleteLogsOnStart = true // Defaults to "true"
 
         // Shortcuts for the commonly used server arguments
-        allowOp = false
-        bindAddress = "0.0.0.0:5520"
+        allowOp = true // Defaults to "true"
+        bindAddress = "0.0.0.0:5520" // Defaults to "0.0.0.0:5520"
 
         // Customize as you like
         // These are just example values
-        jvmArguments = listOf("-Xmx2048m")
-        serverArguments = listOf("--assets CustomAssets.zip")
+        jvmArguments = listOf("-Xmx2048m") // Defaults to "EMPTY"
+        serverArguments = listOf("--assets CustomAssets.zip") // Defaults to "EMPTY"
     }
 
+    // Configuration for the manifest.json generation
     manifestConfiguration {
         // Required
-        pluginGroup = "eu.koboo" // Defaults to your project's group
+        pluginGroup = "Koboo" // Defaults to your project's group
         pluginName = "MyPlugin" // Defaults to your project's name
         pluginVersion = "1.0.0" // Defaults to your project's version
 
@@ -131,7 +149,7 @@ pluginManifest {
         // You need to set at least 1 author.
         // If you set NO author, a default author is created with:
         // 1. Your OS-user -> System.getProperty("user.name")
-        // 2. If no userName available -> project.name + "-Author" (e.g. "MyPlugin-Author")
+        // 2. If no userName available -> project.name + " Author" (e.g. "MyPlugin Author")
         authors {
             author {
                 name = "Koboo"
