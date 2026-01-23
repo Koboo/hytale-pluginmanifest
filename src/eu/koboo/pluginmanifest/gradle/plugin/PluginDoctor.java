@@ -49,17 +49,14 @@ public class PluginDoctor {
             runtimeText = runtimeDirectory.getAbsolutePath();
         }
 
-        boolean usesClientServerJar = true;
         String serverJarText = "Not configured";
         File serverJarFile = null;
-        if (runtimeDirectory != null && runtimeDirectory.exists()) {
+        if (runtimeDirectory != null && runtimeDirectory.exists() && runtimeDirectory.isDirectory()) {
             File runtimeServerJar = new File(runtimeDirectory, "HytaleServer.jar");
             if(runtimeServerJar.exists() && runtimeServerJar.isFile()) {
                 serverJarFile = runtimeServerJar;
                 serverJarText = "From runtimeDirectory";
-                usesClientServerJar = false;
-            }
-            if(!usesClientServerJar) {
+            } else {
                 serverJarFile = clientServerJarFile;
                 serverJarText = "From client installation";
             }
@@ -112,10 +109,10 @@ public class PluginDoctor {
         PluginLog.print("=============== Runtime ==============");
         PluginLog.print("");
         PluginLog.print("  Server-Runtime-Directory > " + runtimeText);
+        PluginLog.print("    Is runtime executable? > " + runnableText);
         PluginLog.print("   Which 'HytaleServer.jar'> " + serverJarText);
         PluginLog.print("            Server-Version > " + runtimeServerVersion);
         PluginLog.print("   Version matches client? > " + matchesVersion);
-        PluginLog.print("    Is runtime executable? > " + runnableText);
         PluginLog.print("");
         PluginLog.print("======================================");
     }
