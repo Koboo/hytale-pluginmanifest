@@ -47,14 +47,11 @@ public abstract class RunServerTask extends JavaExec {
     @TaskAction
     public void runTask() {
         PluginLog.info("Building start command...");
-        File serverJarFile = getClientServerJarFile().getAsFile().getOrNull();
-        if (serverJarFile == null || !serverJarFile.exists()) {
+        File serverJarFile = getClientServerJarFile().getAsFile().get();
+        if (!serverJarFile.exists()) {
             throw new StopExecutionException("HytaleServer.jar doesn't exist!");
         }
-        File runtimeDirectory = getRuntimeDirectory().getAsFile().getOrNull();
-        if (runtimeDirectory == null) {
-            throw new StopExecutionException("runtimeDirectory cannot be null!");
-        }
+        File runtimeDirectory = getRuntimeDirectory().getAsFile().get();
         if (!runtimeDirectory.exists()) {
             runtimeDirectory.mkdirs();
         }
@@ -62,8 +59,8 @@ public abstract class RunServerTask extends JavaExec {
         List<String> taskJvmArguments = new ArrayList<>();
 
         // Add optional aot file for faster startup
-        File serverAOTFile = getClientAOTFile().getAsFile().getOrNull();
-        if (serverAOTFile != null && serverAOTFile.exists()) {
+        File serverAOTFile = getClientAOTFile().getAsFile().get();
+        if (serverAOTFile.exists()) {
             taskJvmArguments.add("-XX:AOTCache=" + serverAOTFile.getAbsolutePath());
         }
 
