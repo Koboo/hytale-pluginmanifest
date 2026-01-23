@@ -2,11 +2,12 @@ package eu.koboo.pluginmanifest.gradle.plugin.utils;
 
 import lombok.experimental.UtilityClass;
 import org.gradle.api.GradleException;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 @UtilityClass
 public class FileUtils {
@@ -36,5 +37,27 @@ public class FileUtils {
             StandardCopyOption.REPLACE_EXISTING,
             StandardCopyOption.COPY_ATTRIBUTES
         );
+    }
+
+    public void deleteRecursively(Path dir) throws IOException {
+        if (!Files.exists(dir)) {
+            return;
+        }
+
+        Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+            @Override
+            public @NonNull FileVisitResult visitFile(@NonNull Path file, @NonNull BasicFileAttributes attrs)
+                throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public @NonNull FileVisitResult postVisitDirectory(@NonNull Path dir, IOException exc)
+                throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }
