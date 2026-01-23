@@ -4,15 +4,20 @@ import eu.koboo.pluginmanifest.gradle.plugin.extension.Patchline;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import org.gradle.api.GradleException;
+import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.file.Directory;
+import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.RegularFile;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @Getter
@@ -24,111 +29,112 @@ public abstract class ClientInstallationExtension {
     Property<String> clientInstallDirectory;
 
     @Inject
-    public ClientInstallationExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
-        patchline = objectFactory.property(Patchline.class);
-        patchline.set(Patchline.RELEASE);
+    public ClientInstallationExtension() {
+        patchline = getObjectFactory().property(Patchline.class);
+        clientInstallDirectory = getObjectFactory().property(String.class);
+    }
 
-        clientInstallDirectory = objectFactory.property(String.class);
-        clientInstallDirectory.convention(
-            providerFactory.provider(ClientInstallationExtension::resolveDefaultClientDirectory)
+    @Inject
+    public abstract ProviderFactory getProviderFactory();
+
+    @Inject
+    public abstract ObjectFactory getObjectFactory();
+
+    public Provider<String> resolvePatchlineProvider() {
+        return getProviderFactory().provider(() -> {
+            Patchline patchline = getPatchline().getOrNull();
+            if (patchline == null) {
+                throw new InvalidUserDataException("patchline can't be null!");
+            }
+            return patchline.name()
+                .toLowerCase(Locale.ROOT)
+                .replace('_', '-');
+        });
+    }
+
+    private Directory clientDirectory() {
+        DirectoryProperty directoryProperty = getObjectFactory().directoryProperty();
+        directoryProperty.set(new File(clientInstallDirectory.get()));
+        return directoryProperty.get();
+    }
+
+    public Provider<RegularFile> provideClientFile(String filePath) {
+        return getProviderFactory().provider(() ->
+            clientDirectory().file(getLatestDirectoryPath() + filePath)
         );
     }
 
-    public @NotNull File resolveClientInstallDirectory() {
-        String clientRootDirectoryPath = getClientInstallDirectory().getOrNull();
-        if (clientRootDirectoryPath == null || clientRootDirectoryPath.trim().isEmpty()) {
-            throw new GradleException("Can't resolve clientRootDirectory, because it can't be null or empty!");
-        }
-        File clientRootDirectory = new File(clientRootDirectoryPath);
-        if (!clientRootDirectory.exists()) {
-            throw new GradleException("Can't resolve clientRootDirectory, because it doesn't exists: " + clientRootDirectory.getAbsolutePath());
-        }
-        return clientRootDirectory;
+    public Provider<Directory> provideClientDirectory(String directoryPath) {
+        return getProviderFactory().provider(() ->
+            clientDirectory().dir(getLatestDirectoryPath() + directoryPath)
+        );
     }
 
-    public @NotNull String resolvePatchlineName() {
-        Patchline patchline = getPatchline().getOrNull();
-        if (patchline == null) {
-            throw new GradleException("patchline can't be null!");
-        }
-        return patchline.name()
-            .toLowerCase(Locale.ROOT)
-            .replace('_', '-');
+    public String getLatestDirectoryPath() {
+        // install/PATCHLINE/package/game/latest/
+        String patchlineName = resolvePatchlineProvider().get();
+        return LATEST_DIRECTORY.replace("PATCHLINE", patchlineName);
     }
 
-    // APPDATA/Hytale/
-    public @NotNull File resolveClientLatestDirectory() {
-        File clientRootDirectory = resolveClientInstallDirectory();
-        // APPDATA/Hytale/install/PATCHLINE/package/game/latest/
-        String patchlineName = resolvePatchlineName();
-        String latestDirectoryPath = LATEST_DIRECTORY.replace("PATCHLINE", patchlineName);
-        return new File(clientRootDirectory, latestDirectoryPath);
+    public Provider<String> createDefaultAppDataProvider() {
+        return getProviderFactory().provider(() -> {
+            List<String> appDataPathList = getAppDataPathList();
+            List<String> modifiedPathList = new ArrayList<>();
+            File defaultClientDirectory = null;
+            for (String directoryPath : appDataPathList) {
+                directoryPath = directoryPath.trim();
+                if (!directoryPath.endsWith("/")) {
+                    directoryPath += "/";
+                }
+                directoryPath += "Hytale/";
+                modifiedPathList.add(directoryPath);
+                File clientHome = new File(directoryPath);
+                if (!clientHome.exists()) {
+                    continue;
+                }
+                if (!clientHome.isDirectory()) {
+                    continue;
+                }
+                File[] files = clientHome.listFiles();
+                if (files == null || files.length == 0) {
+                    continue;
+                }
+                defaultClientDirectory = clientHome;
+                break;
+            }
+            appDataPathList.clear();
+            if (defaultClientDirectory == null) {
+                String paths = String.join("\n - ", modifiedPathList);
+                throw new InvalidUserDataException("Cannot discover client installation. Searched at: " + paths);
+            }
+            return defaultClientDirectory.getAbsolutePath();
+        });
     }
 
-    public @NotNull File resolveClientServerDirectory() {
-        return new File(resolveClientLatestDirectory(), "Server/");
-    }
+    private static @NotNull List<String> getAppDataPathList() {
+        List<String> appDataDirectories = new ArrayList<>();
 
-    public @NotNull File resolveClientServerJarFile() {
-        return new File(resolveClientServerDirectory(), "HytaleServer.jar");
-    }
-
-    public @NotNull File resolveClientServerSourcesFile() {
-        return new File(resolveClientServerDirectory(), "HytaleServer-sources.jar");
-    }
-
-    public @NotNull File resolveClientAOTFile() {
-        return new File(resolveClientServerDirectory(), "HytaleServer.aot");
-    }
-
-    public @NotNull File resolveClientAssetsFile() {
-        return new File(resolveClientLatestDirectory(), "Assets.zip");
-    }
-
-    private static @NotNull String resolveDefaultClientDirectory() {
-        String appDataDirectory = resolveAppDataDirectory();
-        if (appDataDirectory == null || appDataDirectory.trim().isEmpty()) {
-            throw new GradleException("Couldn't find client-installation path!");
-        }
-        if (!appDataDirectory.endsWith("/")) {
-            appDataDirectory += "/";
-        }
-        return appDataDirectory + "Hytale/";
-    }
-
-    private static @Nullable String resolveAppDataDirectory() {
-        String osName = System.getProperty("os.name");
-        if (osName == null || osName.trim().isEmpty()) {
-            throw new GradleException("Couldn't find operating system name by system property \"os.name\"");
-        }
         String userHome = System.getProperty("user.home");
-        osName = osName.toLowerCase(Locale.ROOT);
-        if (osName.startsWith("win")) {
-            String appDataDirectory = System.getenv("APPDATA");
-            if (appDataDirectory != null && appDataDirectory.trim().isEmpty()) {
-                return appDataDirectory;
-            }
-            if (userHome != null && !userHome.trim().isEmpty()) {
-                return userHome + "/AppData/Roaming";
-            }
-            return null;
+        String dataHomeEnv = System.getenv("XDG_DATA_HOME");
+        String appDataEnv = System.getenv("APPDATA");
+
+        if (appDataEnv != null && !appDataEnv.trim().isEmpty()) {
+            // Windows
+            appDataDirectories.add(appDataEnv);
         }
-        if (osName.startsWith("mac")) {
-            if (userHome != null && !userHome.trim().isEmpty()) {
-                return userHome + "/Library/Application Support/";
-            }
-            return null;
+        if (userHome != null && !userHome.trim().isEmpty()) {
+            // Windows
+            appDataDirectories.add(userHome + "/AppData/Roaming/");
+            // Mac
+            appDataDirectories.add(userHome + "/Library/Application Support/");
+            // Linux
+            appDataDirectories.add(userHome + "/.var/app/com.hypixel.HytaleLauncher/data/");
         }
-        if (osName.startsWith("linux")) {
-            if (userHome != null && userHome.trim().isEmpty()) {
-                return userHome + "/.var/app/com.hypixel.HytaleLauncher/data/";
-            }
-            String dataHome = System.getenv("XDG_DATA_HOME");
-            if (dataHome == null || dataHome.trim().isEmpty()) {
-                return dataHome + "/.local/share/";
-            }
-            return null;
+        if (dataHomeEnv != null && !dataHomeEnv.trim().isEmpty()) {
+            // Linux
+            appDataDirectories.add(dataHomeEnv + "/.local/share/");
         }
-        throw new GradleException("Your operating system \"" + osName + "\" is not supported!");
+
+        return appDataDirectories;
     }
 }
