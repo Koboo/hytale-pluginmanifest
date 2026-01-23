@@ -1,5 +1,7 @@
 package eu.koboo.pluginmanifest.gradle.plugin;
 
+import eu.koboo.pluginmanifest.gradle.plugin.extension.Patchline;
+import eu.koboo.pluginmanifest.gradle.plugin.extension.ClientFiles;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
@@ -10,9 +12,9 @@ import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.ProviderUtils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.file.RegularFile;
@@ -20,7 +22,9 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskProvider;
+import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.jvm.tasks.Jar;
 import org.gradle.language.jvm.tasks.ProcessResources;
 
@@ -52,6 +56,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
         applyRuntimeDefault(target, runtimeExt);
 
         ClientInstallationExtension installExt = extension.installationExtension;
+        applyInstallDefaults(target, installExt);
 
         TaskProvider<GenerateManifestTask> generateManifestProvider = target.getTasks().register(GENERATE_MANIFEST, GenerateManifestTask.class);
         TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
@@ -59,43 +64,23 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
         target.afterEvaluate(project -> {
 
-            // Resolve the client installation directory
-            File clientServerJarFile = installExt.resolveClientServerJarFile();
-            if (!clientServerJarFile.exists()) {
-                throw new GradleException("Can't find server jar file at " + clientServerJarFile.getAbsolutePath());
-            }
-
             // Applying server dependency as a file.
             project.getRepositories().flatDir(repository ->
-                repository.dirs(installExt.resolveClientServerDirectory())
+                repository.dirs(installExt.provideClientDirectory(ClientFiles.SERVER_DIR))
             );
             project.getDependencies().add(
                 JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME,
                 ":HytaleServer"
             );
 
-            // Depend "processResources" on "generateManifest"
-            // Exclude/Override actual "src/resources/manifest.json"
-            target.getTasks().withType(ProcessResources.class).configureEach(task -> {
-                task.dependsOn(generateManifestProvider);
-                task.doLast(t -> {
-                    t.getOutputs().getFiles().forEach(outputFile -> {
-                        if (!outputFile.getName().endsWith(MANIFEST)) {
-                            return;
-                        }
-                        task.setDuplicatesStrategy(DuplicatesStrategy.INCLUDE);
-                    });
-                });
-            });
-
             // Adding PROJECT/build/generated/pluginmanifest/ to sourceSet resources.
             SourceSet mainSourceSet = project.getExtensions()
                 .getByType(SourceSetContainer.class)
                 .getByName("main");
-            Provider<Directory> genResourceDir = project.getLayout()
+            Provider<Directory> generatedResourceDir = project.getLayout()
                 .getBuildDirectory()
                 .dir(RESOURCE_DIRECTORY);
-            mainSourceSet.getResources().srcDir(genResourceDir);
+            mainSourceSet.getResources().srcDir(generatedResourceDir);
 
             Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
             Provider<RegularFile> archiveFileProvider = archiveTask.getArchiveFile();
@@ -106,10 +91,16 @@ public class PluginManifestPlugin implements Plugin<Project> {
             generateManifestProvider.configure(task -> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Generates the manifest.json and puts into plugins jar file.");
-                task.getResourceDirectory().set(genResourceDir);
+                task.getResourceDirectory().set(generatedResourceDir);
                 task.getManifestMap().set(ProviderUtils.createManifestProvider(project));
-                task.getMinimizeJson().set(manifestExt.getMinimizeJson());
             });
+            // Create task dependencies for "generateManifest"
+            Task processResources = target.getTasks().getByName("processResources");
+            processResources.dependsOn(generateManifestProvider);
+            Task javadocJar = target.getTasks().getByName("javadocJar");
+            javadocJar.dependsOn(generateManifestProvider);
+            Task sourcesJar = target.getTasks().getByName("sourcesJar");
+            sourcesJar.dependsOn(generateManifestProvider);
 
             //
             // ==== "runServer" ====
@@ -118,12 +109,12 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Runs the server in your server directory with console support in the terminal.");
 
-                task.getClientServerJarFile().set(installExt.resolveClientServerJarFile());
-                task.getClientAOTFile().set(installExt.resolveClientAOTFile());
-                task.getClientAssetsFile().set(installExt.resolveClientAssetsFile());
+                task.getClientServerJarFile().set(installExt.provideClientFile(ClientFiles.SERVER_JAR));
+                task.getClientAOTFile().set(installExt.provideClientFile(ClientFiles.AOT_FILE));
+                task.getClientAssetsFile().set(installExt.provideClientFile(ClientFiles.ASSETS_ZIP));
                 task.getArchiveFile().set(archiveFileProvider);
 
-                task.getRuntimeDirectory().set(runtimeExt.resolveRuntimeDirectory());
+                task.getRuntimeDirectory().set(runtimeExt.provideRuntimeDirectory(project));
                 task.getCopyPluginToRuntime().set(runtimeExt.getCopyPluginToRuntime());
 
                 task.getAllowOp().set(runtimeExt.getAllowOp());
@@ -131,10 +122,15 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getUserServerArguments().set(runtimeExt.getServerArguments());
             });
 
+            //
+            // ==== "decompileServer" ====
+            //
             decompileServerProvider.configure(task -> {
                 task.setGroup(TASK_GROUP_NAME);
-                task.setDescription("Decompiles the server sources from the clients installation path");
-                task.getClientServerJarFile().set(installExt.resolveClientServerJarFile());
+                task.setDescription("Decompiles the server sources from and into the client installation path");
+                task.getClientServerJarFile().set(installExt.provideClientFile(ClientFiles.SERVER_JAR));
+                task.getClientSourcesJarFile().set(installExt.provideClientFile(ClientFiles.SOURCES_JAR));
+                task.getVineflowerJarFile().set(installExt.provideClientFile(ClientFiles.VINEFLOWER_JAR));
             });
 
             //
@@ -153,14 +149,19 @@ public class PluginManifestPlugin implements Plugin<Project> {
         manifestExt.getServerVersion().convention("*");
         manifestExt.getDisabledByDefault().convention(false);
         manifestExt.getIncludesAssetPack().convention(ProviderUtils.createHasResourcesProvider(project));
-        manifestExt.getMinimizeJson().convention(false);
     }
 
     private void applyRuntimeDefault(Project project, ServerRuntimeExtension runtimeExtension) {
+        runtimeExtension.getIsProjectRelative().convention(true);
         runtimeExtension.getCopyPluginToRuntime().convention(false);
         runtimeExtension.getAllowOp().convention(true);
         runtimeExtension.getBindAddress().convention("0.0.0.0:5520");
         runtimeExtension.getJvmArguments().convention(new LinkedList<>());
         runtimeExtension.getServerArguments().convention(new LinkedList<>());
+    }
+
+    private void applyInstallDefaults(Project project, ClientInstallationExtension installExt) {
+        installExt.getPatchline().convention(Patchline.RELEASE);
+        installExt.getClientInstallDirectory().convention(installExt.createDefaultAppDataProvider());
     }
 }
