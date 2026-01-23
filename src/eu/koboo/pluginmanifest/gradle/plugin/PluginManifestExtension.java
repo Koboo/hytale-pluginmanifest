@@ -20,6 +20,7 @@ public abstract class PluginManifestExtension {
     ServerRuntimeExtension serverRuntimeExtension;
     ClientInstallationExtension installationExtension;
     Property<Boolean> addClientServerDependency;
+    Property<Boolean> addDefaultRepositories;
 
     @Inject
     public PluginManifestExtension(ObjectFactory objectFactory) {
@@ -28,6 +29,8 @@ public abstract class PluginManifestExtension {
         this.installationExtension = objectFactory.newInstance(ClientInstallationExtension.class);
         this.addClientServerDependency = objectFactory.property(Boolean.class);
         this.addClientServerDependency.set(true);
+        this.addDefaultRepositories = objectFactory.property(Boolean.class);
+        this.addDefaultRepositories.set(true);
     }
 
     public void manifestConfiguration(Action<JsonManifestExtension> action) {

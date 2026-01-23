@@ -61,7 +61,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
         target.afterEvaluate(project -> {
 
             // Applying server dependency as a file.
-            if(extension.getAddClientServerDependency().get()) {
+            if (extension.getAddClientServerDependency().get()) {
                 project.getRepositories().flatDir(repository ->
                     repository.dirs(installExt.provideClientDirectory(ClientFiles.SERVER_DIR))
                 );
@@ -69,6 +69,20 @@ public class PluginManifestPlugin implements Plugin<Project> {
                     JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME,
                     ":HytaleServer"
                 );
+            }
+
+            // Adding default maven repositories
+            if (extension.getAddDefaultRepositories().get()) {
+                project.getRepositories().mavenLocal();
+                project.getRepositories().mavenCentral();
+                project.getRepositories().maven(repository -> {
+                    repository.setName("hytale-release");
+                    repository.setUrl("https://maven.hytale.com/release");
+                });
+                project.getRepositories().maven(repository -> {
+                    repository.setName("hytale-pre-release");
+                    repository.setUrl("https://maven.hytale.com/pre-release");
+                });
             }
 
             // Adding PROJECT/build/generated/pluginmanifest/ to sourceSet resources.
