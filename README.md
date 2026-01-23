@@ -123,18 +123,20 @@ pluginManifest {
 
     // Configuration for the manifest.json generation
     manifestConfiguration {
-        // Required
+        // Required (AUTOMATICALLY RESOLVED)
         pluginGroup = "Koboo" // Defaults to your project's group
         pluginName = "MyPlugin" // Defaults to your project's name
         pluginVersion = "1.0.0" // Defaults to your project's version
 
-        // Required, sets the required serverVersion for your plugin.
+        // Required (AUTOMATICALLY RESOLVED)
+        // Sets the required serverVersion for your plugin.
         // Needs to be set in SemVerRange format
         // "*"          - Any serverVersion
         // ">=1.0.0"    - serverVersion needs to be greater or equal to 1.0.0
         serverVersion = "*" // Defaults to "*"
 
-        // Required, that's your Main-Class / starting point of the plugin.
+        // Required (AUTOMATICALLY RESOLVED)
+        // That's your Main-Class / starting point of the plugin.
         // The provided class has to "extends JavaPlugin".
         pluginMainClass = "eu.koboo.myplugin.MyPlugin" // Detected by source-file scanning
 
@@ -143,19 +145,22 @@ pluginManifest {
         // Optional, if set it needs to be a valid URL.
         pluginWebsite = "https://github.com/Koboo/MyPlugin"
 
+        // Optional
         // The plugin doesn't start automatically with the server,
-        // so you need to start it manually ingame with the commands:
+        // so you need to start it manually in-game with the commands:
         // /plugin load <PLUGIN_NAME>
         disabledByDefault = false // Defaults to false
 
+        // Optional (AUTOMATICALLY RESOLVED)
         // Does this plugin contain any assets?
         // These can be i.e., model-, texture, or ui-files
         includesAssetPack = false // Defaults to false
 
-        // You need to set at least 1 author.
-        // If you set NO author, a default author is created with:
+        // Required (one author)
+        // If didn't configure an author,
+        // we fall back to resolve these authors:
         // 1. Your OS-user -> System.getProperty("user.name")
-        // 2. If no userName available -> project.name + " Author" (e.g. "MyPlugin Author")
+        // 2. Project Name -> project.name + " Author" (e.g. "MyPlugin Author")
         authors {
             author {
                 name = "Koboo"
@@ -175,10 +180,13 @@ pluginManifest {
         // you can safely remove/delete this.
         pluginDependencies {
             // Dependency is required -> Plugin fails if dependency is not available
+            // Dependency version fallbacks to "*" (any version)
             required("Nitrado:WebServer")
-            // Dependency is optional -> Plugin does not fail if dependency is not available
+            // Dependency is optional -> Plugin does not fail to load if dependency is not available
+            // Dependency version needs to be greater or equal to "1.0.0"
             optional("Nitrado:QueryPlugin", ">=1.0.0")
-            // MyPlugin needs to load before this plugin (Not tested if it fails, if the plugin is not available)
+            // MyPlugin needs to load before this plugin
+            // (Not tested if load fails or not)
             loadBefore("OtherGroup:OtherPlugin")
         }
     }
@@ -260,9 +268,6 @@ The Gradle plugin's generated ``manifest.json``:
 ````
 
 ## Manifest specification
-
-- Keys and values of ``manifest.json`` are required or optional.
-- Keys and values need to be validated.
 
 | ``manifest.json`` Key    | Validation                                                  | Required | Example                                |
 |--------------------------|-------------------------------------------------------------|----------|----------------------------------------|
