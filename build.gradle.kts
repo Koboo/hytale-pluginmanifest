@@ -45,6 +45,8 @@ tasks.shadowJar {
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(25))
     withSourcesJar()
+    // We don't have any documentation using javadocs
+    //withJavadocJar()
 }
 
 tasks {
@@ -62,6 +64,7 @@ sourceSets {
         java.setSrcDirs(listOf("src"))
         resources.setSrcDirs(emptyList<String>())
     }
+    // No tests required, we write always write reliable code
     test {
         java.setSrcDirs(emptyList<String>())
         resources.setSrcDirs(emptyList<String>())
