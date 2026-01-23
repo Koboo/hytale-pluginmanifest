@@ -24,7 +24,6 @@ public abstract class JsonManifestExtension {
 
     Property<Boolean> disabledByDefault;
     Property<Boolean> includesAssetPack;
-    Property<Boolean> minimizeJson;
 
     ManifestAuthorsExtension manifestAuthors;
     ManifestPluginDependencyExtension manifestPluginDependencies;
@@ -42,8 +41,6 @@ public abstract class JsonManifestExtension {
 
         this.disabledByDefault = objectFactory.property(Boolean.class);
         this.includesAssetPack = objectFactory.property(Boolean.class);
-
-        this.minimizeJson = objectFactory.property(Boolean.class);
 
         this.manifestAuthors = objectFactory.newInstance(ManifestAuthorsExtension.class);
         this.manifestPluginDependencies = objectFactory.newInstance(ManifestPluginDependencyExtension.class);

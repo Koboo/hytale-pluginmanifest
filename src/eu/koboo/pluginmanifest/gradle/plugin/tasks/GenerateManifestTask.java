@@ -8,7 +8,6 @@ import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.MapProperty;
-import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
@@ -27,18 +26,12 @@ public abstract class GenerateManifestTask extends DefaultTask {
     @Input
     public abstract MapProperty<String, Object> getManifestMap();
 
-    @Input
-    public abstract Property<Boolean> getMinimizeJson();
-
     @TaskAction
     public void runTask() throws IOException {
 
         Map<String, Object> manifestMap = getManifestMap().get();
         String manifestJson = JsonOutput.toJson(manifestMap);
-
-        if (!getMinimizeJson().get()) {
-            manifestJson = JsonOutput.prettyPrint(manifestJson);
-        }
+        manifestJson = JsonOutput.prettyPrint(manifestJson);
 
         Directory directory = getResourceDirectory().getOrNull();
         if (directory == null) {
