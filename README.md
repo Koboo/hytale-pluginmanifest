@@ -67,6 +67,21 @@ You can override properties of the generated ``manifest.json``.
 
 ````kotlin
 pluginManifest {
+    // Should the plugin add the HytaleServer.jar from your
+    // client installation as dependency?
+    // Turn this off if you are using the official hytale
+    // dependency from the official maven repository
+    addClientServerDependency = true // Defaults to true
+
+    // Should the plugin add several default repositories
+    // to your project?
+    // These repositories are affected:
+    // - local maven
+    // - maven central
+    // - hytale release
+    // - hytale prerelease
+    addDefaultRepositories = true // Defaults to true
+
     // Configuration for your client installation detection
     clientInstallation {
         // Where should we check for your Hytale installation?
