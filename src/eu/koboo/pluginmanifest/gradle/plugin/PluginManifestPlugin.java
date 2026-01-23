@@ -61,13 +61,15 @@ public class PluginManifestPlugin implements Plugin<Project> {
         target.afterEvaluate(project -> {
 
             // Applying server dependency as a file.
-            project.getRepositories().flatDir(repository ->
-                repository.dirs(installExt.provideClientDirectory(ClientFiles.SERVER_DIR))
-            );
-            project.getDependencies().add(
-                JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME,
-                ":HytaleServer"
-            );
+            if(extension.getAddClientServerDependency().get()) {
+                project.getRepositories().flatDir(repository ->
+                    repository.dirs(installExt.provideClientDirectory(ClientFiles.SERVER_DIR))
+                );
+                project.getDependencies().add(
+                    JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME,
+                    ":HytaleServer"
+                );
+            }
 
             // Adding PROJECT/build/generated/pluginmanifest/ to sourceSet resources.
             SourceSet mainSourceSet = project.getExtensions()
