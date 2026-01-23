@@ -128,12 +128,6 @@ pluginManifest {
         // These can be i.e., model-, texture, or ui-files
         includesAssetPack = false // Defaults to false
 
-        // Minimizes the JSON string written into manifest.json
-        // What is minimizing?
-        // Minimizing just removes all unnecessary spaces and line-breaks,
-        // so the file size gets reduced to the bare minimum but sacrifices readability.
-        minimizeJson = false // Defaults to false
-
         // You need to set at least 1 author.
         // If you set NO author, a default author is created with:
         // 1. Your OS-user -> System.getProperty("user.name")
