@@ -10,7 +10,6 @@ import org.gradle.api.provider.Property;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.util.LinkedList;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -27,21 +26,11 @@ public abstract class ServerRuntimeExtension {
     @Inject
     public ServerRuntimeExtension(ObjectFactory objectFactory) {
         runtimeDirectory = objectFactory.property(String.class);
-
         copyPluginToRuntime = objectFactory.property(Boolean.class);
-        copyPluginToRuntime.convention(false);
-
         allowOp = objectFactory.property(Boolean.class);
-        allowOp.convention(true);
-
         bindAddress = objectFactory.property(String.class);
-        bindAddress.convention("0.0.0.0:5520");
-
         jvmArguments = objectFactory.listProperty(String.class);
-        jvmArguments.convention(new LinkedList<>());
-
         serverArguments = objectFactory.listProperty(String.class);
-        serverArguments.convention(new LinkedList<>());
     }
 
     public File resolveRuntimeDirectory() {

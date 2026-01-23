@@ -25,6 +25,7 @@ import org.gradle.jvm.tasks.Jar;
 import org.gradle.language.jvm.tasks.ProcessResources;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.Locale;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -45,9 +46,11 @@ public class PluginManifestPlugin implements Plugin<Project> {
         PluginManifestExtension extension = target.getExtensions().create(EXTENSION_NAME, PluginManifestExtension.class);
 
         JsonManifestExtension manifestExt = extension.jsonManifestExtension;
-        applyDefaults(target, manifestExt);
+        applyManifestDefaults(target, manifestExt);
 
         ServerRuntimeExtension runtimeExt = extension.serverRuntimeExtension;
+        applyRuntimeDefault(target, runtimeExt);
+
         ClientInstallationExtension installExt = extension.installationExtension;
 
         TaskProvider<GenerateManifestTask> generateManifestProvider = target.getTasks().register(GENERATE_MANIFEST, GenerateManifestTask.class);
@@ -142,7 +145,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
         });
     }
 
-    private void applyDefaults(Project project, JsonManifestExtension manifestExt) {
+    private void applyManifestDefaults(Project project, JsonManifestExtension manifestExt) {
         manifestExt.getPluginGroup().convention(ProviderUtils.createPluginGroupProvider(project));
         manifestExt.getPluginName().convention(ProviderUtils.createPluginNameProvider(project));
         manifestExt.getPluginVersion().convention(ProviderUtils.createPluginVersionProvider(project));
@@ -151,5 +154,13 @@ public class PluginManifestPlugin implements Plugin<Project> {
         manifestExt.getDisabledByDefault().convention(false);
         manifestExt.getIncludesAssetPack().convention(ProviderUtils.createHasResourcesProvider(project));
         manifestExt.getMinimizeJson().convention(false);
+    }
+
+    private void applyRuntimeDefault(Project project, ServerRuntimeExtension runtimeExtension) {
+        runtimeExtension.getCopyPluginToRuntime().convention(false);
+        runtimeExtension.getAllowOp().convention(true);
+        runtimeExtension.getBindAddress().convention("0.0.0.0:5520");
+        runtimeExtension.getJvmArguments().convention(new LinkedList<>());
+        runtimeExtension.getServerArguments().convention(new LinkedList<>());
     }
 }
