@@ -1,8 +1,14 @@
 # Hytale Plugin Manifest Generator
 
-<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/badge/gradle-plugin_portal-blue" alt="PluginPortal"></a>
-<a href="https://discord.koboo.eu/"><img src="https://img.shields.io/badge/discord-server-blue?color=purple" alt="PluginPortal"></a>
-<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version?color=green" alt="PluginPortal"></a>
+<a href="https://discord.koboo.eu/">
+<img src="https://img.shields.io/discord/1021053609359708211?color=purple" alt="PluginPortal">
+</a>
+<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest">
+<img src="https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?color=green" alt="PluginPortal">
+</a>
+<a href="LICENSE">
+<img src="https://img.shields.io/github/license/Koboo/hytale-pluginmanifest?color=blue" alt="LICENSE">
+</a>
 
 This project enables you to generate your Hytale Plugin's ``manifest.json`` automatically.
 
@@ -36,28 +42,24 @@ This project enables you to generate your Hytale Plugin's ``manifest.json`` auto
 - [Hosted @ GradlePluginPortal](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
 - [Hosted @ EntixReposilite](https://repo.entix.eu/#/releases/eu/koboo/pluginmanifest-plugin)
 
-![Latest version](https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version)
-
 **Required environment**
 
 - ``Gradle 9.2.1`` or newer
 - ``JDK 25`` or newer
 
 1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``build.gradle``**
-    ````groovy
-    plugins {
-        id 'eu.koboo.pluginmanifest' version 'LATEST_VERSION'
-    }
-    ````
+````groovy
+plugins {
+    id 'eu.koboo.pluginmanifest' version 'LATEST_VERSION'
+}
+````
 
 2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``build.gradle.kts``**
-    ````kotlin
-    plugins {
-        id("eu.koboo.pluginmanifest") version("LATEST_VERSION")
-    }
-    ````
-
-[See latest version](https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest)
+````kotlin
+plugins {
+    id("eu.koboo.pluginmanifest") version("LATEST_VERSION")
+}
+````
 
 ## Configuration
 
@@ -65,56 +67,91 @@ You can override properties of the generated ``manifest.json``.
 
 ````kotlin
 pluginManifest {
-    // Here you can configure:
-    // 1. manifest.json generation properties
-    // 2. If and where your HytaleServer.jar is
-    //
-    // For more information see GitHub:
-    // https://github.com/Koboo/hytale-pluginmanifest
+    // Should the plugin add the HytaleServer.jar from your
+    // client installation as dependency?
+    // Turn this off if you are using the official hytale
+    // dependency from the official maven repository
+    addClientServerDependency = true // Defaults to true
 
+    // Should the plugin add several default repositories
+    // to your project?
+    // These repositories are affected:
+    // - local maven
+    // - maven central
+    // - hytale release
+    // - hytale prerelease
+    addDefaultRepositories = true // Defaults to true
+
+    // Configuration for your client installation detection
     clientInstallation {
         // Where should we check for your Hytale installation?
         // If it's in the default installation directory,
-        // the plugin will probably detect its location automatically.
+        // the plugin will detect it automatically.
         clientInstallDirectory = "C:/Users/Koboo/AppData/Roaming/Hytale"
 
         // Which patchline do you want to use?
+        // Currently supported:
+        // - RELEASE
+        // - PRE_RELEASE
+        // Both patchlines use an own directory in the client-installation.
+        // So you can switch between both anytime.
+        // You have to make sure, the client already downloaded the patchline previously.
         patchline = Patchline.RELEASE
     }
 
+    // Configuration for the server runtime directory
     runtimeConfiguration {
         // If you want to automatically build your plugin
         // and run it on the same HytaleServer.jar,
         // just set any directory here.
-        runtimeDirectory = "D:/PluginManifestRuntime"
+        runtimeDirectory = "run/" // Defaults to "null" (Not configured)
+
+        // Set this to false if you provide an absolute path in "runtimeDirectory",
+        // otherwise the file resolving will be buggy.
+        isProjectRelative = true // Defaults to "true"
 
         // Should we copy the plugin to the "mods/" directory of the server
-        // Or just use the jar file from the "build/libs/" directory?
-        copyPluginToRuntime = false
+        // or should we append the projects "build/libs/" as mod directory?
+        // If you have multiple jar inside your "build/libs/" i.e.
+        // - "*-sources.jar"
+        // - "*-javadoc.jar"
+        // - "*-all.jar"
+        // You should enable this option,
+        // because the server tries to load every jar file as a plugin.
+        // We try to automatically copy the correct plugin jar,
+        // if there is more than 1 jar file inside "build/libs/".
+        copyPluginToRuntime = false // Defaults to "false"
+
+        // We delete the logs directory before we start the server.
+        // Why? Because we save diskSpace then ever we can.
+        deleteLogsOnStart = true // Defaults to "true"
 
         // Shortcuts for the commonly used server arguments
-        allowOp = false
-        bindAddress = "0.0.0.0:5520"
+        allowOp = true // Defaults to "true"
+        bindAddress = "0.0.0.0:5520" // Defaults to "0.0.0.0:5520"
 
         // Customize as you like
         // These are just example values
-        jvmArguments = listOf("-Xmx2048m")
-        serverArguments = listOf("--assets CustomAssets.zip")
+        jvmArguments = listOf("-Xmx2048m") // Defaults to "EMPTY"
+        serverArguments = listOf("--assets CustomAssets.zip") // Defaults to "EMPTY"
     }
 
+    // Configuration for the manifest.json generation
     manifestConfiguration {
-        // Required
-        pluginGroup = "eu.koboo" // Defaults to your project's group
+        // Required (AUTOMATICALLY RESOLVED)
+        pluginGroup = "Koboo" // Defaults to your project's group
         pluginName = "MyPlugin" // Defaults to your project's name
         pluginVersion = "1.0.0" // Defaults to your project's version
 
-        // Required, sets the required serverVersion for your plugin.
+        // Required (AUTOMATICALLY RESOLVED)
+        // Sets the required serverVersion for your plugin.
         // Needs to be set in SemVerRange format
         // "*"          - Any serverVersion
         // ">=1.0.0"    - serverVersion needs to be greater or equal to 1.0.0
         serverVersion = "*" // Defaults to "*"
 
-        // Required, that's your Main-Class / starting point of the plugin.
+        // Required (AUTOMATICALLY RESOLVED)
+        // That's your Main-Class / starting point of the plugin.
         // The provided class has to "extends JavaPlugin".
         pluginMainClass = "eu.koboo.myplugin.MyPlugin" // Detected by source-file scanning
 
@@ -123,25 +160,22 @@ pluginManifest {
         // Optional, if set it needs to be a valid URL.
         pluginWebsite = "https://github.com/Koboo/MyPlugin"
 
+        // Optional
         // The plugin doesn't start automatically with the server,
-        // so you need to start it manually ingame with the commands:
+        // so you need to start it manually in-game with the commands:
         // /plugin load <PLUGIN_NAME>
         disabledByDefault = false // Defaults to false
 
+        // Optional (AUTOMATICALLY RESOLVED)
         // Does this plugin contain any assets?
         // These can be i.e., model-, texture, or ui-files
         includesAssetPack = false // Defaults to false
 
-        // Minimizes the JSON string written into manifest.json
-        // What is minimizing?
-        // Minimizing just removes all unnecessary spaces and line-breaks,
-        // so the file size gets reduced to the bare minimum but sacrifices readability.
-        minimizeJson = false // Defaults to false
-
-        // You need to set at least 1 author.
-        // If you set NO author, a default author is created with:
+        // Required (one author)
+        // If didn't configure an author,
+        // we fall back to resolve these authors:
         // 1. Your OS-user -> System.getProperty("user.name")
-        // 2. If no userName available -> project.name + "-Author" (e.g. "MyPlugin-Author")
+        // 2. Project Name -> project.name + " Author" (e.g. "MyPlugin Author")
         authors {
             author {
                 name = "Koboo"
@@ -161,10 +195,13 @@ pluginManifest {
         // you can safely remove/delete this.
         pluginDependencies {
             // Dependency is required -> Plugin fails if dependency is not available
+            // Dependency version fallbacks to "*" (any version)
             required("Nitrado:WebServer")
-            // Dependency is optional -> Plugin does not fail if dependency is not available
+            // Dependency is optional -> Plugin does not fail to load if dependency is not available
+            // Dependency version needs to be greater or equal to "1.0.0"
             optional("Nitrado:QueryPlugin", ">=1.0.0")
-            // MyPlugin needs to load before this plugin (Not tested if it fails, if the plugin is not available)
+            // MyPlugin needs to load before this plugin
+            // (Not tested if load fails or not)
             loadBefore("OtherGroup:OtherPlugin")
         }
     }
@@ -247,9 +284,6 @@ The Gradle plugin's generated ``manifest.json``:
 
 ## Manifest specification
 
-- Keys and values of ``manifest.json`` are required or optional.
-- Keys and values need to be validated.
-
 | ``manifest.json`` Key    | Validation                                                  | Required | Example                                |
 |--------------------------|-------------------------------------------------------------|----------|----------------------------------------|
 | ``Group``                | UTF-8 ``String``                                            | ✅        | ``Koboos-Plugins``                     |
@@ -271,9 +305,8 @@ The Gradle plugin's generated ``manifest.json``:
 Add this to your ``settings.gradle.kts`` for snapshot-versions.
 
 1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``settings.gradle``**
-
-  ````groovy
-   pluginManagement {
+````groovy
+pluginManagement {
     repositories {
         gradlePluginPortal()
         maven {
@@ -282,20 +315,20 @@ Add this to your ``settings.gradle.kts`` for snapshot-versions.
         }
     }
 }
-  ````
+````
 
 2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``settings.gradle.kts``**
-   ````kotlin
-   pluginManagement {
-     repositories {
-       gradlePluginPortal()
-       maven {
-         name = "entixReposilite"
-         url = uri("https://repo.entix.eu/snapshots")
-       }
-     }
-   }
-   ````
+````kotlin
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            name = "entixReposilite"
+            url = uri("https://repo.entix.eu/snapshots")
+        }
+    }
+}
+````
 
 ## Credits
 

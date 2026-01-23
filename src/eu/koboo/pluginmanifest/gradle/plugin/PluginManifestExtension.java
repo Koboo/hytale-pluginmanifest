@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.gradle.api.Action;
 import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.provider.Property;
 
 import javax.inject.Inject;
 
@@ -18,12 +19,18 @@ public abstract class PluginManifestExtension {
     JsonManifestExtension jsonManifestExtension;
     ServerRuntimeExtension serverRuntimeExtension;
     ClientInstallationExtension installationExtension;
+    Property<Boolean> addClientServerDependency;
+    Property<Boolean> addDefaultRepositories;
 
     @Inject
     public PluginManifestExtension(ObjectFactory objectFactory) {
         this.jsonManifestExtension = objectFactory.newInstance(JsonManifestExtension.class);
         this.serverRuntimeExtension = objectFactory.newInstance(ServerRuntimeExtension.class);
         this.installationExtension = objectFactory.newInstance(ClientInstallationExtension.class);
+        this.addClientServerDependency = objectFactory.property(Boolean.class);
+        this.addClientServerDependency.set(true);
+        this.addDefaultRepositories = objectFactory.property(Boolean.class);
+        this.addDefaultRepositories.set(true);
     }
 
     public void manifestConfiguration(Action<JsonManifestExtension> action) {

@@ -12,6 +12,7 @@ import org.gradle.work.DisableCachingByDefault;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @DisableCachingByDefault(because = "Starts the configured hytale server")
@@ -36,6 +37,9 @@ public abstract class RunServerTask extends JavaExec {
     public abstract Property<Boolean> getCopyPluginToRuntime();
 
     @Input
+    public abstract Property<Boolean> getDeleteLogsOnStart();
+
+    @Input
     public abstract Property<Boolean> getAllowOp();
 
     @Input
@@ -47,23 +51,34 @@ public abstract class RunServerTask extends JavaExec {
     @TaskAction
     public void runTask() {
         PluginLog.info("Building start command...");
-        File serverJarFile = getClientServerJarFile().getAsFile().getOrNull();
-        if (serverJarFile == null || !serverJarFile.exists()) {
+        File serverJarFile = getClientServerJarFile().getAsFile().get();
+        if (!serverJarFile.exists()) {
             throw new StopExecutionException("HytaleServer.jar doesn't exist!");
         }
-        File runtimeDirectory = getRuntimeDirectory().getAsFile().getOrNull();
-        if (runtimeDirectory == null) {
-            throw new StopExecutionException("runtimeDirectory cannot be null!");
-        }
+        File runtimeDirectory = getRuntimeDirectory().getAsFile().get();
         if (!runtimeDirectory.exists()) {
             runtimeDirectory.mkdirs();
+        }
+        File runtimeServerJar = new File(runtimeDirectory, "HytaleServer.jar");
+        if (runtimeServerJar.exists()) {
+            serverJarFile = runtimeServerJar;
+            PluginLog.info("Using server jar from runtime directory");
+        }
+
+        File logsDirectory = new File(runtimeDirectory, "logs");
+        if (logsDirectory.exists()) {
+            try {
+                FileUtils.deleteRecursively(logsDirectory.toPath());
+            } catch (IOException e) {
+                PluginLog.info("Can not delete runtime logs directory: " + e.getMessage());
+            }
         }
 
         List<String> taskJvmArguments = new ArrayList<>();
 
         // Add optional aot file for faster startup
-        File serverAOTFile = getClientAOTFile().getAsFile().getOrNull();
-        if (serverAOTFile != null && serverAOTFile.exists()) {
+        File serverAOTFile = getClientAOTFile().getAsFile().get();
+        if (serverAOTFile.exists()) {
             taskJvmArguments.add("-XX:AOTCache=" + serverAOTFile.getAbsolutePath());
         }
 
@@ -105,16 +120,32 @@ public abstract class RunServerTask extends JavaExec {
             modsDirectory.mkdirs();
         }
         File modsArchiveFile = new File(modsDirectory, pluginArchiveFile.getName());
-
         boolean copyPluginToRuntimeModsFolder = getCopyPluginToRuntime().get();
+
+        // Check if there are more than 1 jar file inside "build/libs/"
+        File buildLibsDirectory = pluginArchiveFile.getParentFile();
+        File[] archiveFiles = buildLibsDirectory.listFiles();
+        if (archiveFiles != null && archiveFiles.length > 1) {
+            long archiveFileAmount = Arrays.stream(archiveFiles)
+                .map(File::getName)
+                .filter(name -> name.endsWith(".jar") || name.endsWith(".zip"))
+                .count();
+            PluginLog.info("Found " + archiveFileAmount + " jar files inside build directory..");
+            copyPluginToRuntimeModsFolder = archiveFileAmount > 1;
+            if (copyPluginToRuntimeModsFolder) {
+                PluginLog.info("Detected more than one jar file in build directory!");
+            }
+        }
+
         if (!copyPluginToRuntimeModsFolder) {
             PluginLog.info("Using \"--mods\" as argument to include build directory as mods!");
             if (modsArchiveFile.exists()) {
-                modsDirectory.delete();
+                modsArchiveFile.delete();
                 PluginLog.info("Deleted existing plugin from runtime \"mods/\" directory!");
             }
+
             taskServerArguments.add("--mods");
-            taskServerArguments.add(pluginArchiveFile.getParentFile().getAbsolutePath());
+            taskServerArguments.add(buildLibsDirectory.getAbsolutePath());
         } else {
             PluginLog.info("Copying plugin into runtime \"mods/\" directory!");
             try {
