@@ -1,6 +1,5 @@
 package eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime;
 
-import eu.koboo.pluginmanifest.gradle.plugin.PluginManifestExtension;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
@@ -20,6 +19,7 @@ public abstract class ServerRuntimeExtension {
     Property<String> runtimeDirectory;
     Property<Boolean> isProjectRelative;
     Property<Boolean> copyPluginToRuntime;
+    Property<Boolean> deleteLogsOnStart;
 
     Property<Boolean> allowOp;
     Property<String> bindAddress;
@@ -31,6 +31,8 @@ public abstract class ServerRuntimeExtension {
         runtimeDirectory = objectFactory.property(String.class);
         isProjectRelative = objectFactory.property(Boolean.class);
         copyPluginToRuntime = objectFactory.property(Boolean.class);
+        deleteLogsOnStart = objectFactory.property(Boolean.class);
+
         allowOp = objectFactory.property(Boolean.class);
         bindAddress = objectFactory.property(String.class);
         jvmArguments = objectFactory.listProperty(String.class);

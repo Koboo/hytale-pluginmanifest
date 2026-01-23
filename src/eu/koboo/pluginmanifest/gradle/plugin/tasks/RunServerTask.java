@@ -2,6 +2,7 @@ package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
 import eu.koboo.pluginmanifest.gradle.plugin.utils.FileUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
+import lombok.SneakyThrows;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
@@ -11,7 +12,9 @@ import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @DisableCachingByDefault(because = "Starts the configured hytale server")
@@ -34,6 +37,9 @@ public abstract class RunServerTask extends JavaExec {
 
     @Input
     public abstract Property<Boolean> getCopyPluginToRuntime();
+
+    @Input
+    public abstract Property<Boolean> getDeleteLogsOnStart();
 
     @Input
     public abstract Property<Boolean> getAllowOp();
@@ -59,6 +65,15 @@ public abstract class RunServerTask extends JavaExec {
         if(runtimeServerJar.exists()) {
             serverJarFile = runtimeServerJar;
             PluginLog.info("Using server jar from runtime directory");
+        }
+
+        File logsDirectory = new File(runtimeDirectory, "logs");
+        if(logsDirectory.exists()) {
+            try {
+                FileUtils.deleteRecursively(logsDirectory.toPath());
+            } catch (IOException e) {
+                PluginLog.info("Can not delete runtime logs directory: " + e.getMessage());
+            }
         }
 
         List<String> taskJvmArguments = new ArrayList<>();

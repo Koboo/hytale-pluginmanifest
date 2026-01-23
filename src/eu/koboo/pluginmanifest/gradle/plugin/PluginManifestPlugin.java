@@ -16,17 +16,13 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.Directory;
-import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskProvider;
-import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.jvm.tasks.Jar;
-import org.gradle.language.jvm.tasks.ProcessResources;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -116,6 +112,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
 
                 task.getRuntimeDirectory().set(runtimeExt.provideRuntimeDirectory(project));
                 task.getCopyPluginToRuntime().set(runtimeExt.getCopyPluginToRuntime());
+                task.getDeleteLogsOnStart().set(runtimeExt.getDeleteLogsOnStart());
 
                 task.getAllowOp().set(runtimeExt.getAllowOp());
                 task.getUserJvmArguments().set(runtimeExt.getJvmArguments());
@@ -154,6 +151,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
     private void applyRuntimeDefault(Project project, ServerRuntimeExtension runtimeExtension) {
         runtimeExtension.getIsProjectRelative().convention(true);
         runtimeExtension.getCopyPluginToRuntime().convention(false);
+        runtimeExtension.getDeleteLogsOnStart().convention(true);
+
         runtimeExtension.getAllowOp().convention(true);
         runtimeExtension.getBindAddress().convention("0.0.0.0:5520");
         runtimeExtension.getJvmArguments().convention(new LinkedList<>());
