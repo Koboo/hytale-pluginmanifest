@@ -49,13 +49,24 @@ public class PluginDoctor {
             runtimeText = runtimeDirectory.getAbsolutePath();
         }
 
-        boolean isServerRunnable = false;
+        boolean usesClientServerJar = true;
+        String serverJarText = "Not configured";
         File serverJarFile = null;
         if (runtimeDirectory != null && runtimeDirectory.exists()) {
-            serverJarFile = clientServerJarFile;
-            if (serverJarFile.exists() && clientAssetsFile.exists()) {
-                isServerRunnable = true;
+            File runtimeServerJar = new File(runtimeDirectory, "HytaleServer.jar");
+            if(runtimeServerJar.exists() && runtimeServerJar.isFile()) {
+                serverJarFile = runtimeServerJar;
+                serverJarText = "From runtimeDirectory";
+                usesClientServerJar = false;
             }
+            if(!usesClientServerJar) {
+                serverJarFile = clientServerJarFile;
+                serverJarText = "From client installation";
+            }
+        }
+        String runnableText = "NO";
+        if(serverJarFile != null && serverJarFile.exists() && serverJarFile.isFile()) {
+            runnableText = "YES";
         }
 
         // Parse versions by MANIFEST of client and runtime server jar
@@ -101,15 +112,12 @@ public class PluginDoctor {
         PluginLog.print("=============== Runtime ==============");
         PluginLog.print("");
         PluginLog.print("  Server-Runtime-Directory > " + runtimeText);
-        PluginLog.print("    Runtime-Server-Version > " + runtimeServerVersion);
-        PluginLog.print("       Is server runnable? > " + booleanToHuman(isServerRunnable));
+        PluginLog.print("   Which 'HytaleServer.jar'> " + serverJarText);
+        PluginLog.print("            Server-Version > " + runtimeServerVersion);
         PluginLog.print("   Version matches client? > " + matchesVersion);
+        PluginLog.print("    Is runtime executable? > " + runnableText);
         PluginLog.print("");
         PluginLog.print("======================================");
-    }
-
-    private String booleanToHuman(boolean value) {
-        return value ? "YES" : "NO";
     }
 
     private String fileExists(File file) {

@@ -55,6 +55,11 @@ public abstract class RunServerTask extends JavaExec {
         if (!runtimeDirectory.exists()) {
             runtimeDirectory.mkdirs();
         }
+        File runtimeServerJar = new File(runtimeDirectory, "HytaleServer.jar");
+        if(runtimeServerJar.exists()) {
+            serverJarFile = runtimeServerJar;
+            PluginLog.info("Using server jar from runtime directory");
+        }
 
         List<String> taskJvmArguments = new ArrayList<>();
 
