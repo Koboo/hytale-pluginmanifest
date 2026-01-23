@@ -1,16 +1,21 @@
 package eu.koboo.pluginmanifest.gradle.plugin;
 
+import eu.koboo.pluginmanifest.gradle.plugin.extension.ClientFiles;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JarManifestUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.JavaSourceUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
+import eu.koboo.pluginmanifest.gradle.plugin.utils.ProviderUtils;
+import groovy.json.JsonOutput;
 import lombok.experimental.UtilityClass;
+import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Project;
 import org.gradle.jvm.tasks.Jar;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 @UtilityClass
 public class PluginDoctor {
@@ -22,26 +27,33 @@ public class PluginDoctor {
                             ServerRuntimeExtension runtimeExt,
                             ClientInstallationExtension installExt) {
 
-        File clientInstallDirectory = installExt.resolveClientInstallDirectory();
-        File clientServerJarFile = installExt.resolveClientServerJarFile();
+        File clientInstallDirectory = new File(installExt.getClientInstallDirectory().get());
+        File clientServerJarFile = installExt.provideClientFile(ClientFiles.SERVER_JAR).get().getAsFile();
+        File clientAssetsFile = installExt.provideClientFile(ClientFiles.ASSETS_ZIP).get().getAsFile();
+        File clientAOTFile = installExt.provideClientFile(ClientFiles.AOT_FILE).get().getAsFile();
+        File clientSourcesFile = installExt.provideClientFile(ClientFiles.SOURCES_JAR).get().getAsFile();
 
         String clientServerVersion = JarManifestUtils.getVersion(clientServerJarFile);
 
-        String infoRuntimeDirectory = "Not configured";
         String runtimeDirectoryPath = runtimeExt.getRuntimeDirectory().getOrNull();
         File runtimeDirectory = null;
+        String runtimeText = "Not configured";
         if (runtimeDirectoryPath != null && !runtimeDirectoryPath.trim().isEmpty()) {
-            runtimeDirectory = new File(runtimeDirectoryPath);
-            infoRuntimeDirectory = runtimeDirectory.getAbsolutePath();
+            runtimeDirectory = runtimeExt.provideRuntimeDirectory(project);
+            if(runtimeDirectory.exists() && !runtimeDirectory.isDirectory()) {
+                throw new InvalidUserDataException("Configured runtimeDirectory is not a directory!");
+            }
+            if(!runtimeDirectory.exists()) {
+                runtimeDirectory.mkdirs();
+            }
+            runtimeText = runtimeDirectory.getAbsolutePath();
         }
 
         boolean isServerRunnable = false;
         File serverJarFile = null;
         if (runtimeDirectory != null && runtimeDirectory.exists()) {
-            serverJarFile = installExt.resolveClientServerJarFile();
-            File aotFile = installExt.resolveClientAOTFile();
-            File assetsFile = installExt.resolveClientAssetsFile();
-            if (serverJarFile.exists() && aotFile.exists() && assetsFile.exists()) {
+            serverJarFile = clientServerJarFile;
+            if (serverJarFile.exists() && clientAssetsFile.exists()) {
                 isServerRunnable = true;
             }
         }
@@ -61,30 +73,25 @@ public class PluginDoctor {
         File archiveFile = archiveTask.getArchiveFile().get().getAsFile();
         String archiveTaskName = archiveTask.getName();
 
-        boolean hasResources = JavaSourceUtils.hasResources(project);
-        List<String> mainClassCandidates = JavaSourceUtils.getMainClassCandidates(project);
+        Map<String, Object> manifestMap = ProviderUtils.createManifestProvider(project).get();
+        String manifestJson = JsonOutput.toJson(manifestMap);
+        manifestJson = JsonOutput.prettyPrint(manifestJson);
 
-        String mainClass = "Not found";
-        if (mainClassCandidates.size() == 1) {
-            mainClass = mainClassCandidates.getFirst();
-        }
+        String patchlineName = installExt.resolvePatchlineProvider().get();
 
         PluginLog.info("PluginManifest doctor results for \"" + project.getName() + "\":");
         PluginLog.print("========= Client Installation ========");
         PluginLog.print("");
         PluginLog.print("                      Path > " + clientInstallDirectory.getAbsolutePath());
-        PluginLog.print("                 Patchline > " + installExt.resolvePatchlineName());
+        PluginLog.print("                 Patchline > " + patchlineName);
         PluginLog.print("            Server-Version > " + JarManifestUtils.getVersion(clientServerJarFile));
         PluginLog.print("        'HytaleServer.jar' > " + fileExists(clientServerJarFile));
-        PluginLog.print("        'HytaleServer.aot' > " + fileExists(installExt.resolveClientAOTFile()));
-        PluginLog.print("'HytaleServer-sources.jar' > " + fileExists(installExt.resolveClientServerSourcesFile()));
-        PluginLog.print("              'Assets.zip' > " + fileExists(installExt.resolveClientAssetsFile()));
+        PluginLog.print("        'HytaleServer.aot' > " + fileExists(clientAOTFile));
+        PluginLog.print("'HytaleServer-sources.jar' > " + fileExists(clientSourcesFile));
+        PluginLog.print("              'Assets.zip' > " + fileExists(clientAssetsFile));
         PluginLog.print("");
         PluginLog.print("============== Manifest ==============");
-        PluginLog.print("");
-        PluginLog.print(" 'IncludesAssetPack' > \"" + hasResources + "\"");
-        PluginLog.print("              'Main' > \"" + mainClass + "\"");
-        PluginLog.print("");
+        PluginLog.print(manifestJson);
         PluginLog.print("============== JAR file ==============");
         PluginLog.print("");
         PluginLog.print(" JAR file build task > \"" + archiveTaskName + "\"");
@@ -93,7 +100,7 @@ public class PluginDoctor {
         PluginLog.print("");
         PluginLog.print("=============== Runtime ==============");
         PluginLog.print("");
-        PluginLog.print("  Server-Runtime-Directory > " + infoRuntimeDirectory);
+        PluginLog.print("  Server-Runtime-Directory > " + runtimeText);
         PluginLog.print("    Runtime-Server-Version > " + runtimeServerVersion);
         PluginLog.print("       Is server runnable? > " + booleanToHuman(isServerRunnable));
         PluginLog.print("   Version matches client? > " + matchesVersion);
