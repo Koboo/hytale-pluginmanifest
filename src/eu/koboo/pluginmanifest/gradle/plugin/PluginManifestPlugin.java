@@ -1,7 +1,7 @@
 package eu.koboo.pluginmanifest.gradle.plugin;
 
-import eu.koboo.pluginmanifest.gradle.plugin.extension.Patchline;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.ClientFiles;
+import eu.koboo.pluginmanifest.gradle.plugin.extension.Patchline;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.clientinstall.ClientInstallationExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.manifest.JsonManifestExtension;
 import eu.koboo.pluginmanifest.gradle.plugin.extension.serverruntime.ServerRuntimeExtension;

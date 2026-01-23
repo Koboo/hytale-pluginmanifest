@@ -45,7 +45,7 @@ public abstract class ServerRuntimeExtension {
             throw new InvalidUserDataException("Can't resolve runtimeDirectory, no path set!");
         }
         File runtimeDirectory;
-        if(getIsProjectRelative().get()) {
+        if (getIsProjectRelative().get()) {
             File projectDirectory = project.getLayout().getProjectDirectory().getAsFile();
             runtimeDirectory = new File(projectDirectory, runtimeDirectoryPath);
         } else {

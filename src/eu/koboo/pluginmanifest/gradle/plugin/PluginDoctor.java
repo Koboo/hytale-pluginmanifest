@@ -14,7 +14,6 @@ import org.gradle.api.Project;
 import org.gradle.jvm.tasks.Jar;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 
 @UtilityClass
@@ -40,10 +39,10 @@ public class PluginDoctor {
         String runtimeText = "Not configured";
         if (runtimeDirectoryPath != null && !runtimeDirectoryPath.trim().isEmpty()) {
             runtimeDirectory = runtimeExt.provideRuntimeDirectory(project);
-            if(runtimeDirectory.exists() && !runtimeDirectory.isDirectory()) {
+            if (runtimeDirectory.exists() && !runtimeDirectory.isDirectory()) {
                 throw new InvalidUserDataException("Configured runtimeDirectory is not a directory!");
             }
-            if(!runtimeDirectory.exists()) {
+            if (!runtimeDirectory.exists()) {
                 runtimeDirectory.mkdirs();
             }
             runtimeText = runtimeDirectory.getAbsolutePath();
@@ -53,7 +52,7 @@ public class PluginDoctor {
         File serverJarFile = null;
         if (runtimeDirectory != null && runtimeDirectory.exists() && runtimeDirectory.isDirectory()) {
             File runtimeServerJar = new File(runtimeDirectory, "HytaleServer.jar");
-            if(runtimeServerJar.exists() && runtimeServerJar.isFile()) {
+            if (runtimeServerJar.exists() && runtimeServerJar.isFile()) {
                 serverJarFile = runtimeServerJar;
                 serverJarText = "From runtimeDirectory";
             } else {
@@ -62,7 +61,7 @@ public class PluginDoctor {
             }
         }
         String runnableText = "NO";
-        if(serverJarFile != null && serverJarFile.exists() && serverJarFile.isFile()) {
+        if (serverJarFile != null && serverJarFile.exists() && serverJarFile.isFile()) {
             runnableText = "YES";
         }
 

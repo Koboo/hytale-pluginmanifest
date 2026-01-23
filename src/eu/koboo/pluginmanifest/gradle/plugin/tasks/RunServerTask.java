@@ -2,7 +2,6 @@ package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
 import eu.koboo.pluginmanifest.gradle.plugin.utils.FileUtils;
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
-import lombok.SneakyThrows;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
@@ -12,10 +11,8 @@ import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 @DisableCachingByDefault(because = "Starts the configured hytale server")
@@ -63,13 +60,13 @@ public abstract class RunServerTask extends JavaExec {
             runtimeDirectory.mkdirs();
         }
         File runtimeServerJar = new File(runtimeDirectory, "HytaleServer.jar");
-        if(runtimeServerJar.exists()) {
+        if (runtimeServerJar.exists()) {
             serverJarFile = runtimeServerJar;
             PluginLog.info("Using server jar from runtime directory");
         }
 
         File logsDirectory = new File(runtimeDirectory, "logs");
-        if(logsDirectory.exists()) {
+        if (logsDirectory.exists()) {
             try {
                 FileUtils.deleteRecursively(logsDirectory.toPath());
             } catch (IOException e) {
@@ -127,15 +124,15 @@ public abstract class RunServerTask extends JavaExec {
 
         // Check if there are more than 1 jar file inside "build/libs/"
         File buildLibsDirectory = pluginArchiveFile.getParentFile();
-        File[] archiveFiles =  buildLibsDirectory.listFiles();
-        if(archiveFiles != null && archiveFiles.length > 1) {
+        File[] archiveFiles = buildLibsDirectory.listFiles();
+        if (archiveFiles != null && archiveFiles.length > 1) {
             long archiveFileAmount = Arrays.stream(archiveFiles)
                 .map(File::getName)
                 .filter(name -> name.endsWith(".jar") || name.endsWith(".zip"))
                 .count();
             PluginLog.info("Found " + archiveFileAmount + " jar files inside build directory..");
             copyPluginToRuntimeModsFolder = archiveFileAmount > 1;
-            if(copyPluginToRuntimeModsFolder) {
+            if (copyPluginToRuntimeModsFolder) {
                 PluginLog.info("Detected more than one jar file in build directory!");
             }
         }

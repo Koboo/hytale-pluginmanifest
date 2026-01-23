@@ -2,7 +2,10 @@ package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.tasks.*;
+import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.JavaExec;
+import org.gradle.api.tasks.StopExecutionException;
+import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
