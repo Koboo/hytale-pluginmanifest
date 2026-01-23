@@ -1,8 +1,14 @@
 # Hytale Plugin Manifest Generator
 
-<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/badge/gradle-plugin_portal-blue" alt="PluginPortal"></a>
-<a href="https://discord.koboo.eu/"><img src="https://img.shields.io/badge/discord-server-blue?color=purple" alt="PluginPortal"></a>
-<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest"><img src="https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?label=latest+version?color=green" alt="PluginPortal"></a>
+<a href="https://discord.koboo.eu/">
+<img src="https://img.shields.io/discord/1021053609359708211?color=purple" alt="PluginPortal">
+</a>
+<a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest">
+<img src="https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?color=green" alt="PluginPortal">
+</a>
+<a href="LICENSE">
+<img src="https://img.shields.io/github/license/Koboo/hytale-pluginmanifest?color=blue" alt="LICENSE">
+</a>
 
 This project enables you to generate your Hytale Plugin's ``manifest.json`` automatically.
 
@@ -281,27 +287,26 @@ Add this to your ``settings.gradle.kts`` for snapshot-versions.
 1. <img src=".idea/groovy_logo.png" height="10em" alt="Groovy Logo"></img> **Groovy DSL: ``settings.gradle``**
 ````groovy
 pluginManagement {
-  repositories {
-      gradlePluginPortal()
-      maven {
-          name 'entixReposilite'
-          url 'https://repo.entix.eu/snapshots'
-      }
-  }
+    repositories {
+        gradlePluginPortal()
+        maven {
+            name 'entixReposilite'
+            url 'https://repo.entix.eu/snapshots'
+        }
+    }
 }
-  ````
-
+````
 
 2. <img src=".idea/kotlin_logo.png" height="10em" alt="Kotlin Logo"></img> **Kotlin DSL: ``settings.gradle.kts``**
 ````kotlin
 pluginManagement {
-  repositories {
-    gradlePluginPortal()
-    maven {
-      name = "entixReposilite"
-      url = uri("https://repo.entix.eu/snapshots")
+    repositories {
+        gradlePluginPortal()
+        maven {
+            name = "entixReposilite"
+            url = uri("https://repo.entix.eu/snapshots")
+        }
     }
-  }
 }
 ````
 
