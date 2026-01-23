@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -122,16 +123,32 @@ public abstract class RunServerTask extends JavaExec {
             modsDirectory.mkdirs();
         }
         File modsArchiveFile = new File(modsDirectory, pluginArchiveFile.getName());
-
         boolean copyPluginToRuntimeModsFolder = getCopyPluginToRuntime().get();
+
+        // Check if there are more than 1 jar file inside "build/libs/"
+        File buildLibsDirectory = pluginArchiveFile.getParentFile();
+        File[] archiveFiles =  buildLibsDirectory.listFiles();
+        if(archiveFiles != null && archiveFiles.length > 1) {
+            long archiveFileAmount = Arrays.stream(archiveFiles)
+                .map(File::getName)
+                .filter(name -> name.endsWith(".jar") || name.endsWith(".zip"))
+                .count();
+            PluginLog.info("Found " + archiveFileAmount + " jar files inside build directory..");
+            copyPluginToRuntimeModsFolder = archiveFileAmount > 1;
+            if(copyPluginToRuntimeModsFolder) {
+                PluginLog.info("Detected more than one jar file in build directory!");
+            }
+        }
+
         if (!copyPluginToRuntimeModsFolder) {
             PluginLog.info("Using \"--mods\" as argument to include build directory as mods!");
             if (modsArchiveFile.exists()) {
-                modsDirectory.delete();
+                modsArchiveFile.delete();
                 PluginLog.info("Deleted existing plugin from runtime \"mods/\" directory!");
             }
+
             taskServerArguments.add("--mods");
-            taskServerArguments.add(pluginArchiveFile.getParentFile().getAbsolutePath());
+            taskServerArguments.add(buildLibsDirectory.getAbsolutePath());
         } else {
             PluginLog.info("Copying plugin into runtime \"mods/\" directory!");
             try {
