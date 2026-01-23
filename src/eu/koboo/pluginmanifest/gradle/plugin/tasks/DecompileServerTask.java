@@ -2,10 +2,7 @@ package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.JavaExec;
-import org.gradle.api.tasks.StopExecutionException;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
@@ -23,23 +20,27 @@ public abstract class DecompileServerTask extends JavaExec {
     @InputFile
     public abstract RegularFileProperty getClientServerJarFile();
 
+    @InputFile
+    public abstract RegularFileProperty getClientSourcesJarFile();
+
+    @InputFile
+    public abstract RegularFileProperty getVineflowerJarFile();
+
     @TaskAction
     public void runTask() {
         PluginLog.info("Decompiling server sources...");
-        File serverJarFile = getClientServerJarFile().getAsFile().getOrNull();
-        if (serverJarFile == null || !serverJarFile.exists()) {
+        File serverJarFile = getClientServerJarFile().getAsFile().get();
+        if (!serverJarFile.exists()) {
             throw new StopExecutionException("HytaleServer.jar doesn't exist!");
         }
 
-        File serverDirectory = serverJarFile.getParentFile();
-
-        File serverSourcesFile = new File(serverDirectory, "HytaleServer-sources.jar");
+        File serverSourcesFile = getClientSourcesJarFile().getAsFile().get();
         if (serverSourcesFile.exists()) {
             PluginLog.info("Deleting old server sources...");
             serverSourcesFile.delete();
         }
 
-        File vineflowerJarFile = new File(serverDirectory, "vineflower.jar");
+        File vineflowerJarFile = getVineflowerJarFile().getAsFile().get();
         if (!vineflowerJarFile.exists()) {
             PluginLog.info("Downloading vineflower...");
             try {
@@ -62,7 +63,7 @@ public abstract class DecompileServerTask extends JavaExec {
 
         PluginLog.info("Start decompiling...");
 
-        workingDir(serverDirectory);
+        workingDir(serverJarFile.getParentFile());
         classpath(vineflowerJarFile);
         jvmArgs(jvmArguments);
         args(arguments);
