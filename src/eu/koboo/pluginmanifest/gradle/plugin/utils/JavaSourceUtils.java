@@ -22,6 +22,7 @@ import java.util.*;
 @UtilityClass
 public class JavaSourceUtils {
 
+    private static final String TASK_JAR = "jar";
     private static final String TASK_SHADOW = "shadowJar";
 
     public boolean hasResources(Project project) {
@@ -127,18 +128,17 @@ public class JavaSourceUtils {
     }
 
     public Jar resolveArchiveTask(@NotNull Project project) {
-        Jar shadowTask = project.getTasks().withType(Jar.class)
+        Jar shadowTask = project.getTasks()
+            .withType(Jar.class)
             .findByName(TASK_SHADOW);
         if (shadowTask != null) {
             return shadowTask;
         }
         Jar defaultTask = project.getTasks()
             .withType(Jar.class)
-            .stream()
-            .findFirst()
-            .orElse(null);
+            .findByName(TASK_JAR);
         if (defaultTask == null) {
-            throw new GradleException("No jar task found!");
+            throw new GradleException("No task for archive found!");
         }
         return defaultTask;
     }
