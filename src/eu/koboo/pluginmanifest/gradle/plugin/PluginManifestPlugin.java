@@ -89,7 +89,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
             Provider<Directory> generatedResourceDir = project.getLayout()
                 .getBuildDirectory()
                 .dir(RESOURCE_DIRECTORY);
-            if(!extension.getDisableManifestGeneration().get()) {
+            if (!extension.getDisableManifestGeneration().get()) {
                 SourceSet mainSourceSet = project.getExtensions()
                     .getByType(SourceSetContainer.class)
                     .getByName("main");
@@ -109,7 +109,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getManifestMap().set(ProviderUtils.createManifestProvider(project));
             });
             // Create task dependencies for "generateManifest"
-            if(!extension.getDisableManifestGeneration().get()) {
+            if (!extension.getDisableManifestGeneration().get()) {
                 Task processResources = target.getTasks().getByName("processResources");
                 processResources.dependsOn(generateManifestProvider);
                 Task javadocJar = target.getTasks().getByName("javadocJar");

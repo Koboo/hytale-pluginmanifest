@@ -100,7 +100,7 @@ public class PluginDoctor {
         PluginLog.print("              'Assets.zip' > " + fileExists(clientAssetsFile));
         PluginLog.print("");
         PluginLog.print("============== Manifest ==============");
-        if(extension.getDisableManifestGeneration().get()) {
+        if (extension.getDisableManifestGeneration().get()) {
             PluginLog.print("Manifest generation is disabled.");
         } else {
             PluginLog.print(manifestJson);

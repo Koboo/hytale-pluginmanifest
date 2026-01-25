@@ -32,7 +32,7 @@ public abstract class GenerateManifestTask extends DefaultTask {
 
     @TaskAction
     public void runTask() throws IOException {
-        if(getDisableManifestGeneration().get()) {
+        if (getDisableManifestGeneration().get()) {
             return;
         }
 

@@ -161,7 +161,7 @@ public class ProviderUtils {
                     }
                     authorList.add(authorObject);
                 }
-                if(!authorList.isEmpty()) {
+                if (!authorList.isEmpty()) {
                     manifestMap.put("Authors", authorList);
                 }
 
