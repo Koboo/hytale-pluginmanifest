@@ -112,14 +112,12 @@ public class ProviderUtils {
 
                 // "DisabledByDefault"
                 boolean disabledByDefault = extension.getDisabledByDefault().getOrElse(false);
-                PluginLog.info("DisabledByDefault: " + disabledByDefault);
                 if (disabledByDefault) {
                     manifestMap.put("DisabledByDefault", true);
                 }
 
                 // "IncludesAssetPack"
                 boolean includesAssetPack = extension.getIncludesAssetPack().get();
-                PluginLog.info("IncludesAssetPack: " + includesAssetPack);
                 if (includesAssetPack) {
                     manifestMap.put("IncludesAssetPack", true);
                 }
@@ -163,20 +161,9 @@ public class ProviderUtils {
                     }
                     authorList.add(authorObject);
                 }
-                // Default author
-                if (authorList.isEmpty()) {
-                    Map<String, String> authorObject = new LinkedHashMap<>();
-                    String userName = System.getProperty("user.name");
-                    if (userName == null || userName.trim().isEmpty()) {
-                        userName = pluginName + " Author";
-                        PluginLog.info("Used project name as authorName \"" + userName + "\".");
-                    } else {
-                        PluginLog.info("Used system property \"user.name\" as authorName \"" + userName + "\".");
-                    }
-                    authorObject.put("Name", userName);
-                    authorList.add(authorObject);
+                if(!authorList.isEmpty()) {
+                    manifestMap.put("Authors", authorList);
                 }
-                manifestMap.put("Authors", authorList);
 
                 ManifestPluginDependencyExtension dependencies = extension.getManifestPluginDependencies();
 
