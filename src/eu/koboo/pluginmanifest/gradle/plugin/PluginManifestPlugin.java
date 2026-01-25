@@ -146,8 +146,8 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Decompiles the server sources from and into the client installation path");
                 task.getClientServerJarFile().set(installExt.provideClientFile(ClientFiles.SERVER_JAR));
-                task.getClientSourcesJarFile().set(installExt.provideClientFile(ClientFiles.SOURCES_JAR));
-                task.getVineflowerJarFile().set(installExt.provideClientFile(ClientFiles.VINEFLOWER_JAR));
+                task.getClientSourcesJarPath().set(installExt.provideClientPath(ClientFiles.SOURCES_JAR));
+                task.getVineflowerJarPath().set(installExt.provideClientPath(ClientFiles.VINEFLOWER_JAR));
             });
 
             //

@@ -31,8 +31,8 @@ public class PluginDoctor {
         File clientInstallDirectory = new File(installExt.getClientInstallDirectory().get());
         File clientServerJarFile = installExt.provideClientFile(ClientFiles.SERVER_JAR).get().getAsFile();
         File clientAssetsFile = installExt.provideClientFile(ClientFiles.ASSETS_ZIP).get().getAsFile();
-        File clientAOTFile = installExt.provideClientFile(ClientFiles.AOT_FILE).get().getAsFile();
         File clientSourcesFile = installExt.provideClientFile(ClientFiles.SOURCES_JAR).get().getAsFile();
+        File clientAOTFile = installExt.provideClientFile(ClientFiles.AOT_FILE).get().getAsFile();
 
         String clientServerVersion = JarManifestUtils.getVersion(clientServerJarFile);
 
