@@ -82,6 +82,10 @@ pluginManifest {
     // - hytale prerelease
     addDefaultRepositories = true // Defaults to true
 
+    // Disables the generation of the manifest.json
+    // Mainly used to test purposes
+    disableManifestGeneration = false // Defaults to false
+
     // Configuration for your client installation detection
     clientInstallation {
         // Where should we check for your Hytale installation?
