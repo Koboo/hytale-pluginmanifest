@@ -154,7 +154,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
             // ==== INFORMATION PRINTING ====
             //
 
-            PluginDoctor.printDoctor(project, runtimeExt, installExt);
+            PluginDoctor.printDoctor(project);
         });
     }
 

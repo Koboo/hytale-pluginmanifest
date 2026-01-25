@@ -22,9 +22,11 @@ public class PluginDoctor {
     private static final String FOUND = "[✓] Found";
     private static final String NOT_FOUND = "[ ] Not found";
 
-    public void printDoctor(Project project,
-                            ServerRuntimeExtension runtimeExt,
-                            ClientInstallationExtension installExt) {
+    public void printDoctor(Project project) {
+
+        PluginManifestExtension extension = project.getExtensions().getByType(PluginManifestExtension.class);
+        ServerRuntimeExtension runtimeExt = extension.getServerRuntimeExtension();
+        ClientInstallationExtension installExt = extension.getInstallationExtension();
 
         File clientInstallDirectory = new File(installExt.getClientInstallDirectory().get());
         File clientServerJarFile = installExt.provideClientFile(ClientFiles.SERVER_JAR).get().getAsFile();
@@ -98,7 +100,11 @@ public class PluginDoctor {
         PluginLog.print("              'Assets.zip' > " + fileExists(clientAssetsFile));
         PluginLog.print("");
         PluginLog.print("============== Manifest ==============");
-        PluginLog.print(manifestJson);
+        if(extension.getDisableManifestGeneration().get()) {
+            PluginLog.print("Manifest generation is disabled.");
+        } else {
+            PluginLog.print(manifestJson);
+        }
         PluginLog.print("============== JAR file ==============");
         PluginLog.print("");
         PluginLog.print(" JAR file build task > \"" + archiveTaskName + "\"");
