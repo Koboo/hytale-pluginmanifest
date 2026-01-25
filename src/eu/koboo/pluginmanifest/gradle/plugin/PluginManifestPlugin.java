@@ -107,6 +107,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setDescription("Generates the manifest.json and puts into plugins jar file.");
                 task.getResourceDirectory().set(generatedResourceDir);
                 task.getManifestMap().set(ProviderUtils.createManifestProvider(project));
+                task.getDisableManifestGeneration().set(extension.getDisableManifestGeneration());
             });
             // Create task dependencies for "generateManifest"
             if (!extension.getDisableManifestGeneration().get()) {
