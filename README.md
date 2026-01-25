@@ -97,9 +97,9 @@ pluginManifest {
         // Currently supported:
         // - RELEASE
         // - PRE_RELEASE
-        // Both patchlines use an own directory in the client-installation.
+        // Both patchlines use their own directory in the client-installation.
         // So you can switch between both anytime.
-        // You have to make sure, the client already downloaded the patchline previously.
+        // You have to make sure the client already downloaded the patchline previously.
         patchline = Patchline.RELEASE
     }
 
