@@ -82,6 +82,10 @@ pluginManifest {
     // - hytale prerelease
     addDefaultRepositories = true // Defaults to true
 
+    // Disables the generation of the manifest.json
+    // Mainly used to test purposes
+    disableManifestGeneration = false // Defaults to false
+
     // Configuration for your client installation detection
     clientInstallation {
         // Where should we check for your Hytale installation?
@@ -171,11 +175,7 @@ pluginManifest {
         // These can be i.e., model-, texture, or ui-files
         includesAssetPack = false // Defaults to false
 
-        // Required (one author)
-        // If didn't configure an author,
-        // we fall back to resolve these authors:
-        // 1. Your OS-user -> System.getProperty("user.name")
-        // 2. Project Name -> project.name + " Author" (e.g. "MyPlugin Author")
+        // Optional
         authors {
             author {
                 name = "Koboo"
@@ -227,7 +227,6 @@ Table description:
 | Gradle ``build.gradle.kts``    | ``group = "eu.koboo"``                                             | ``"Group": "koboo"``                     | ``pluginGroup``          |
 | Gradle ``settings.gradle.kts`` | ``rootProject.name = "MyPlugin"``                                  | ``"Name": "MyPlugin"``                   | ``pluginName``           |
 | Gradle ``build.gradle.kts``    | ``version = "1.0.0"``                                              | ``"Version": "1.0.0"``                   | ``pluginVersion``        |
-| OS Username                    | ``String username = System.getProperty("user.name");``             | ``"Authors": [ { "Name": "Koboo" } ]``   | See manual configuration |
 | Project's java files           | ``public class eu.koboo.myplugin.MyPlugin extends JavaPlugin { }`` | ``"Main": "eu.koboo.myplugin.MyPlugin"`` | ``pluginMainClass``      |
 | Default serverVersion          | /                                                                  | ``"ServerVersion": "*"``                 | ``serverVersion``        |
 
@@ -271,14 +270,9 @@ The Gradle plugin's generated ``manifest.json``:
 {
     "Group": "koboo",
     "Name": "hytale-plugin-template",
-    "ServerVersion": "*",
-    "Main": "your.plugin.YourPlugin",
     "Version": "1.0.0",
-    "Authors": [
-        {
-            "Name": "Koboo"
-        }
-    ]
+    "ServerVersion": "*",
+    "Main": "your.plugin.YourPlugin"
 }
 ````
 
@@ -291,7 +285,7 @@ The Gradle plugin's generated ``manifest.json``:
 | ``Version``              | SemVer format ``MAJOR.MINOR.PATCH-RELEASE1.RELEASE2+BUILD`` | ✅        | ``1.0.0-SNAPSHOT.PRERELEASE+1d27cwq``  |
 | ``ServerVersion``        | SemVerRange format                                          | ✅        | ``*``, ``>=1.0.0``                     |
 | ``Main``                 | Fully qualified class name                                  | ✅        | ``eu.koboo.myplugin.MyPlugin``         |
-| ``Authors`` - ``Name``   | UTF-8 ``String``                                            | ✅        | ``Koboo``                              |
+| ``Authors`` - ``Name``   | UTF-8 ``String``                                            | ❌        | ``Koboo``                              |
 | ``Authors`` - ``Email``  | E-Mail-Address format ``{PREFIX}@{DOMAIN}.{TLD}``           | ❌        | ``admin@koboo.eu``                     |
 | ``Authors`` - ``Url``    | URI format ``{https\|http}://{DOMAIN}.{TLD}``               | ❌        | ``https://koboo.eu``                   |
 | ``Description``          | UTF-8 ``String``                                            | ❌        | ``My awesome plugin that does things`` |

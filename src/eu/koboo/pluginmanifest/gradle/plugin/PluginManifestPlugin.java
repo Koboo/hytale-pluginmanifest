@@ -86,13 +86,15 @@ public class PluginManifestPlugin implements Plugin<Project> {
             }
 
             // Adding PROJECT/build/generated/pluginmanifest/ to sourceSet resources.
-            SourceSet mainSourceSet = project.getExtensions()
-                .getByType(SourceSetContainer.class)
-                .getByName("main");
             Provider<Directory> generatedResourceDir = project.getLayout()
                 .getBuildDirectory()
                 .dir(RESOURCE_DIRECTORY);
-            mainSourceSet.getResources().srcDir(generatedResourceDir);
+            if (!extension.getDisableManifestGeneration().get()) {
+                SourceSet mainSourceSet = project.getExtensions()
+                    .getByType(SourceSetContainer.class)
+                    .getByName("main");
+                mainSourceSet.getResources().srcDir(generatedResourceDir);
+            }
 
             Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
             Provider<RegularFile> archiveFileProvider = archiveTask.getArchiveFile();
@@ -105,14 +107,17 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setDescription("Generates the manifest.json and puts into plugins jar file.");
                 task.getResourceDirectory().set(generatedResourceDir);
                 task.getManifestMap().set(ProviderUtils.createManifestProvider(project));
+                task.getDisableManifestGeneration().set(extension.getDisableManifestGeneration());
             });
             // Create task dependencies for "generateManifest"
-            Task processResources = target.getTasks().getByName("processResources");
-            processResources.dependsOn(generateManifestProvider);
-            Task javadocJar = target.getTasks().getByName("javadocJar");
-            javadocJar.dependsOn(generateManifestProvider);
-            Task sourcesJar = target.getTasks().getByName("sourcesJar");
-            sourcesJar.dependsOn(generateManifestProvider);
+            if (!extension.getDisableManifestGeneration().get()) {
+                Task processResources = target.getTasks().getByName("processResources");
+                processResources.dependsOn(generateManifestProvider);
+                Task javadocJar = target.getTasks().getByName("javadocJar");
+                javadocJar.dependsOn(generateManifestProvider);
+                Task sourcesJar = target.getTasks().getByName("sourcesJar");
+                sourcesJar.dependsOn(generateManifestProvider);
+            }
 
             //
             // ==== "runServer" ====
@@ -142,15 +147,15 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.setGroup(TASK_GROUP_NAME);
                 task.setDescription("Decompiles the server sources from and into the client installation path");
                 task.getClientServerJarFile().set(installExt.provideClientFile(ClientFiles.SERVER_JAR));
-                task.getClientSourcesJarFile().set(installExt.provideClientFile(ClientFiles.SOURCES_JAR));
-                task.getVineflowerJarFile().set(installExt.provideClientFile(ClientFiles.VINEFLOWER_JAR));
+                task.getClientSourcesJarPath().set(installExt.provideClientPath(ClientFiles.SOURCES_JAR));
+                task.getVineflowerJarPath().set(installExt.provideClientPath(ClientFiles.VINEFLOWER_JAR));
             });
 
             //
             // ==== INFORMATION PRINTING ====
             //
 
-            PluginDoctor.printDoctor(project, runtimeExt, installExt);
+            PluginDoctor.printDoctor(project);
         });
     }
 

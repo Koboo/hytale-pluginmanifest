@@ -2,10 +2,8 @@ package eu.koboo.pluginmanifest.gradle.plugin.tasks;
 
 import eu.koboo.pluginmanifest.gradle.plugin.utils.PluginLog;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.JavaExec;
-import org.gradle.api.tasks.StopExecutionException;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.*;
 import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
@@ -23,11 +21,11 @@ public abstract class DecompileServerTask extends JavaExec {
     @InputFile
     public abstract RegularFileProperty getClientServerJarFile();
 
-    @InputFile
-    public abstract RegularFileProperty getClientSourcesJarFile();
+    @Input
+    public abstract Property<String> getClientSourcesJarPath();
 
-    @InputFile
-    public abstract RegularFileProperty getVineflowerJarFile();
+    @Input
+    public abstract Property<String> getVineflowerJarPath();
 
     @TaskAction
     public void runTask() {
@@ -37,13 +35,15 @@ public abstract class DecompileServerTask extends JavaExec {
             throw new StopExecutionException("HytaleServer.jar doesn't exist!");
         }
 
-        File serverSourcesFile = getClientSourcesJarFile().getAsFile().get();
-        if (serverSourcesFile.exists()) {
+        String serverSourcesPath = getClientSourcesJarPath().get();
+        File clientSourcesJarFile = new File(serverSourcesPath);
+        if (clientSourcesJarFile.exists()) {
             PluginLog.info("Deleting old server sources...");
-            serverSourcesFile.delete();
+            clientSourcesJarFile.delete();
         }
 
-        File vineflowerJarFile = getVineflowerJarFile().getAsFile().get();
+        String vineflowerJarPath = getVineflowerJarPath().get();
+        File vineflowerJarFile = new File(vineflowerJarPath);
         if (!vineflowerJarFile.exists()) {
             PluginLog.info("Downloading vineflower...");
             try {

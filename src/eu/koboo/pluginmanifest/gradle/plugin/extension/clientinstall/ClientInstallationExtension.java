@@ -58,6 +58,15 @@ public abstract class ClientInstallationExtension {
         return directoryProperty.get();
     }
 
+    public Provider<String> provideClientPath(String filePath) {
+        return getProviderFactory().provider(() -> {
+                File clientDirectory = clientDirectory().getAsFile();
+                File clientFile = new File(clientDirectory, getLatestDirectoryPath() + filePath);
+                return clientFile.getAbsolutePath();
+            }
+        );
+    }
+
     public Provider<RegularFile> provideClientFile(String filePath) {
         return getProviderFactory().provider(() ->
             clientDirectory().file(getLatestDirectoryPath() + filePath)
