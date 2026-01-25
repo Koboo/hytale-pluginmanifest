@@ -101,7 +101,9 @@ public class PluginDoctor {
         PluginLog.print("");
         PluginLog.print("============== Manifest ==============");
         if (extension.getDisableManifestGeneration().get()) {
+            PluginLog.print("");
             PluginLog.print("Manifest generation is disabled.");
+            PluginLog.print("");
         } else {
             PluginLog.print(manifestJson);
         }
