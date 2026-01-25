@@ -86,13 +86,15 @@ public class PluginManifestPlugin implements Plugin<Project> {
             }
 
             // Adding PROJECT/build/generated/pluginmanifest/ to sourceSet resources.
-            SourceSet mainSourceSet = project.getExtensions()
-                .getByType(SourceSetContainer.class)
-                .getByName("main");
             Provider<Directory> generatedResourceDir = project.getLayout()
                 .getBuildDirectory()
                 .dir(RESOURCE_DIRECTORY);
-            mainSourceSet.getResources().srcDir(generatedResourceDir);
+            if(!extension.getDisableManifestGeneration().get()) {
+                SourceSet mainSourceSet = project.getExtensions()
+                    .getByType(SourceSetContainer.class)
+                    .getByName("main");
+                mainSourceSet.getResources().srcDir(generatedResourceDir);
+            }
 
             Jar archiveTask = JavaSourceUtils.resolveArchiveTask(project);
             Provider<RegularFile> archiveFileProvider = archiveTask.getArchiveFile();
@@ -107,12 +109,14 @@ public class PluginManifestPlugin implements Plugin<Project> {
                 task.getManifestMap().set(ProviderUtils.createManifestProvider(project));
             });
             // Create task dependencies for "generateManifest"
-            Task processResources = target.getTasks().getByName("processResources");
-            processResources.dependsOn(generateManifestProvider);
-            Task javadocJar = target.getTasks().getByName("javadocJar");
-            javadocJar.dependsOn(generateManifestProvider);
-            Task sourcesJar = target.getTasks().getByName("sourcesJar");
-            sourcesJar.dependsOn(generateManifestProvider);
+            if(!extension.getDisableManifestGeneration().get()) {
+                Task processResources = target.getTasks().getByName("processResources");
+                processResources.dependsOn(generateManifestProvider);
+                Task javadocJar = target.getTasks().getByName("javadocJar");
+                javadocJar.dependsOn(generateManifestProvider);
+                Task sourcesJar = target.getTasks().getByName("sourcesJar");
+                sourcesJar.dependsOn(generateManifestProvider);
+            }
 
             //
             // ==== "runServer" ====
