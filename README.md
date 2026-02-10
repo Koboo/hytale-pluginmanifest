@@ -6,9 +6,6 @@
 <a href="https://plugins.gradle.org/plugin/eu.koboo.pluginmanifest">
 <img src="https://img.shields.io/gradle-plugin-portal/v/eu.koboo.pluginmanifest?color=green" alt="PluginPortal">
 </a>
-<a href="LICENSE">
-<img src="https://img.shields.io/github/license/Koboo/hytale-pluginmanifest?color=blue" alt="LICENSE">
-</a>
 
 This project enables you to generate your Hytale Plugin's ``manifest.json`` automatically.
 
