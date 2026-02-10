@@ -68,7 +68,7 @@ You can override properties of the generated ``manifest.json``.
 ````kotlin
 pluginManifest {
     // Should the plugin add the HytaleServer.jar from your
-    // client installation as dependency?
+    // client installation as a dependency?
     // Turn this off if you are using the official hytale
     // dependency from the official maven repository
     addClientServerDependency = true // Defaults to true
@@ -115,20 +115,20 @@ pluginManifest {
         // otherwise the file resolving will be buggy.
         isProjectRelative = true // Defaults to "true"
 
-        // Should we copy the plugin to the "mods/" directory of the server
-        // or should we append the projects "build/libs/" as mod directory?
-        // If you have multiple jar inside your "build/libs/" i.e.
+        // Should we copy the plugin to the "mods/" directory of the server,
+        // or should we append the projects "build/libs/" as a mod directory?
+        // If you have multiple jars inside your "build/libs/" i.e.
         // - "*-sources.jar"
         // - "*-javadoc.jar"
         // - "*-all.jar"
-        // You should enable this option,
+        // You should enable this option
         // because the server tries to load every jar file as a plugin.
-        // We try to automatically copy the correct plugin jar,
+        // We try to automatically copy the correct plugin jar
         // if there is more than 1 jar file inside "build/libs/".
         copyPluginToRuntime = false // Defaults to "false"
 
         // We delete the logs directory before we start the server.
-        // Why? Because we save diskSpace then ever we can.
+        // Why? Because we save diskSpace than ever we can.
         deleteLogsOnStart = true // Defaults to "true"
 
         // Shortcuts for the commonly used server arguments
@@ -192,17 +192,17 @@ pluginManifest {
             }
         }
 
-        // Optional, if you don't have any plugin dependency,
+        // Optionally, if you don't have any plugin dependency,
         // you can safely remove/delete this.
         pluginDependencies {
             // Dependency is required -> Plugin fails if dependency is not available
             // Dependency version fallbacks to "*" (any version)
             required("Nitrado:WebServer")
-            // Dependency is optional -> Plugin does not fail to load if dependency is not available
-            // Dependency version needs to be greater or equal to "1.0.0"
+            // Dependency is optional -> Plugin does not fail to load if the dependency is not available
+            // The Dependency version needs to be greater or equal to "1.0.0"
             optional("Nitrado:QueryPlugin", ">=1.0.0")
             // MyPlugin needs to load before this plugin
-            // (Not tested if load fails or not)
+            // (Behavior not tested)
             loadBefore("OtherGroup:OtherPlugin")
         }
     }
