@@ -36,10 +36,12 @@ public class PluginDoctor {
 
         String clientServerVersion = JarManifestUtils.getVersion(clientServerJarFile);
 
+        boolean isServerPlugin = extension.getIsServerPlugin().get();
+
         String runtimeDirectoryPath = runtimeExt.getRuntimeDirectory().getOrNull();
         File runtimeDirectory = null;
         String runtimeText = "Not configured";
-        if (runtimeDirectoryPath != null && !runtimeDirectoryPath.trim().isEmpty()) {
+        if (isServerPlugin && runtimeDirectoryPath != null && !runtimeDirectoryPath.trim().isEmpty()) {
             runtimeDirectory = runtimeExt.provideRuntimeDirectory(project);
             if (runtimeDirectory.exists() && !runtimeDirectory.isDirectory()) {
                 throw new InvalidUserDataException("Configured runtimeDirectory is not a directory!");
@@ -52,7 +54,7 @@ public class PluginDoctor {
 
         String serverJarText = "Not configured";
         File serverJarFile = null;
-        if (runtimeDirectory != null && runtimeDirectory.exists() && runtimeDirectory.isDirectory()) {
+        if (isServerPlugin && runtimeDirectory != null && runtimeDirectory.exists() && runtimeDirectory.isDirectory()) {
             File runtimeServerJar = new File(runtimeDirectory, "HytaleServer.jar");
             if (runtimeServerJar.exists() && runtimeServerJar.isFile()) {
                 serverJarFile = runtimeServerJar;
@@ -63,14 +65,14 @@ public class PluginDoctor {
             }
         }
         String runnableText = "NO";
-        if (serverJarFile != null && serverJarFile.exists() && serverJarFile.isFile()) {
+        if (isServerPlugin && serverJarFile != null && serverJarFile.exists() && serverJarFile.isFile()) {
             runnableText = "YES";
         }
 
         // Parse versions by MANIFEST of client and runtime server jar
         String runtimeServerVersion = JarManifestUtils.getVersion(serverJarFile);
         String matchesVersion = "NO";
-        if (!JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
+        if (isServerPlugin && !JarManifestUtils.isUnknown(clientServerVersion) && !JarManifestUtils.isUnknown(runtimeServerVersion)) {
             if (clientServerVersion.equals(runtimeServerVersion)) {
                 matchesVersion = "YES";
             }
@@ -82,9 +84,12 @@ public class PluginDoctor {
         File archiveFile = archiveTask.getArchiveFile().get().getAsFile();
         String archiveTaskName = archiveTask.getName();
 
-        Map<String, Object> manifestMap = ProviderUtils.createManifestProvider(project).get();
-        String manifestJson = JsonOutput.toJson(manifestMap);
-        manifestJson = JsonOutput.prettyPrint(manifestJson);
+        String manifestJson = null;
+        if(isServerPlugin) {
+            Map<String, Object> manifestMap = ProviderUtils.createManifestProvider(project).get();
+            manifestJson = JsonOutput.toJson(manifestMap);
+            manifestJson = JsonOutput.prettyPrint(manifestJson);
+        }
 
         String patchlineName = installExt.resolvePatchlineProvider().get();
 
@@ -100,7 +105,7 @@ public class PluginDoctor {
         PluginLog.print("              'Assets.zip' > " + fileExists(clientAssetsFile));
         PluginLog.print("");
         PluginLog.print("============== Manifest ==============");
-        if (extension.getDisableManifestGeneration().get()) {
+        if (!isServerPlugin) {
             PluginLog.print("");
             PluginLog.print("Manifest generation is disabled.");
             PluginLog.print("");
@@ -114,13 +119,19 @@ public class PluginDoctor {
         PluginLog.print(" JAR file build path > " + archiveFile.getAbsolutePath());
         PluginLog.print("");
         PluginLog.print("=============== Runtime ==============");
-        PluginLog.print("");
-        PluginLog.print("  Server-Runtime-Directory > " + runtimeText);
-        PluginLog.print("    Is runtime executable? > " + runnableText);
-        PluginLog.print("   Which 'HytaleServer.jar'> " + serverJarText);
-        PluginLog.print("            Server-Version > " + runtimeServerVersion);
-        PluginLog.print("   Version matches client? > " + matchesVersion);
-        PluginLog.print("");
+        if(isServerPlugin) {
+            PluginLog.print("");
+            PluginLog.print("  Server-Runtime-Directory > " + runtimeText);
+            PluginLog.print("    Is runtime executable? > " + runnableText);
+            PluginLog.print("   Which 'HytaleServer.jar'> " + serverJarText);
+            PluginLog.print("            Server-Version > " + runtimeServerVersion);
+            PluginLog.print("   Version matches client? > " + matchesVersion);
+            PluginLog.print("");
+        } else {
+            PluginLog.print("");
+            PluginLog.print("Runtime execution is disabled.");
+            PluginLog.print("");
+        }
         PluginLog.print("======================================");
     }
 

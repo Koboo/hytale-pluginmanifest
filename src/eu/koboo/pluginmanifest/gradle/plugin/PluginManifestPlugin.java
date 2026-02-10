@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.UnknownTaskException;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.plugins.JavaPlugin;
@@ -46,19 +47,28 @@ public class PluginManifestPlugin implements Plugin<Project> {
         PluginManifestExtension extension = target.getExtensions().create(EXTENSION_NAME, PluginManifestExtension.class);
 
         JsonManifestExtension manifestExt = extension.jsonManifestExtension;
-        applyManifestDefaults(target, manifestExt);
-
         ServerRuntimeExtension runtimeExt = extension.serverRuntimeExtension;
-        applyRuntimeDefault(target, runtimeExt);
-
         ClientInstallationExtension installExt = extension.installationExtension;
-        applyInstallDefaults(target, installExt);
 
-        TaskProvider<GenerateManifestTask> generateManifestProvider = target.getTasks().register(GENERATE_MANIFEST, GenerateManifestTask.class);
-        TaskProvider<RunServerTask> runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
+        TaskProvider<GenerateManifestTask> generateManifestProvider;
+        TaskProvider<RunServerTask> runServerProvider;
+        if (extension.getIsServerPlugin().get()) {
+            generateManifestProvider = target.getTasks().register(GENERATE_MANIFEST, GenerateManifestTask.class);
+            runServerProvider = target.getTasks().register(RUN_SERVER, RunServerTask.class);
+        } else {
+            generateManifestProvider = null;
+            runServerProvider = null;
+        }
         TaskProvider<DecompileServerTask> decompileServerProvider = target.getTasks().register(DECOMPILE_SERVER, DecompileServerTask.class);
 
         target.afterEvaluate(project -> {
+
+            boolean isServerPlugin = extension.getIsServerPlugin().get();
+            if (isServerPlugin) {
+                applyManifestDefaults(project, manifestExt);
+                applyRuntimeDefault(project, runtimeExt);
+            }
+            applyInstallDefaults(project, installExt);
 
             // Applying server dependency as a file.
             if (extension.getAddClientServerDependency().get()) {
@@ -89,7 +99,7 @@ public class PluginManifestPlugin implements Plugin<Project> {
             Provider<Directory> generatedResourceDir = project.getLayout()
                 .getBuildDirectory()
                 .dir(RESOURCE_DIRECTORY);
-            if (!extension.getDisableManifestGeneration().get()) {
+            if (isServerPlugin && generateManifestProvider != null) {
                 SourceSet mainSourceSet = project.getExtensions()
                     .getByType(SourceSetContainer.class)
                     .getByName("main");
@@ -102,43 +112,45 @@ public class PluginManifestPlugin implements Plugin<Project> {
             //
             // ==== "generateManifestJson" ====
             //
-            generateManifestProvider.configure(task -> {
-                task.setGroup(TASK_GROUP_NAME);
-                task.setDescription("Generates the manifest.json and puts into plugins jar file.");
-                task.getResourceDirectory().set(generatedResourceDir);
-                task.getManifestMap().set(ProviderUtils.createManifestProvider(project));
-                task.getDisableManifestGeneration().set(extension.getDisableManifestGeneration());
-            });
+            if(isServerPlugin && generateManifestProvider != null) {
+                generateManifestProvider.configure(task -> {
+                    task.setGroup(TASK_GROUP_NAME);
+                    task.setDescription("Generates the manifest.json and puts into plugins jar file.");
+                    task.getResourceDirectory().set(generatedResourceDir);
+                    task.getManifestMap().set(ProviderUtils.createManifestProvider(project));
+                });
+            }
             // Create task dependencies for "generateManifest"
-            if (!extension.getDisableManifestGeneration().get()) {
-                Task processResources = target.getTasks().getByName("processResources");
-                processResources.dependsOn(generateManifestProvider);
-                Task javadocJar = target.getTasks().getByName("javadocJar");
-                javadocJar.dependsOn(generateManifestProvider);
-                Task sourcesJar = target.getTasks().getByName("sourcesJar");
-                sourcesJar.dependsOn(generateManifestProvider);
+            if (isServerPlugin && generateManifestProvider != null) {
+                try {
+                    project.getTasks().named("processResources").configure(_ -> project.getTasks().named(GENERATE_MANIFEST));
+                } catch (UnknownTaskException e) {
+                    // Silent failure
+                }
             }
 
             //
             // ==== "runServer" ====
             //
-            runServerProvider.configure(task -> {
-                task.setGroup(TASK_GROUP_NAME);
-                task.setDescription("Runs the server in your server directory with console support in the terminal.");
+            if(isServerPlugin && runServerProvider != null) {
+                runServerProvider.configure(task -> {
+                    task.setGroup(TASK_GROUP_NAME);
+                    task.setDescription("Runs the server in your server directory with console support in the terminal.");
 
-                task.getClientServerJarFile().set(installExt.provideClientFile(ClientFiles.SERVER_JAR));
-                task.getClientAOTFile().set(installExt.provideClientFile(ClientFiles.AOT_FILE));
-                task.getClientAssetsFile().set(installExt.provideClientFile(ClientFiles.ASSETS_ZIP));
-                task.getArchiveFile().set(archiveFileProvider);
+                    task.getClientServerJarFile().set(installExt.provideClientFile(ClientFiles.SERVER_JAR));
+                    task.getClientAOTFile().set(installExt.provideClientFile(ClientFiles.AOT_FILE));
+                    task.getClientAssetsFile().set(installExt.provideClientFile(ClientFiles.ASSETS_ZIP));
+                    task.getArchiveFile().set(archiveFileProvider);
 
-                task.getRuntimeDirectory().set(runtimeExt.provideRuntimeDirectory(project));
-                task.getCopyPluginToRuntime().set(runtimeExt.getCopyPluginToRuntime());
-                task.getDeleteLogsOnStart().set(runtimeExt.getDeleteLogsOnStart());
+                    task.getRuntimeDirectory().set(runtimeExt.provideRuntimeDirectory(project));
+                    task.getCopyPluginToRuntime().set(runtimeExt.getCopyPluginToRuntime());
+                    task.getDeleteLogsOnStart().set(runtimeExt.getDeleteLogsOnStart());
 
-                task.getAllowOp().set(runtimeExt.getAllowOp());
-                task.getUserJvmArguments().set(runtimeExt.getJvmArguments());
-                task.getUserServerArguments().set(runtimeExt.getServerArguments());
-            });
+                    task.getAllowOp().set(runtimeExt.getAllowOp());
+                    task.getUserJvmArguments().set(runtimeExt.getJvmArguments());
+                    task.getUserServerArguments().set(runtimeExt.getServerArguments());
+                });
+            }
 
             //
             // ==== "decompileServer" ====

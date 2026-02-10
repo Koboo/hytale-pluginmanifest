@@ -27,15 +27,8 @@ public abstract class GenerateManifestTask extends DefaultTask {
     @Input
     public abstract MapProperty<String, Object> getManifestMap();
 
-    @Input
-    public abstract Property<Boolean> getDisableManifestGeneration();
-
     @TaskAction
     public void runTask() throws IOException {
-        if (getDisableManifestGeneration().get()) {
-            return;
-        }
-
         Map<String, Object> manifestMap = getManifestMap().get();
         String manifestJson = JsonOutput.toJson(manifestMap);
         manifestJson = JsonOutput.prettyPrint(manifestJson);
