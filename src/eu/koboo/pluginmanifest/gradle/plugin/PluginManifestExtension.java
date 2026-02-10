@@ -22,7 +22,7 @@ public abstract class PluginManifestExtension {
 
     Property<Boolean> addClientServerDependency;
     Property<Boolean> addDefaultRepositories;
-    Property<Boolean> disableManifestGeneration;
+    Property<Boolean> isServerPlugin;
 
     @Inject
     public PluginManifestExtension(ObjectFactory objectFactory) {
@@ -34,8 +34,8 @@ public abstract class PluginManifestExtension {
         this.addClientServerDependency.set(true);
         this.addDefaultRepositories = objectFactory.property(Boolean.class);
         this.addDefaultRepositories.set(true);
-        this.disableManifestGeneration = objectFactory.property(Boolean.class);
-        this.disableManifestGeneration.set(false);
+        this.isServerPlugin = objectFactory.property(Boolean.class);
+        this.isServerPlugin.set(true);
     }
 
     public void manifestConfiguration(Action<JsonManifestExtension> action) {
