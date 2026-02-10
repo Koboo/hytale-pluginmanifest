@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.UnknownTaskException;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.plugins.JavaPlugin;
@@ -111,12 +112,18 @@ public class PluginManifestPlugin implements Plugin<Project> {
             });
             // Create task dependencies for "generateManifest"
             if (!extension.getDisableManifestGeneration().get()) {
-                Task processResources = target.getTasks().getByName("processResources");
-                processResources.dependsOn(generateManifestProvider);
-                Task javadocJar = target.getTasks().getByName("javadocJar");
-                javadocJar.dependsOn(generateManifestProvider);
-                Task sourcesJar = target.getTasks().getByName("sourcesJar");
-                sourcesJar.dependsOn(generateManifestProvider);
+                try {
+                    Task processResources = target.getTasks().getByName("processResources");
+                    processResources.dependsOn(generateManifestProvider);
+
+                    Task javadocJar = target.getTasks().getByName("javadocJar");
+                    javadocJar.dependsOn(generateManifestProvider);
+
+                    Task sourcesJar = target.getTasks().getByName("sourcesJar");
+                    sourcesJar.dependsOn(generateManifestProvider);
+                } catch (UnknownTaskException e) {
+                    // Silent failure
+                }
             }
 
             //

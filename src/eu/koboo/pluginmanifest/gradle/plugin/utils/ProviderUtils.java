@@ -20,7 +20,6 @@ import java.util.Map;
 @UtilityClass
 public class ProviderUtils {
 
-
     public Provider<String> createPluginGroupProvider(Project project) {
         return project.provider(() -> project.getGroup().toString());
     }
@@ -91,7 +90,8 @@ public class ProviderUtils {
                     try {
                         boolean isSeparatorAllowed = true;
                         boolean isWhitespaceAllowed = true;
-                        ManifestValidation.validateString("pluginDescription", pluginDescription,
+                        ManifestValidation.validateString(
+                            "pluginDescription", pluginDescription,
                             isSeparatorAllowed, isWhitespaceAllowed);
                         manifestMap.put("Description", pluginDescription);
                     } catch (ValidationException e) {
