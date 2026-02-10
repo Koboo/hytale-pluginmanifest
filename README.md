@@ -83,8 +83,9 @@ pluginManifest {
     addDefaultRepositories = true // Defaults to true
 
     // Disables the generation of the manifest.json
-    // Mainly used to test purposes
-    disableManifestGeneration = false // Defaults to false
+    // Disables the ability to run a server from within the ide
+    // Mainly used for library-, instead of plugin-development
+    isServerPlugin = true // Defaults to true
 
     // Configuration for your client installation detection
     clientInstallation {
